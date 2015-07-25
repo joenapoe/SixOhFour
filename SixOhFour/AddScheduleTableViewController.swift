@@ -361,10 +361,8 @@ class AddScheduleTableViewController: UITableViewController, UIPickerViewDataSou
                 let addJobsVC: AddJobTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("AddJobTableViewController") as! AddJobTableViewController
                 
                 self.navigationController?.pushViewController(addJobsVC, animated: true)
-                
             
                 return false
-                
             } else {
                 return true
             }
@@ -373,7 +371,7 @@ class AddScheduleTableViewController: UITableViewController, UIPickerViewDataSou
         return true
         
     }
-    
+
     
 
 }

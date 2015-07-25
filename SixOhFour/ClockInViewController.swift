@@ -411,7 +411,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         var timeStampAll = NSDateFormatter.localizedStringFromDate(NSDate(), dateStyle: .MediumStyle, timeStyle: .MediumStyle)
         timelogTimestamp.append(timeStampAll)
         lapsTableView.reloadData()
-
         
         var indexPathScroll = NSIndexPath(forRow: timelogsList.count, inSection: 0)
         self.lapsTableView.scrollToRowAtIndexPath(indexPathScroll, atScrollPosition: UITableViewScrollPosition.Bottom, animated: true)

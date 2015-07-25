@@ -1,9 +1,15 @@
-
+//
+//  detailsTimelogTableViewController.swift
+//  SixOhFour
+//
+//  Created by joenapoe
+//  Copyright (c) 2015 vinceboogie. All rights reserved.
+//
 
 import UIKit
 import CoreData
 
-class detailsTimelogViewController: UITableViewController, UIPickerViewDelegate {
+class detailsTimelogViewController: UITableViewController {
 
     @IBOutlet weak var jobColorDisplay: JobColorView!
     @IBOutlet weak var jobLabel: UILabel!
@@ -11,13 +17,18 @@ class detailsTimelogViewController: UITableViewController, UIPickerViewDelegate 
     @IBOutlet weak var timestampLabel: UILabel!
     @IBOutlet weak var commentTextField: UITextField!
     @IBOutlet weak var timestampPicker: UIDatePicker!
+    @IBOutlet weak var minTimeLabel: UILabel!
+    @IBOutlet weak var maxTimeLabel: UILabel!
     
     var entrySelectedIndex : Int = -1
+
     var jobLabelDisplay = ""
     var jobColorDisplayPassed : UIColor!
     var doneButton : UIBarButtonItem!
     var noMinDate : Bool = false
     var noMaxDate : Bool = false
+    var hideTimePicker : Bool = true
+
     
     let context = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
     
@@ -48,7 +59,7 @@ class detailsTimelogViewController: UITableViewController, UIPickerViewDelegate 
         let entryDate = dateFormatterEntry.dateFromString(entryDateString)
         timestampPicker.date = entryDate!
 
-        datePickerChanged(timestampLabel!, timestampPicker!)
+        datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
         
         if noMinDate == true {
             //No Minimum Data
@@ -82,14 +93,15 @@ class detailsTimelogViewController: UITableViewController, UIPickerViewDelegate 
             println("timestampPicker.maximumDate \(timestampPicker.maximumDate!)")
         }
         
-    }
-    
-    override func viewDidAppear(animated: Bool) {
         
     }
     
+    override func viewDidAppear(animated: Bool) {
+
+    }
+    
     @IBAction func timestampChanged(sender: AnyObject) {
-        datePickerChanged(timestampLabel!, timestampPicker!)
+        datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
     }
     
     override func didReceiveMemoryWarning() {
@@ -111,7 +123,6 @@ class detailsTimelogViewController: UITableViewController, UIPickerViewDelegate 
         println(nItem)
         self.performSegueWithIdentifier("unwindFromDetailsTimelogViewController", sender: self)
     }
-}
 
 // MARK: - Date Picker
 
@@ -128,6 +139,55 @@ func datePickerChanged(label: UILabel, datePicker: UIDatePicker) {
 }
 
 
+override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    
+    if indexPath.row == 2 {
+        if hideTimePicker == true {
+            hideTimePicker(false)
+            hideTimePicker = false
+        } else {
+            hideTimePicker(true)
+            hideTimePicker = true
+        }
+        
+    } else {
+        println(indexPath.row)
+        hideTimePicker(true)
+        hideTimePicker = true
+    }
+
+}
+
+override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+
+    if hideTimePicker && indexPath.row == 3 {
+        hideTimePicker(true)
+        return 0
+    } else {
+        return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
+    }
+    
+}
+
+    func hideTimePicker(status: Bool) {
+    
+        if status {
+            timestampPicker.hidden = true
+            minTimeLabel.hidden = true
+            maxTimeLabel.hidden = true
+            hideTimePicker = true
+        } else {
+            timestampPicker.hidden = false
+            minTimeLabel.hidden = false
+            maxTimeLabel.hidden = false
+            hideTimePicker = false
+        }
+        
+        tableView.beginUpdates()
+        tableView.endUpdates()
+    }
+    
+}
 
 
     

@@ -40,6 +40,8 @@ class SetBreakTimeViewController: UIViewController, UIPickerViewDataSource, UIPi
 
         doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: "doneSettingBreak")
         self.navigationItem.rightBarButtonItem = doneButton
+        
+        
     }
 
     
