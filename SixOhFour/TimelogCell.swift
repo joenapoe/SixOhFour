@@ -20,6 +20,13 @@ class TimelogCell: UITableViewCell {
         }
     }
     
+    var timelog: Timelog! {
+        didSet {
+            type.text = timelog.type
+            time.text = NSDateFormatter.localizedStringFromDate( (timelog.time) , dateStyle: .MediumStyle, timeStyle: .MediumStyle)
+            jobColorView.color = timelog.workedShift.job.color.getColor
+        }
+    }
     
     
     override func awakeFromNib() {

@@ -55,13 +55,14 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     var breakCount: Int = 0
     
     var jobListEmpty = true
-    var selectedJob : Job!
-    var noMinDate: Bool = false
-    var noMaxDate: Bool = false
-    
+
+    //Variables for Segue: "showDetails"
     var nItemClockIn : Timelog!
     var nItemClockInPrevious : Timelog!
     var nItemClockInNext : Timelog!
+    var selectedJob : Job!
+    var noMinDate: Bool = false
+    var noMaxDate: Bool = false
     
     var timelogList = [Timelog]()
     var timelogTimestamp: [NSDate] = []
@@ -569,12 +570,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
-        
-        cell.job = selectedJob
-        
-        cell.type.text = timelogList[indexPath.row].type
-        cell.time.text = NSDateFormatter.localizedStringFromDate( (timelogList[indexPath.row].time) , dateStyle: .MediumStyle, timeStyle: .MediumStyle)
-        
+
+        cell.timelog = timelogList[indexPath.row]
         cell.jobColorView.setNeedsDisplay()
         
         return cell
@@ -645,6 +642,18 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             destinationVC.noMaxDate = self.noMaxDate
             destinationVC.selectedJob = self.selectedJob
         }
+        
+        if segue.identifier == "showManualEditsList" {
+            let destinationVC = segue.destinationViewController as! ManualEditsListTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+//            //Passes 2 data variables
+//            destinationVC.breakMinutes = self.breakMinutesSet
+//            destinationVC.breakHours = self.breakHoursSet
+//            //Pass same 2 variable to get the delta
+//            destinationVC.breakMinutesSetIntial = self.breakMinutesSet
+//            destinationVC.breakHoursSetIntial = self.breakHoursSet
+        }
+        
     }
     
 // MARK: Segues (Unwind) = Getting data from sourceVC

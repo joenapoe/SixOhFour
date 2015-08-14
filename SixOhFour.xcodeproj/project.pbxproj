@@ -11,6 +11,9 @@
 		004C09911B7CF9ED004F4527 /* WatchCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C09901B7CF9ED004F4527 /* WatchCounter.swift */; };
 		004C09931B7D14D4004F4527 /* DetailsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */; };
 		00521B971B758C0900735849 /* SetBreakTimeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00521B961B758C0900735849 /* SetBreakTimeViewController.swift */; };
+		00941E2C1B7D532500656726 /* ManualEditsListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00941E2B1B7D532500656726 /* ManualEditsListTableViewController.swift */; };
+		00941E2E1B7D533E00656726 /* ManualEditsShiftTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00941E2D1B7D533E00656726 /* ManualEditsShiftTableViewController.swift */; };
+		00941E341B7D828500656726 /* ManualEditsListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00941E331B7D828500656726 /* ManualEditsListTableViewCell.swift */; };
 		00A068DB1B7BC36B003719B8 /* String+SixOhFour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A068DA1B7BC36B003719B8 /* String+SixOhFour.swift */; };
 		00A068DD1B7C36B1003719B8 /* TimelogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A068DC1B7C36B1003719B8 /* TimelogCell.swift */; };
 		870CECBF1B4F4E9C00B30AAE /* PayRateTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870CECBE1B4F4E9C00B30AAE /* PayRateTableViewController.swift */; };
@@ -97,6 +100,9 @@
 		004C09901B7CF9ED004F4527 /* WatchCounter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchCounter.swift; sourceTree = "<group>"; };
 		004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailsTableViewController.swift; sourceTree = "<group>"; };
 		00521B961B758C0900735849 /* SetBreakTimeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBreakTimeViewController.swift; sourceTree = "<group>"; };
+		00941E2B1B7D532500656726 /* ManualEditsListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManualEditsListTableViewController.swift; sourceTree = "<group>"; };
+		00941E2D1B7D533E00656726 /* ManualEditsShiftTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManualEditsShiftTableViewController.swift; sourceTree = "<group>"; };
+		00941E331B7D828500656726 /* ManualEditsListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManualEditsListTableViewCell.swift; sourceTree = "<group>"; };
 		00A068DA1B7BC36B003719B8 /* String+SixOhFour.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+SixOhFour.swift"; sourceTree = "<group>"; };
 		00A068DC1B7C36B1003719B8 /* TimelogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelogCell.swift; sourceTree = "<group>"; };
 		870CECBE1B4F4E9C00B30AAE /* PayRateTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PayRateTableViewController.swift; sourceTree = "<group>"; };
@@ -353,6 +359,8 @@
 				87238A4F1B3E3212004D44CA /* ClockInViewController.swift */,
 				00521B961B758C0900735849 /* SetBreakTimeViewController.swift */,
 				004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */,
+				00941E2B1B7D532500656726 /* ManualEditsListTableViewController.swift */,
+				00941E2D1B7D533E00656726 /* ManualEditsShiftTableViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -361,6 +369,7 @@
 			isa = PBXGroup;
 			children = (
 				00A068DC1B7C36B1003719B8 /* TimelogCell.swift */,
+				00941E331B7D828500656726 /* ManualEditsListTableViewCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -576,7 +585,9 @@
 				B9E34BCB1B50D21800B9FD88 /* JobsListTableViewController.swift in Sources */,
 				879277011B5868E90023CBA6 /* JobOverviewViewController.swift in Sources */,
 				87B7C1881B69C22800C65C96 /* RepeatingSchedule.swift in Sources */,
+				00941E2E1B7D533E00656726 /* ManualEditsShiftTableViewController.swift in Sources */,
 				871307391B630E4B00D96582 /* TimesheetViewController.swift in Sources */,
+				00941E341B7D828500656726 /* ManualEditsListTableViewCell.swift in Sources */,
 				87B7C1861B69C22800C65C96 /* Job.swift in Sources */,
 				B9CF32991B6B046900757E43 /* CVCalendarViewAnimator.swift in Sources */,
 				004C09911B7CF9ED004F4527 /* WatchCounter.swift in Sources */,
@@ -597,6 +608,7 @@
 				B9CF328F1B6B046900757E43 /* CVCalendarContentViewController.swift in Sources */,
 				00A068DD1B7C36B1003719B8 /* TimelogCell.swift in Sources */,
 				00521B971B758C0900735849 /* SetBreakTimeViewController.swift in Sources */,
+				00941E2C1B7D532500656726 /* ManualEditsListTableViewController.swift in Sources */,
 				B9CF329B1B6B046900757E43 /* CVCalendarViewAppearance.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -9,15 +9,39 @@
 import UIKit
 
 class ManualEditsShiftTableViewController: UITableViewController {
-
+    var dataManager = DataManager()
+    var selectedWorkedShift : WorkedShift!
+    var TLresults = [Timelog]()
+    var JOBresults = [Job]()
+    
+    var nItemClockIn : Timelog!
+    var nItemClockInPrevious : Timelog!
+    var nItemClockInNext : Timelog!
+    var selectedJob : Job!
+    var noMinDate: Bool = false
+    var noMaxDate: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+//        self.title = "Unsaved Shifts"
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: nil)
+        self.tableView.rowHeight = 30.0
+
+        
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+
+        
+        var predicate = NSPredicate(format: "SELF.workedShift == %@", selectedWorkedShift)
+        
+        TLresults = dataManager.fetch("Timelog", predicate: predicate) as! [Timelog]
+        
+
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -27,27 +51,48 @@ class ManualEditsShiftTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 0
-    }
-
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-        return 0
+        return TLresults.count
     }
 
-    /*
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
 
-        // Configure the cell...
+        cell.timelog = TLresults[indexPath.row]
 
         return cell
     }
-    */
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        println(indexPath.row)
+        
+        
+        var predicateJob = NSPredicate(format: "company.name == %@", (TLresults[indexPath.row].workedShift.job.company.name) )
+        JOBresults = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
+        
+        
+        selectedJob = JOBresults[0]
+            
+        nItemClockIn = TLresults[indexPath.row]
+        
+        if (indexPath.row) == 0 {
+            noMinDate = true // user select CLOCKIN so noMinDate
+        } else {
+            noMinDate = false
+            self.nItemClockInPrevious = TLresults[indexPath.row - 1]
+        }
+        
+        if (TLresults.count - indexPath.row - 1) == 0 {
+            noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
+        } else {
+            noMaxDate = false
+            self.nItemClockInNext = TLresults[indexPath.row + 1]
+        }
+        
+        self.performSegueWithIdentifier("showDetails", sender: tableView.cellForRowAtIndexPath(indexPath))
+        
+    }
 
     /*
     // Override to support conditional editing of the table view.
@@ -93,5 +138,22 @@ class ManualEditsShiftTableViewController: UITableViewController {
         // Pass the selected object to the new view controller.
     }
     */
+
+    // MARK: Segues
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    
+    if segue.identifier == "showDetails" {
+    
+    let destinationVC = segue.destinationViewController as! DetailsTableViewController
+    destinationVC.hidesBottomBarWhenPushed = true;
+        
+    destinationVC.nItem = self.nItemClockIn
+    destinationVC.nItemPrevious = self.nItemClockInPrevious
+    destinationVC.nItemNext = self.nItemClockInNext
+    destinationVC.noMinDate = self.noMinDate
+    destinationVC.noMaxDate = self.noMaxDate
+    destinationVC.selectedJob = self.selectedJob
+        }
+    }
 
 }

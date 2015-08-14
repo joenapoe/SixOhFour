@@ -10,14 +10,42 @@ import UIKit
 
 class ManualEditsListTableViewController: UITableViewController {
 
+    var dataManager = DataManager()
+    var allOpenWorkedShifts = [WorkedShift]()
+    var allOpenWorkedShiftsCIs = [Timelog]()
+    var selectedWorkedShift : WorkedShift!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
+//        var doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: nil)
+//        self.navigationItem.rightBarButtonItem = doneButton
 
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        self.title = "Unsaved Shifts"
+//        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
+        
+        
+        
+        let predicateOpen = NSPredicate(format: "status == 1")
+        allOpenWorkedShifts = dataManager.fetch("WorkedShift", predicate: predicateOpen) as! [WorkedShift]
+        println(allOpenWorkedShifts.count)
+    
+        
+        
+        let predicateOpenWS = NSPredicate(format: "workedShift.status == 1")
+        let predicateCI = NSPredicate(format: "type == %@" , "Clocked In")
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
+        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate) as! [Timelog]
+        
+        println(allOpenWorkedShiftsCIs.count)
+
+        
+        
+        
+        println(allOpenWorkedShifts)
+        println(allOpenWorkedShiftsCIs)
+
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -25,29 +53,30 @@ class ManualEditsListTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    // MARK: - Table view data source
-
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 0
-    }
-
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-        return 0
+        return allOpenWorkedShifts.count
     }
 
-    /*
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath) as! UITableViewCell
-
-        // Configure the cell...
-
+        
+        let cell = tableView.dequeueReusableCellWithIdentifier("ManualEditsListTableViewCell", forIndexPath: indexPath) as! ManualEditsListTableViewCell
+        
+        cell.workedShift = allOpenWorkedShifts[indexPath.row]
+        
+        cell.clockInTL = allOpenWorkedShiftsCIs[indexPath.row]
+        
         return cell
     }
-    */
+
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        println(indexPath.row)
+        selectedWorkedShift = allOpenWorkedShifts[indexPath.row]
+        
+        self.performSegueWithIdentifier("showManualEditsShift", sender: tableView.cellForRowAtIndexPath(indexPath))
+        
+    }
+
 
     /*
     // Override to support conditional editing of the table view.
@@ -93,5 +122,20 @@ class ManualEditsListTableViewController: UITableViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "showManualEditsShift" {
+            let destinationVC = segue.destinationViewController as! ManualEditsShiftTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            //            //Passes 2 data variables
+            destinationVC.selectedWorkedShift = self.selectedWorkedShift
+            //            destinationVC.breakHours = self.breakHoursSet
+            //            //Pass same 2 variable to get the delta
+            //            destinationVC.breakMinutesSetIntial = self.breakMinutesSet
+            //            destinationVC.breakHoursSetIntial = self.breakHoursSet
+        }
+        
+    }
 
 }
