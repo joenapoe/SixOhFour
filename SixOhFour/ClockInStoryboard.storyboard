@@ -65,9 +65,9 @@
                                     <constraint firstAttribute="height" constant="200" id="shU-Vw-9Ll"/>
                                 </constraints>
                             </imageView>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="30" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="t1M-q2-2Gz">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="t1M-q2-2Gz">
                                 <rect key="frame" x="5" y="279" width="310" height="284"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="356" id="OI2-2d-ve3"/>
                                 </constraints>
@@ -343,10 +343,10 @@
         <scene sceneID="Zwf-EY-nBK">
             <objects>
                 <tableViewController id="qjo-6T-SdF" customClass="ManualEditsListTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="aHY-tp-msZ">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="aHY-tp-msZ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ManualEditsListTableViewCell" id="fbn-TH-qXP" customClass="ManualEditsListTableViewCell" customModule="SixOhFour" customModuleProvider="target">
                                 <autoresizingMask key="autoresizingMask"/>
@@ -459,10 +459,10 @@
         <scene sceneID="Yx0-9r-HRO">
             <objects>
                 <tableViewController id="ZT9-wB-HRj" customClass="DetailsTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="gmf-Mj-d79">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" showsSelectionImmediatelyOnTouchBegin="NO" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="gmf-Mj-d79">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                         <inset key="separatorInset" minX="15" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <sections>
@@ -648,7 +648,9 @@
                             <outlet property="delegate" destination="ZT9-wB-HRj" id="2Vh-lk-3NV"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Details" id="Cek-eH-R5M" userLabel="Detail"/>
+                    <navigationItem key="navigationItem" title="Details" id="Cek-eH-R5M" userLabel="Detail">
+                        <barButtonItem key="backBarButtonItem" title="Cancel" id="0Ue-5m-PMT"/>
+                    </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
                         <outlet property="commentTextField" destination="U15-DI-FcH" id="5AR-wg-nVq"/>
@@ -737,10 +739,10 @@
         <scene sceneID="4Dc-Bf-foR">
             <objects>
                 <tableViewController id="CyI-bi-2t7" customClass="AddNewShiftTableViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="91F-72-YKP">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="91F-72-YKP">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="30" id="F6B-xD-Q8g" customClass="TimelogCell" customModule="SixOhFour" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="310" height="44"/>
@@ -802,6 +804,6 @@
         <image name="list" width="20" height="20"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="WGH-vH-gcD"/>
+        <segue reference="Im2-QB-IyV"/>
     </inferredMetricsTieBreakers>
 </document>
