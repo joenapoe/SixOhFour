@@ -118,7 +118,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
         selectedJob = JOBresults[0]
             
         
-        if indexPath.section == 0 {
+        if indexPath.section == 1 {
             nItemClockIn = TLresults[indexPath.row]
             if (indexPath.row) == 0 {
                 noMinDate = true // user select CLOCKIN so noMinDate
@@ -133,7 +133,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
                 noMaxDate = false
                 self.nItemClockInNext = TLresults[indexPath.row + 1]
             }
-        } else {
+        } else if indexPath.section == 2 {
             let tempTL = dataManager.addItem("Timelog") as! Timelog
             
             nItemClockIn = tempTL
@@ -165,7 +165,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
         
         let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
 //        header.textLabel.frame = header.frame
-        header.textLabel.textAlignment = NSTextAlignment.Justified
+        header.textLabel.textAlignment = NSTextAlignment.Left
         
         if section == 1 {
             header.textLabel.text = "Saved Entries:"
@@ -186,7 +186,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
         if section == 0 {
             return 40
         } else if section == 1{
-            return 15
+            return 35
         } else {
             return 35
         }
@@ -194,6 +194,20 @@ class ManualEditsShiftTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return ""
     }
+    override func tableView(tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
+        let footer:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
+        //        header.textLabel.frame = header.frame
+        footer.textLabel.textAlignment = NSTextAlignment.Left
+        if section == 0 {
+            footer.textLabel.text = "You earned $189.39 for this shift"
+            footer.textLabel.textColor = UIColor.blackColor()
+            footer.textLabel.font = UIFont.systemFontOfSize(12)
+        }
+    }
+    override func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+            return ""
+    }
+    
     
     /*
     // Override to support conditional editing of the table view.
