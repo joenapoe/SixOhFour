@@ -9,11 +9,16 @@
 import UIKit
 
 class ManualEditsShiftTableViewController: UITableViewController {
-    var dataManager = DataManager()
+    
+    //PASSED IN VARIABLES:
     var selectedWorkedShift : WorkedShift!
+
+    //Fetched Info from passed in var.
+    var dataManager = DataManager()
     var TLresults = [Timelog]()
     var JOBresults = [Job]()
     
+    // NOTE Variables passed to Details
     var nItemClockIn : Timelog!
     var nItemClockInPrevious : Timelog!
     var nItemClockInNext : Timelog!
@@ -21,13 +26,17 @@ class ManualEditsShiftTableViewController: UITableViewController {
     var noMinDate: Bool = false
     var noMaxDate: Bool = false
     
+    // Created to handle Incomplete
+    var cellIncomp: TimelogCell!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        self.title = "Unsaved Shifts"
+        self.title = "Shift"
+        
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: nil)
+//        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
         self.tableView.rowHeight = 30.0
-
         
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -41,7 +50,6 @@ class ManualEditsShiftTableViewController: UITableViewController {
         TLresults = dataManager.fetch("Timelog", predicate: predicate) as! [Timelog]
         
 
-
     }
 
     override func didReceiveMemoryWarning() {
@@ -51,18 +59,53 @@ class ManualEditsShiftTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 3
+    }
+    
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return TLresults.count
+        if section == 1 {
+            return TLresults.count
+        } else if section == 2{
+            if TLresults.count % 2 == 1 {
+                return 1
+            } else {
+                return 2
+            }
+        } else {
+            return 0
+        }
     }
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
-
-        cell.timelog = TLresults[indexPath.row]
-
-        return cell
+        
+        if indexPath.section == 1 {
+            let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
+            cell.timelog = TLresults[indexPath.row]
+            return cell
+        } else {
+            cellIncomp = tableView.dequeueReusableCellWithIdentifier("TimelogCell") as! TimelogCell
+            cellIncomp.time.text = "Missing Time"
+            cellIncomp.jobColorView.color = TLresults[indexPath.row].workedShift.job.color.getColor
+            
+            if indexPath.row == 0 && (TLresults.count % 2 == 0) {
+                var breakNumber : Int = (TLresults.count / 2)
+                if breakNumber == 1 {
+                    cellIncomp.type.text = "Ended Break"
+                } else {
+                    cellIncomp.type.text = "Ended Break #\(breakNumber)"
+                }
+            } else {
+                cellIncomp.type.text = "Clocked Out"
+            }
+        return cellIncomp
+        }
     }
+    
+    
+
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         println(indexPath.row)
@@ -74,26 +117,84 @@ class ManualEditsShiftTableViewController: UITableViewController {
         
         selectedJob = JOBresults[0]
             
-        nItemClockIn = TLresults[indexPath.row]
         
-        if (indexPath.row) == 0 {
-            noMinDate = true // user select CLOCKIN so noMinDate
+        if indexPath.section == 0 {
+            nItemClockIn = TLresults[indexPath.row]
+            if (indexPath.row) == 0 {
+                noMinDate = true // user select CLOCKIN so noMinDate
+            } else {
+                noMinDate = false
+                self.nItemClockInPrevious = TLresults[indexPath.row - 1]
+            }
+        
+            if (TLresults.count - indexPath.row - 1) == 0 {
+                noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
+            } else {
+                noMaxDate = false
+                self.nItemClockInNext = TLresults[indexPath.row + 1]
+            }
         } else {
-            noMinDate = false
-            self.nItemClockInPrevious = TLresults[indexPath.row - 1]
+            let tempTL = dataManager.addItem("Timelog") as! Timelog
+            
+            nItemClockIn = tempTL
+            if (indexPath.row) == 0 {
+                noMinDate = true // user select CLOCKIN so noMinDate
+            } else {
+                noMinDate = false
+                self.nItemClockInPrevious = TLresults[indexPath.row - 1]
+            }
+            
+            if (TLresults.count - indexPath.row - 1) == 0 {
+                noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
+            } else {
+                noMaxDate = false
+                self.nItemClockInNext = TLresults[indexPath.row + 1]
+            }
+            
+            
         }
         
-        if (TLresults.count - indexPath.row - 1) == 0 {
-            noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
-        } else {
-            noMaxDate = false
-            self.nItemClockInNext = TLresults[indexPath.row + 1]
-        }
         
         self.performSegueWithIdentifier("showDetails", sender: tableView.cellForRowAtIndexPath(indexPath))
         
     }
 
+    
+    // Tableview Headers
+    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        
+        let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
+//        header.textLabel.frame = header.frame
+        header.textLabel.textAlignment = NSTextAlignment.Justified
+        
+        if section == 1 {
+            header.textLabel.text = "Saved Entries:"
+            header.textLabel.textColor = UIColor.blackColor()
+            header.textLabel.font = UIFont.systemFontOfSize(12)
+        } else if section == 2{
+            header.textLabel.text = "Incomplete Entries:"
+            header.textLabel.textColor = UIColor.redColor()
+            header.textLabel.font = UIFont.boldSystemFontOfSize(12)
+        } else if section == 0 {
+            header.textLabel.text = "Work time = 8.04 hrs"
+            header.textLabel.textColor = UIColor.blackColor()
+            header.textLabel.font = UIFont.systemFontOfSize(16)
+            header.textLabel.numberOfLines = 2;
+        }
+    }
+    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        if section == 0 {
+            return 40
+        } else if section == 1{
+            return 15
+        } else {
+            return 35
+        }
+    }
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return ""
+    }
+    
     /*
     // Override to support conditional editing of the table view.
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -154,6 +255,13 @@ class ManualEditsShiftTableViewController: UITableViewController {
     destinationVC.noMaxDate = self.noMaxDate
     destinationVC.selectedJob = self.selectedJob
         }
+    }
+    
+    @IBAction func unwindFromManualEditsShift (segue: UIStoryboardSegue) {
+        
+        let sourceVC = segue.sourceViewController as! ManualEditsShiftTableViewController
+        let destVC = segue.destinationViewController as! ManualEditsListTableViewController
+        
     }
 
 }

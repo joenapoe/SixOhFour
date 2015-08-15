@@ -21,7 +21,7 @@ class ManualEditsListTableViewController: UITableViewController {
 //        var doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: nil)
 //        self.navigationItem.rightBarButtonItem = doneButton
 
-        self.title = "Unsaved Shifts"
+        self.title = "Incomplete Shifts"
 //        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
         
         
@@ -77,6 +77,32 @@ class ManualEditsListTableViewController: UITableViewController {
         
     }
 
+// Tableview Headers
+    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        
+        let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
+        
+        header.textLabel.textColor = UIColor.blackColor()
+        //        header.textLabel.font = UIFont.boldSystemFontOfSize(18)
+        header.textLabel.frame = header.frame
+        header.textLabel.textAlignment = NSTextAlignment.Justified
+        header.textLabel.text = "You have \(allOpenWorkedShifts.count) unsaved shifts:"
+        
+        if allOpenWorkedShifts.count == 0 {
+            header.textLabel.hidden = true
+        } else {
+            header.textLabel.hidden = false
+            if allOpenWorkedShifts.count == 1 {
+                header.textLabel.text = "You have 1 unsaved shift:"
+            }
+        }
+    }
+    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 35
+    }
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return ""
+    }
 
     /*
     // Override to support conditional editing of the table view.
@@ -127,6 +153,7 @@ class ManualEditsListTableViewController: UITableViewController {
         
         if segue.identifier == "showManualEditsShift" {
             let destinationVC = segue.destinationViewController as! ManualEditsShiftTableViewController
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
             destinationVC.hidesBottomBarWhenPushed = true;
             //            //Passes 2 data variables
             destinationVC.selectedWorkedShift = self.selectedWorkedShift

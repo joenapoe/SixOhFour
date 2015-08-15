@@ -79,7 +79,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         self.lapsTableView.rowHeight = 30.0
         workTitleLabel.text = " "
         workTimeLabel.text = "00:00:00"
@@ -113,7 +113,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
                 jobTitleDisplayLabel.textColor = UIColor.blackColor()
                 jobColorDisplay.hidden = false
                 jobColorDisplay.color = firstJob.color.getColor
-                jobColorDisplay.setNeedsDisplay()
                 jobListEmpty = false
                 if flow == "Idle" {
                     startStopButton.enabled = true
@@ -127,7 +126,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else {
             jobTitleDisplayLabel.text = selectedJob.company.name
             jobColorDisplay.color = selectedJob.color.getColor
-            jobColorDisplay.setNeedsDisplay()
         }
         
         if flow == "clockedOut" {
@@ -140,8 +138,9 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             sumUpBreaks(flow)
             sumUpWorkDuration()
         }
-        lapsTableView.reloadData()
-        
+
+        updateTable()
+
     }
     
     //MARK: IBActions:
@@ -273,7 +272,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             timelogDescription.removeAll(keepCapacity: false)
             timelogList = []
             
-            lapsTableView.reloadData()
+            updateTable()
             
             breakCount = 0
             
@@ -301,16 +300,25 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             self.navigationController?.pushViewController(addJobsVC, animated: true)
             
+            
         } else {
             let addJobStoryboard: UIStoryboard = UIStoryboard(name: "CalendarStoryboard", bundle: nil)
             let jobsListVC: JobsListTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("JobsListTableViewController")
                 as! JobsListTableViewController
+            
+            jobsListVC.previousSelection = self.selectedJob.company.name
             
             self.navigationController?.pushViewController(jobsListVC, animated: true)
         }
     }
     
     //MARK: Functions
+    
+    func updateTable() {
+        
+        lapsTableView.reloadData()
+        jobColorDisplay.setNeedsDisplay()
+    }
     
     func saveToCoreData(){
     
@@ -375,7 +383,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     func appendToTimeTableView() {
         
         timelogTimestamp.append(NSDate())
-        lapsTableView.reloadData()
+        updateTable()
         
         var indexPathScroll = NSIndexPath(forRow: timelogList.count, inSection: 0)
         self.lapsTableView.scrollToRowAtIndexPath(indexPathScroll, atScrollPosition: UITableViewScrollPosition.Bottom, animated: true)
@@ -571,7 +579,9 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
 
+
         cell.timelog = timelogList[indexPath.row]
+        cell.jobColorView.color = selectedJob.color.getColor
         cell.jobColorView.setNeedsDisplay()
         
         return cell
@@ -580,6 +590,31 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return timelogTimestamp.count
+    }
+    
+
+    
+    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        
+        let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
+
+        header.textLabel.textColor = UIColor.blackColor()
+//        header.textLabel.font = UIFont.boldSystemFontOfSize(18)
+        header.textLabel.frame = header.frame
+        header.textLabel.textAlignment = NSTextAlignment.Justified
+        header.textLabel.text = "Entries for the shift"
+
+        if timelogList.count == 0 {
+            header.textLabel.hidden = true
+        } else {
+            header.textLabel.hidden = false
+        }
+    }
+    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 35
+    }
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return ""
     }
     
     
@@ -615,6 +650,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     {
         //Editbreaktime
         if segue.identifier == "editBreaktimeSegue" {
+            
             let destinationVC = segue.destinationViewController as! SetBreakTimeViewController
             destinationVC.navigationItem.title = "Set Breaktime"
             destinationVC.hidesBottomBarWhenPushed = true;
@@ -630,6 +666,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         //Send Core Data to Timelog Details
         if segue.identifier == "showDetails" {
             
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
+
             let destinationVC = segue.destinationViewController as! DetailsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
             
@@ -652,6 +690,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
 //            //Pass same 2 variable to get the delta
 //            destinationVC.breakMinutesSetIntial = self.breakMinutesSet
 //            destinationVC.breakHoursSetIntial = self.breakHoursSet
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
+
         }
         
     }
@@ -663,10 +703,18 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         let sourceVC = segue.sourceViewController as! JobsListTableViewController
         
         selectedJob = sourceVC.selectedJob
+
+        if sourceVC.selectedJob != nil {
+            selectedJob = sourceVC.selectedJob
+            jobColorDisplay.color = selectedJob.color.getColor
+        }
         
         if timelogList != [] {
             saveWorkedShiftToJob()
         }
+        
+        updateTable()
+        
     }
 
     
@@ -710,6 +758,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         timelogTimestamp[selectedRowIndex] = sourceVC.nItem.time
+
+        updateTable()
     }
 
     override func didReceiveMemoryWarning() {

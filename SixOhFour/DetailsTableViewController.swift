@@ -21,9 +21,9 @@ class DetailsTableViewController: UITableViewController {
     @IBOutlet weak var minTimeLabel: UILabel!
     @IBOutlet weak var maxTimeLabel: UILabel!
     
-    var entrySelectedIndex : Int = -1
+//    var entrySelectedIndex : Int = -1
     
-    var jobLabelDisplay = "" // will change from pushed data Segue
+    var jobLabelDisplay = String() // will change from pushed data Segue
     
     var doneButton : UIBarButtonItem!
     var noMinDate : Bool = false
@@ -32,13 +32,11 @@ class DetailsTableViewController: UITableViewController {
     
     var selectedJob : Job!
     
-    //    let context = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
-    
     var nItem : Timelog! // will change from pushed data Segue
     var nItemPrevious : Timelog! // will change from pushed data Segue
     var nItemNext : Timelog! // will change from pushed data Segue
     
-    var clockInTime : NSDate!
+//    var clockInTime : NSDate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -138,10 +136,10 @@ class DetailsTableViewController: UITableViewController {
             nItem.time = timestampPicker.date
         }
         
-        if nItem.type == "Clocked In"
-        {
-            clockInTime = timestampPicker.date
-        }
+//        if nItem.type == "Clocked In"
+//        {
+//            clockInTime = timestampPicker.date
+//        }
     }
     
     func doneSettingDetails () {
