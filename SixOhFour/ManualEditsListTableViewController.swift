@@ -24,30 +24,35 @@ class ManualEditsListTableViewController: UITableViewController {
         self.title = "Incomplete Shifts"
 //        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
         
-        
-        
-        let predicateOpen = NSPredicate(format: "status == 1")
-        allOpenWorkedShifts = dataManager.fetch("WorkedShift", predicate: predicateOpen) as! [WorkedShift]
-        println(allOpenWorkedShifts.count)
-    
-        
+
+
+    }
+
+    override func viewWillAppear(animated: Bool) {
+
+        super.viewWillAppear(true)
         
         let predicateOpenWS = NSPredicate(format: "workedShift.status == 1")
         let predicateCI = NSPredicate(format: "type == %@" , "Clocked In")
         let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
-        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate) as! [Timelog]
         
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        //        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate) as! [Timelog]
+        
+        allOpenWorkedShifts = [WorkedShift]()
+        
+        for timelog in allOpenWorkedShiftsCIs {
+            allOpenWorkedShifts.append(timelog.workedShift)
+        }
+        //        println("WORKEDSHIFTS = \(allOpenWorkedShifts) ")
         println(allOpenWorkedShiftsCIs.count)
-
-        
-        
-        
         println(allOpenWorkedShifts)
         println(allOpenWorkedShiftsCIs)
-
-        
+        tableView.reloadData()
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

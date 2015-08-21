@@ -35,7 +35,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
 
         self.title = "Shift"
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: nil)
+//        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: nil)
 //        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
         self.tableView.rowHeight = 30.0
         
@@ -48,7 +48,11 @@ class ManualEditsShiftTableViewController: UITableViewController {
         
         var predicate = NSPredicate(format: "SELF.workedShift == %@", selectedWorkedShift)
         
-        TLresults = dataManager.fetch("Timelog", predicate: predicate) as! [Timelog]
+//        TLresults = dataManager.fetch("Timelog", predicate: predicate) as! [Timelog]
+        
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        TLresults = dataManager.fetch("Timelog", predicate: predicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
         
 
     }
@@ -289,6 +293,9 @@ class ManualEditsShiftTableViewController: UITableViewController {
         selectedWorkedShift.moneyShiftOTx2()
         tableView.reloadData()
         println(selectedWorkedShift)
+        
+        dataManager.save()
+        
     }
     
 //    func updateTable() {
