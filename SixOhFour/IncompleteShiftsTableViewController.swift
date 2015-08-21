@@ -8,28 +8,25 @@
 
 import UIKit
 
-class ManualEditsListTableViewController: UITableViewController {
-
+class IncompleteShiftsTableViewController: UITableViewController {
+    
     var dataManager = DataManager()
-    var allOpenWorkedShifts = [WorkedShift]()
-    var allOpenWorkedShiftsCIs = [Timelog]()
+    var openShifts = [WorkedShift]()
+    var openShiftsCIs = [Timelog]()
     var selectedWorkedShift : WorkedShift!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        var doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: nil)
-//        self.navigationItem.rightBarButtonItem = doneButton
-
-        self.title = "Incomplete Shifts"
-//        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
         
-
-
+        self.title = "Incomplete Shifts"
+        //        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .Plain, target: self, action: nil)
+        //        var doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: nil)
+        //        self.navigationItem.rightBarButtonItem = doneButton
+        
     }
-
+    
     override func viewWillAppear(animated: Bool) {
-
+        
         super.viewWillAppear(true)
         
         let predicateOpenWS = NSPredicate(format: "workedShift.status == 1")
@@ -38,18 +35,14 @@ class ManualEditsListTableViewController: UITableViewController {
         
         var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
         
-        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        //        allOpenWorkedShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate) as! [Timelog]
+        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
         
-        allOpenWorkedShifts = [WorkedShift]()
+        openShifts = [WorkedShift]()
         
-        for timelog in allOpenWorkedShiftsCIs {
-            allOpenWorkedShifts.append(timelog.workedShift)
+        for timelog in openShiftsCIs {
+            openShifts.append(timelog.workedShift)
         }
-        //        println("WORKEDSHIFTS = \(allOpenWorkedShifts) ")
-        println(allOpenWorkedShiftsCIs.count)
-        println(allOpenWorkedShifts)
-        println(allOpenWorkedShiftsCIs)
+        
         tableView.reloadData()
     }
     
@@ -57,32 +50,30 @@ class ManualEditsListTableViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allOpenWorkedShifts.count
+        return openShifts.count
     }
-
+    
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("ManualEditsListTableViewCell", forIndexPath: indexPath) as! ManualEditsListTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("ShiftListTableViewCell", forIndexPath: indexPath) as! ManualEditsListTableViewCell
         
-        cell.workedShift = allOpenWorkedShifts[indexPath.row]
-        
-        cell.clockInTL = allOpenWorkedShiftsCIs[indexPath.row]
-        
+        cell.workedShift = openShifts[indexPath.row]
+        cell.clockInTL = openShiftsCIs[indexPath.row]
         return cell
     }
-
+    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         println(indexPath.row)
-        selectedWorkedShift = allOpenWorkedShifts[indexPath.row]
+        selectedWorkedShift = openShifts[indexPath.row]
         
-        self.performSegueWithIdentifier("showManualEditsShift", sender: tableView.cellForRowAtIndexPath(indexPath))
+        self.performSegueWithIdentifier("showShift", sender: tableView.cellForRowAtIndexPath(indexPath))
         
     }
-
-// Tableview Headers
+    
+    // Tableview Headers
     override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         
         let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
@@ -91,13 +82,13 @@ class ManualEditsListTableViewController: UITableViewController {
         //        header.textLabel.font = UIFont.boldSystemFontOfSize(18)
         header.textLabel.frame = header.frame
         header.textLabel.textAlignment = NSTextAlignment.Justified
-        header.textLabel.text = "You have \(allOpenWorkedShifts.count) unsaved shifts:"
+        header.textLabel.text = "You have \(openShifts.count) unsaved shifts:"
         
-        if allOpenWorkedShifts.count == 0 {
+        if openShifts.count == 0 {
             header.textLabel.hidden = true
         } else {
             header.textLabel.hidden = false
-            if allOpenWorkedShifts.count == 1 {
+            if openShifts.count == 1 {
                 header.textLabel.text = "You have 1 unsaved shift:"
             }
         }
@@ -108,68 +99,68 @@ class ManualEditsListTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return ""
     }
-
-    /*
+    
     // Override to support conditional editing of the table view.
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
+    // Return NO if you do not want the specified item to be editable.
+    return true
     }
-    */
-
-    /*
+    
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
+    if editingStyle == .Delete {
+        tableView.beginUpdates()
 
+        let shiftToDelete = openShifts[indexPath.row]
+        openShifts.removeAtIndex(indexPath.row)
+
+        dataManager.delete(shiftToDelete)
+
+        tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
+        tableView.endUpdates()
+        
+        // TODO: Time the reload data to better show animation of delete
+        tableView.reloadData() // Needed to udate header
+    }
+    }
+    
+    
+    
     /*
     // Override to support rearranging the table view.
     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
+    
     }
     */
-
+    
     /*
     // Override to support conditional rearranging of the table view.
     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
+    // Return NO if you do not want the item to be re-orderable.
+    return true
     }
     */
-
+    
     /*
     // MARK: - Navigation
-
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
     }
     */
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
-        if segue.identifier == "showManualEditsShift" {
-            let destinationVC = segue.destinationViewController as! ManualEditsShiftTableViewController
+        if segue.identifier == "showShift" {
+            let destinationVC = segue.destinationViewController as! ShiftTableViewController
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
             destinationVC.hidesBottomBarWhenPushed = true;
-            //            //Passes 2 data variables
             destinationVC.selectedWorkedShift = self.selectedWorkedShift
-            //            destinationVC.breakHours = self.breakHoursSet
-            //            //Pass same 2 variable to get the delta
-            //            destinationVC.breakMinutesSetIntial = self.breakMinutesSet
-            //            destinationVC.breakHoursSetIntial = self.breakHoursSet
         }
-        
     }
-
-
+    
+    
     
 }

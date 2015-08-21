@@ -21,28 +21,22 @@ class DetailsTableViewController: UITableViewController {
     @IBOutlet weak var minTimeLabel: UILabel!
     @IBOutlet weak var maxTimeLabel: UILabel!
     
-//    var entrySelectedIndex : Int = -1
-    
-    var jobLabelDisplay = String() // will change from pushed data Segue
-    
-    var doneButton : UIBarButtonItem!
+    //PUSHED IN DATA
+    var selectedJob : Job!
     var noMinDate : Bool = false
     var noMaxDate : Bool = false
-    var hideTimePicker : Bool = true
-    
-    var selectedJob : Job!
-    
     var nItem : Timelog! // will change from pushed data Segue
     var nItemPrevious : Timelog! // will change from pushed data Segue
     var nItemNext : Timelog! // will change from pushed data Segue
     
-//    var clockInTime : NSDate!
+    var doneButton : UIBarButtonItem!
+    var hideTimePicker : Bool = true
+    var jobLabelDisplay = String() // will change from pushed data Segue
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        jobLabel.text = selectedJob.company.name
-        jobColorDisplay.color = selectedJob.color.getColor
+
         
         println(nItem)
         
@@ -58,7 +52,10 @@ class DetailsTableViewController: UITableViewController {
         timestampPicker.date = nItem.time
         
         datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
+
         
+        // TODO : Need to set restrictions of 24hrs when picking times for both min and max
+        //Hurdle = how are you going to handle when the WS only has 1 entry CI.. what is the min?
         if noMinDate == true {
             //No Minimum Data
             println("FIRST ENTRY CHOOSEN = no min date")
@@ -71,24 +68,34 @@ class DetailsTableViewController: UITableViewController {
             println("timestampPicker.minimumDate \(timestampPicker.minimumDate!)")
         }
         
+        // TODO : Need to set restrictions of 24hrs when picking times for both min and max
+//        if noMaxDate == true && noMinDate == true {
         if noMaxDate == true {
             //No NextTimeStamp for Maxium Data
+            //And no MinDate to set 24hr restriction
             timestampPicker.maximumDate = NSDate()
             maxTimeLabel.text = "Cannot select a future time."
             
+//        } else if noMaxDate == true && nItemPrevious.time > 24hours ago {
+//
+//            timestampPicker.maximumDate = nItemPrevious.time + 24hours
+//            maxTimeLabel.text = "Must be within 24hrs of last entry"
+//        
+//        } else if noMaxDate == false {
+
         } else {
-            
             timestampPicker.maximumDate = nItemNext.time
             println("timestampPicker.maximumDate \(timestampPicker.maximumDate!)")
             maxTimeLabel.text = "\(nItemNext.type): \(dateFormatter(nItemNext.time))"
-            
         }
         
         
     }
     
-    override func viewDidAppear(animated: Bool) {
-        
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
+        jobLabel.text = selectedJob.company.name
+        jobColorDisplay.color = selectedJob.color.getColor
     }
     
     @IBAction func timestampChanged(sender: AnyObject) {
@@ -136,10 +143,6 @@ class DetailsTableViewController: UITableViewController {
             nItem.time = timestampPicker.date
         }
         
-//        if nItem.type == "Clocked In"
-//        {
-//            clockInTime = timestampPicker.date
-//        }
     }
     
     func doneSettingDetails () {
@@ -157,8 +160,6 @@ class DetailsTableViewController: UITableViewController {
         dateFormatter.timeStyle = NSDateFormatterStyle.MediumStyle
         
         label.text = dateFormatter.stringFromDate(datePicker.date)
-        
-        
         
     }
     
@@ -213,6 +214,28 @@ class DetailsTableViewController: UITableViewController {
         // NOTE: Convert from NSDate to regualer
         let dateString = NSDateFormatter.localizedStringFromDate( timestamp , dateStyle: .MediumStyle, timeStyle: .MediumStyle)
         return dateString
+    }
+    
+    @IBAction func unwindFromJobsListTableViewController (segue: UIStoryboardSegue) {
+        
+        let sourceVC = segue.sourceViewController as! JobsListTableViewController
+        
+        selectedJob = sourceVC.selectedJob
+        
+        
+        // TODO : Need to fix selectedjob in display, label, and core data
+        
+        if sourceVC.selectedJob != nil {
+            selectedJob = sourceVC.selectedJob
+            jobColorDisplay.color = selectedJob.color.getColor
+        }
+        
+//        if timelogList != [] {
+//            saveWorkedShiftToJob()
+//        }
+//        
+//        updateTable()
+//        
     }
     
 }

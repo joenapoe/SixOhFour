@@ -255,10 +255,10 @@
                         </variation>
                     </view>
                     <navigationItem key="navigationItem" title="Clock In" id="LOe-Sq-fwg">
-                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="organize" id="LI3-og-Reh">
+                        <barButtonItem key="leftBarButtonItem" systemItem="organize" id="LI3-og-Reh">
                             <color key="tintColor" red="1" green="0.2880933175" blue="0.25940279179999998" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
-                                <segue destination="qjo-6T-SdF" kind="show" identifier="showManualEditsList" id="OO6-ve-6mf"/>
+                                <segue destination="qjo-6T-SdF" kind="show" identifier="showIncompleteShifts" id="OO6-ve-6mf"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="Plus" id="728-4r-pYg">
@@ -274,6 +274,7 @@
                         <outlet property="breakTitleLabel" destination="l76-Rv-bIS" id="8p5-Pc-bfY"/>
                         <outlet property="editBreakButton" destination="1U3-zR-tQT" id="Zdi-mc-nnU"/>
                         <outlet property="editBreakInstruction" destination="iAj-kd-ysD" id="Wk8-fr-Tm6"/>
+                        <outlet property="incompleteFolderButton" destination="LI3-og-Reh" id="Pil-Qb-o9S"/>
                         <outlet property="jobColorDisplay" destination="Hm9-tB-lC4" id="6ZL-GT-UCr"/>
                         <outlet property="jobTitleDisplayButton" destination="o2h-OL-GR8" id="AVR-eK-nwp"/>
                         <outlet property="jobTitleDisplayLabel" destination="KOx-7b-nx6" id="kaV-If-g0K"/>
@@ -340,16 +341,16 @@
             </objects>
             <point key="canvasLocation" x="2510" y="-614"/>
         </scene>
-        <!--Manual Edits List Table View Controller-->
+        <!--Incomplete Shifts Table View Controller-->
         <scene sceneID="Zwf-EY-nBK">
             <objects>
-                <tableViewController id="qjo-6T-SdF" customClass="ManualEditsListTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="qjo-6T-SdF" customClass="IncompleteShiftsTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="aHY-tp-msZ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ManualEditsListTableViewCell" id="fbn-TH-qXP" customClass="ManualEditsListTableViewCell" customModule="SixOhFour" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ShiftListTableViewCell" id="fbn-TH-qXP" customClass="ManualEditsListTableViewCell" customModule="SixOhFour" customModuleProvider="target">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fbn-TH-qXP" id="6ju-L7-37E">
                                     <autoresizingMask key="autoresizingMask"/>
@@ -431,7 +432,7 @@
                     </tableView>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
-                        <segue destination="2CI-Xf-CjC" kind="show" identifier="showManualEditsShift" id="hGe-mi-6gJ"/>
+                        <segue destination="2CI-Xf-CjC" kind="show" identifier="showShift" id="hGe-mi-6gJ"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="n0w-Y1-Dzk" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -670,10 +671,10 @@
             </objects>
             <point key="canvasLocation" x="3610.5" y="404.5"/>
         </scene>
-        <!--Manual Edits Shift Table View Controller-->
+        <!--Shift Table View Controller-->
         <scene sceneID="NwN-eA-G2V">
             <objects>
-                <tableViewController id="2CI-Xf-CjC" customClass="ManualEditsShiftTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="2CI-Xf-CjC" customClass="ShiftTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="30" sectionHeaderHeight="10" sectionFooterHeight="10" id="xzE-1e-CK4">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

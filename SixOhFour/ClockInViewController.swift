@@ -27,6 +27,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var startStopButton: UIButton!
     @IBOutlet weak var breakButton: UIButton!
     @IBOutlet weak var editBreakButton: UIButton!
+    @IBOutlet var incompleteFolderButton: UIBarButtonItem!
     
     var timer = NSTimer()
     
@@ -69,6 +70,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     var timelogDescription: [String] = []
     
     var totalBreaktime : Double = 0.0
+    
     var selectedRowIndex: Int = -1
     var elapsedTime : Int = 0
     var duration : Double = 0.0
@@ -76,6 +78,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     var currentWorkedShift : WorkedShift!
     
     var dataManager = DataManager()
+    
+    var openShiftsCIs = [Timelog]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,7 +94,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         editBreakButton.enabled = false
         saveOption.hidden = true
         saveOption.textColor = UIColor.blueColor()
-        
+
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -130,23 +134,15 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if flow == "clockedOut" {
             breakButton.setTitle("Reset", forState: UIControlState.Normal)
-//            sumUpBreaks(flow)
-//            sumUpWorkDuration()
-            
-//            saveDurationToWorkedShift()
             currentWorkedShift.sumUpDuration()
             
         } else if flow == "onBreak" {
             //while your on break you can see the duration adjustments
-//            sumUpBreaks(flow)
-//            sumUpWorkDuration()
-
-//            saveDurationToWorkedShift()
             currentWorkedShift.sumUpDuration()
-
         }
-
         updateTable()
+
+        checkForIncomplete()
 
     }
     
@@ -187,12 +183,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             breakButton.setTitle("Reset", forState: UIControlState.Normal)
             saveOption.hidden = false
             
-//            sumUpBreaks(flow)
-//            sumUpWorkDuration()
-
-            //saveDurationToWorkedShift()
             currentWorkedShift.sumUpDuration()
-
             saveWorkedShiftToJob()
             
         }
@@ -205,7 +196,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         if flow == "onTheClock" {
             flow = "onBreak"
             breakCount++
-
+            
             breakTimeLabel.hidden = false
             breakTitleLabel.hidden = false
             editBreakInstruction.hidden = false
@@ -235,8 +226,9 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             appendToTimeTableView()
             saveToCoreData()
             
-            //ENDED BREAK
-        } else if flow == "onBreak" {
+            
+        } else if flow == "onBreak" {  //ENDED BREAK
+
             flow = "onTheClock"
             
             breakTimerOver.invalidate()
@@ -264,10 +256,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             appendToTimeTableView()
             saveToCoreData()
-//            sumUpBreaks(flow)
-//added this for now
-            
-//            saveDurationToWorkedShift()
+
             currentWorkedShift.sumUpDuration()
 
             
@@ -343,37 +332,28 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         newTimelog.time = NSDate()
         newTimelog.setValue("", forKey: "comment")
 
-        println(newTimelog)
+        println("newTimelog = \(newTimelog)")
 
         // NOTE: New worked shift if Clocked In
         if timelogDescription.last == "Clocked In" {
             let newWorkedShift = dataManager.addItem("WorkedShift") as! WorkedShift
             currentWorkedShift = newWorkedShift
-            currentWorkedShift.status = 1
+            currentWorkedShift.status = 2 // 2=running, 1=incomplete, 0=complete
             newTimelog.workedShift = currentWorkedShift
-            println("newWorkedShift.objectID \(newWorkedShift.objectID)")
+//            println("newWorkedShift.objectID \(newWorkedShift.objectID)")
         } else {
             newTimelog.workedShift = currentWorkedShift
             println("currentWorkedShift.objectID \(currentWorkedShift.objectID)")
             if timelogDescription.last == "Clocked Out"{
-                currentWorkedShift.status = 0
+                currentWorkedShift.status = 0 // 2=running, 1=incomplete, 0=complete
             }
         }
         println(currentWorkedShift)
         timelogList.append(newTimelog)
         
-//        saveDurationToWorkedShift()
         currentWorkedShift.sumUpDuration()
-
         saveWorkedShiftToJob()
     }
-    
-//    func saveDurationToWorkedShift() {
-//        sumUpBreaks(flow)
-//        sumUpWorkDuration()
-//        currentWorkedShift.setValue(duration, forKey: "duration")
-//        println(currentWorkedShift)
-//    }
     
     func saveWorkedShiftToJob() {
         var predicateJob = NSPredicate(format: "company.name == %@" , jobTitleDisplayLabel.text!)
@@ -386,19 +366,18 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         let allWorkedShifts = dataManager.fetch("WorkedShift") as! [WorkedShift]
         let allJobs = dataManager.fetch("Job") as! [Job]
 
+        dataManager.save()
+
+        // TEST
         println("Total \(allTimelogs.count) timeLogs")
         println("Total \(allWorkedShifts.count) workedShifts")
         println("Total \(allJobs.count) jobs")
-
         for i in 0...(allJobs.count-1) {
             var currentJob = allJobs[i]
-            println("JOB#\(i+1) has \(currentJob.workedShifts.count) workedShifts")
+            println("1 of the jobs has \(currentJob.workedShifts.count) workedShifts")
         }
         
-        dataManager.save()
-
     }
-    
     
     func appendToTimeTableView() {
         
@@ -419,9 +398,10 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func runWorkTimer() {
         //currently calculated since clock in and subtracting the total breaktime duration
-        let elapsedTimeInterval = NSDate().timeIntervalSinceDate(timelogTimestamp[0])
+        let elapsedTimeInterval = NSDate().timeIntervalSinceDate(timelogTimestamp.last!)
         
-        elapsedTime = Int(elapsedTimeInterval) - Int(totalBreaktime)
+        elapsedTime = Int(elapsedTimeInterval) + Int(currentWorkedShift.duration)
+
     }
     
     func updateWorkTimerLabel() {
@@ -446,44 +426,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         workWatchString  = getWatchString(elapsedSecond, minutes: elapsedMinute, hours: elapsedHour)
         workTimeLabel.text = workWatchString
-    }
-    
-    func sumUpBreaks(flow : String) {
-        
-        var subtractor: Int!
-        
-        if flow == "onBreak" {
-            subtractor = 1
-        } else {
-            subtractor = 0
-        }
-        
-        if breakCount > 0 {
-            
-            var breakCountdown = (breakCount-subtractor) * 2
-            var tempTotalBreaktime : Double = 0
-            var partialBreaktime: Double = 0
-            
-            // NOTE : Calculates Break times for all the breakSets the user has in the shift
-            if breakCount-subtractor >= 1 {
-                for i in 1...(breakCount-subtractor) {
-                    partialBreaktime = timelogTimestamp[breakCountdown].timeIntervalSinceDate(timelogTimestamp[breakCountdown-1])
-                    tempTotalBreaktime = tempTotalBreaktime + partialBreaktime
-                    breakCountdown = breakCountdown - 2
-                }
-                
-            }
-            totalBreaktime = tempTotalBreaktime
-        }
-    }
-    
-    func sumUpWorkDuration() {
-        
-        let totalShiftTimeInterval = (timelogTimestamp.last)!.timeIntervalSinceDate(timelogTimestamp[0])
-        duration = (totalShiftTimeInterval) - (totalBreaktime)
-        elapsedTime = Int(duration)
-        updateWorkTimerLabel()
-        
     }
     
     func runBreakTimer() {
@@ -564,7 +506,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             message: "Please choose from the following:",
             preferredStyle: .Alert)
         
-        alert.addAction(UIAlertAction(title: "View", style: .Default, handler: nil))
         alert.addAction(UIAlertAction(title: "Clock In", style: .Default, handler: {
             action in self.lapReset(true)
         }))
@@ -582,6 +523,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.breakTimer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: Selector("runBreakTimer"), userInfo: nil, repeats: true)
             
         }))
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
         self.presentViewController(alert, animated: true, completion: nil)
     }
     
@@ -591,6 +533,23 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         let hoursString = String.hoursString(hours)
         
         return "\(hoursString):\(minutesString):\(secondsString)"
+    }
+    
+    func checkForIncomplete() {
+        let predicateOpenWS = NSPredicate(format: "workedShift.status == 1")
+        let predicateCI = NSPredicate(format: "type == %@" , "Clocked In")
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
+        
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        
+        println("openShiftsCIs.count \(openShiftsCIs.count)")
+        if openShiftsCIs.count == 0 {
+            incompleteFolderButton.enabled = false
+        } else {
+            incompleteFolderButton.enabled = true
+        }
     }
     
 // MARK: Table View functions
@@ -687,7 +646,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if segue.identifier == "showDetails" {
             
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
 
             let destinationVC = segue.destinationViewController as! DetailsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
@@ -702,15 +661,9 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             destinationVC.selectedJob = self.selectedJob
         }
         
-        if segue.identifier == "showManualEditsList" {
-            let destinationVC = segue.destinationViewController as! ManualEditsListTableViewController
+        if segue.identifier == "showIncompleteShifts" {
+            let destinationVC = segue.destinationViewController as! IncompleteShiftsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
-//            //Passes 2 data variables
-//            destinationVC.breakMinutes = self.breakMinutesSet
-//            destinationVC.breakHours = self.breakHoursSet
-//            //Pass same 2 variable to get the delta
-//            destinationVC.breakMinutesSetIntial = self.breakMinutesSet
-//            destinationVC.breakHoursSetIntial = self.breakHoursSet
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
 
         }
@@ -738,6 +691,40 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
 
+    
+    // Same unwind func in 2 differect VCs, control each exit independently
+    @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
+        
+        let sourceVC = segue.sourceViewController as! DetailsTableViewController
+        timelogTimestamp[selectedRowIndex] = sourceVC.nItem.time
+        
+        currentWorkedShift.sumUpDuration()
+        println(currentWorkedShift)
+        
+        
+        
+        
+        elapsedTime = Int(currentWorkedShift.duration)
+        updateWorkTimerLabel()
+        
+        selectedJob = sourceVC.selectedJob
+        
+        if sourceVC.selectedJob != nil {
+            selectedJob = sourceVC.selectedJob
+            jobColorDisplay.color = selectedJob.color.getColor
+        }
+        
+        if timelogList != [] {
+            saveWorkedShiftToJob()
+        }
+        
+        
+        
+        
+        
+        updateTable()
+    }
+    
     
     @IBAction func unwindFromSetBreakTimeViewController (segue: UIStoryboardSegue) {
         
@@ -775,17 +762,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         displayBreaktime ()
     }
 
-// Let me try to put this in the detailVC because im having issues from other view controllers exiting from "details"
-// Solution was just to put another unwind into the other viewcontrollers
-    @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
-        
-        let sourceVC = segue.sourceViewController as! DetailsTableViewController
-        timelogTimestamp[selectedRowIndex] = sourceVC.nItem.time
-
-        currentWorkedShift.sumUpDuration()
-        println(currentWorkedShift)
-        updateTable()
-    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
