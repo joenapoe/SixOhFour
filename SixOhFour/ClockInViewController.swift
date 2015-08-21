@@ -130,13 +130,20 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if flow == "clockedOut" {
             breakButton.setTitle("Reset", forState: UIControlState.Normal)
-            sumUpBreaks(flow)
-            sumUpWorkDuration()
-            saveDurationToWorkedShift()
+//            sumUpBreaks(flow)
+//            sumUpWorkDuration()
+            
+//            saveDurationToWorkedShift()
+            currentWorkedShift.sumUpDuration()
+            
         } else if flow == "onBreak" {
             //while your on break you can see the duration adjustments
-            sumUpBreaks(flow)
-            sumUpWorkDuration()
+//            sumUpBreaks(flow)
+//            sumUpWorkDuration()
+
+//            saveDurationToWorkedShift()
+            currentWorkedShift.sumUpDuration()
+
         }
 
         updateTable()
@@ -180,9 +187,12 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             breakButton.setTitle("Reset", forState: UIControlState.Normal)
             saveOption.hidden = false
             
-            sumUpBreaks(flow)
-            sumUpWorkDuration()
-            saveDurationToWorkedShift()
+//            sumUpBreaks(flow)
+//            sumUpWorkDuration()
+
+            //saveDurationToWorkedShift()
+            currentWorkedShift.sumUpDuration()
+
             saveWorkedShiftToJob()
             
         }
@@ -254,7 +264,12 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             appendToTimeTableView()
             saveToCoreData()
-            sumUpBreaks(flow)
+//            sumUpBreaks(flow)
+//added this for now
+            
+//            saveDurationToWorkedShift()
+            currentWorkedShift.sumUpDuration()
+
             
             breakTimeLabel.text = "0\(breakHours):\(breakMinutes):0\(breakSeconds)"
             
@@ -347,13 +362,18 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         println(currentWorkedShift)
         timelogList.append(newTimelog)
         
+//        saveDurationToWorkedShift()
+        currentWorkedShift.sumUpDuration()
+
         saveWorkedShiftToJob()
     }
     
-    func saveDurationToWorkedShift() {
-        currentWorkedShift.setValue(duration, forKey: "duration")
-        println(currentWorkedShift)
-    }
+//    func saveDurationToWorkedShift() {
+//        sumUpBreaks(flow)
+//        sumUpWorkDuration()
+//        currentWorkedShift.setValue(duration, forKey: "duration")
+//        println(currentWorkedShift)
+//    }
     
     func saveWorkedShiftToJob() {
         var predicateJob = NSPredicate(format: "company.name == %@" , jobTitleDisplayLabel.text!)
@@ -444,8 +464,8 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             var tempTotalBreaktime : Double = 0
             var partialBreaktime: Double = 0
             
+            // NOTE : Calculates Break times for all the breakSets the user has in the shift
             if breakCount-subtractor >= 1 {
-                
                 for i in 1...(breakCount-subtractor) {
                     partialBreaktime = timelogTimestamp[breakCountdown].timeIntervalSinceDate(timelogTimestamp[breakCountdown-1])
                     tempTotalBreaktime = tempTotalBreaktime + partialBreaktime
@@ -648,8 +668,10 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
     {
-        //Editbreaktime
+
         if segue.identifier == "editBreaktimeSegue" {
+            
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
             
             let destinationVC = segue.destinationViewController as! SetBreakTimeViewController
             destinationVC.navigationItem.title = "Set Breaktime"
@@ -663,7 +685,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             destinationVC.breakHoursSetIntial = self.breakHoursSet
         }
         
-        //Send Core Data to Timelog Details
         if segue.identifier == "showDetails" {
             
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
@@ -753,12 +774,16 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         displayBreaktime ()
     }
-    
+
+// Let me try to put this in the detailVC because im having issues from other view controllers exiting from "details"
+// Solution was just to put another unwind into the other viewcontrollers
     @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
         
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         timelogTimestamp[selectedRowIndex] = sourceVC.nItem.time
 
+        currentWorkedShift.sumUpDuration()
+        println(currentWorkedShift)
         updateTable()
     }
 

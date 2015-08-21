@@ -25,6 +25,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
     var selectedJob : Job!
     var noMinDate: Bool = false
     var noMaxDate: Bool = false
+    var selectedRowIndex = Int()
     
     // Created to handle Incomplete
     var cellIncomp: TimelogCell!
@@ -104,22 +105,20 @@ class ManualEditsShiftTableViewController: UITableViewController {
         }
     }
     
-    
-
-    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         println(indexPath.row)
-        
         
         var predicateJob = NSPredicate(format: "company.name == %@", (TLresults[indexPath.row].workedShift.job.company.name) )
         JOBresults = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         
-        
         selectedJob = JOBresults[0]
-            
         
         if indexPath.section == 1 {
             nItemClockIn = TLresults[indexPath.row]
+            
+            selectedRowIndex = (indexPath.row)
+            println("From shift: selectedRowIndex = \(selectedRowIndex)")
+            
             if (indexPath.row) == 0 {
                 noMinDate = true // user select CLOCKIN so noMinDate
             } else {
@@ -176,7 +175,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
             header.textLabel.textColor = UIColor.redColor()
             header.textLabel.font = UIFont.boldSystemFontOfSize(12)
         } else if section == 0 {
-            header.textLabel.text = "Work time = 8.04 hrs"
+            header.textLabel.text = "Work time = \( selectedWorkedShift.hoursWorked() ) hrs"
             header.textLabel.textColor = UIColor.blackColor()
             header.textLabel.font = UIFont.systemFontOfSize(16)
             header.textLabel.numberOfLines = 2;
@@ -199,7 +198,7 @@ class ManualEditsShiftTableViewController: UITableViewController {
         //        header.textLabel.frame = header.frame
         footer.textLabel.textAlignment = NSTextAlignment.Left
         if section == 0 {
-            footer.textLabel.text = "You earned $189.39 for this shift"
+            footer.textLabel.text = "You earned $\( selectedWorkedShift.moneyShiftOTx2()) for this shift"
             footer.textLabel.textColor = UIColor.blackColor()
             footer.textLabel.font = UIFont.systemFontOfSize(12)
         }
@@ -277,5 +276,25 @@ class ManualEditsShiftTableViewController: UITableViewController {
         let destVC = segue.destinationViewController as! ManualEditsListTableViewController
         
     }
+    
+    @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
+        
+        let sourceVC = segue.sourceViewController as! DetailsTableViewController
+                TLresults[selectedRowIndex] = sourceVC.nItem
+
+        
+        
+        selectedWorkedShift.sumUpDuration()
+        selectedWorkedShift.hoursWorked()
+        selectedWorkedShift.moneyShiftOTx2()
+        tableView.reloadData()
+        println(selectedWorkedShift)
+    }
+    
+//    func updateTable() {
+//        
+//        tableView.reloadData()
+//        //jobColorDisplay.setNeedsDisplay()
+//    }
 
 }
