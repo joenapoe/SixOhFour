@@ -49,6 +49,13 @@ class ShiftTableViewController: UITableViewController {
         super.viewWillAppear(true)
         fetchTLresults()
         tableView.reloadData()
+        
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        tableView.reloadData()
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -83,6 +90,7 @@ class ShiftTableViewController: UITableViewController {
         if indexPath.section == 1 {
             let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
             cell.timelog = TLresults[indexPath.row]
+            cell.jobColorView.setNeedsDisplay()
             return cell
         } else {
             cellIncomp = tableView.dequeueReusableCellWithIdentifier("TimelogCell") as! TimelogCell
@@ -99,6 +107,7 @@ class ShiftTableViewController: UITableViewController {
             } else {
                 cellIncomp.type.text = "Clocked Out"
             }
+            cellIncomp.jobColorView.setNeedsDisplay()
             return cellIncomp
         }
     }
@@ -317,21 +326,20 @@ class ShiftTableViewController: UITableViewController {
         println("selectedWorkedShift = \(selectedWorkedShift)")
         
         
+        selectedJob = sourceVC.selectedJob
+        selectedWorkedShift.job = selectedJob
+
         
-        
-        if sourceVC.selectedJob != nil {
-            selectedJob = sourceVC.selectedJob
-//            jobColorDisplay.color = selectedJob.color.getColor
-        }
+//        if sourceVC.selectedJob != nil {
+//            selectedJob = sourceVC.selectedJob
+////            jobColorDisplay.color = selectedJob.color.getColor
+//        }
         
 //        if timelogList != [] {
 //            saveWorkedShiftToJob()
 //        }
         
-        tableView.reloadData()
-        
-        
-        
+        dataManager.save()
         
     }
 }
