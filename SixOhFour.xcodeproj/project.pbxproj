@@ -13,6 +13,7 @@
 		004C09911B7CF9ED004F4527 /* WatchCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C09901B7CF9ED004F4527 /* WatchCounter.swift */; };
 		004C09931B7D14D4004F4527 /* DetailsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */; };
 		00521B971B758C0900735849 /* SetBreakTimeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00521B961B758C0900735849 /* SetBreakTimeViewController.swift */; };
+		006ABA421B8972460065B6DB /* AddShiftViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 006ABA411B8972460065B6DB /* AddShiftViewController.swift */; };
 		00941E341B7D828500656726 /* ManualEditsListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00941E331B7D828500656726 /* ManualEditsListTableViewCell.swift */; };
 		00A068DB1B7BC36B003719B8 /* String+SixOhFour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A068DA1B7BC36B003719B8 /* String+SixOhFour.swift */; };
 		00A068DD1B7C36B1003719B8 /* TimelogCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A068DC1B7C36B1003719B8 /* TimelogCell.swift */; };
@@ -102,6 +103,7 @@
 		004C09901B7CF9ED004F4527 /* WatchCounter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchCounter.swift; sourceTree = "<group>"; };
 		004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailsTableViewController.swift; sourceTree = "<group>"; };
 		00521B961B758C0900735849 /* SetBreakTimeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBreakTimeViewController.swift; sourceTree = "<group>"; };
+		006ABA411B8972460065B6DB /* AddShiftViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddShiftViewController.swift; sourceTree = "<group>"; };
 		00941E331B7D828500656726 /* ManualEditsListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManualEditsListTableViewCell.swift; sourceTree = "<group>"; };
 		00A068DA1B7BC36B003719B8 /* String+SixOhFour.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+SixOhFour.swift"; sourceTree = "<group>"; };
 		00A068DC1B7C36B1003719B8 /* TimelogCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelogCell.swift; sourceTree = "<group>"; };
@@ -361,6 +363,7 @@
 				004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */,
 				004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */,
 				004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */,
+				006ABA411B8972460065B6DB /* AddShiftViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -566,6 +569,7 @@
 				B936D63F1B607674009777A7 /* EndRepeatTableViewController.swift in Sources */,
 				B9CF329E1B6B046900757E43 /* CVCalendarViewPresentationMode.swift in Sources */,
 				87EAE1371B6B18FA00EBEF78 /* DetailsCell.swift in Sources */,
+				006ABA421B8972460065B6DB /* AddShiftViewController.swift in Sources */,
 				87EAE1331B6B05D000EBEF78 /* TimesheetCell.swift in Sources */,
 				87238A501B3E3212004D44CA /* ClockInViewController.swift in Sources */,
 				B9CF32A61B6B046900757E43 /* CVSet.swift in Sources */,

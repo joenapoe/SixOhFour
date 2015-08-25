@@ -175,7 +175,10 @@ class ShiftTableViewController: UITableViewController {
             
             //            noMaxDate = false
             noMaxDate = true
-            // Sim : need to send up a restriction of 24hrs
+            
+            
+            
+            // TODO : need to send up a restriction of 24hrs
             
             //            if (TLresults.count - indexPath.row - 1) == 0 {
             //                noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead

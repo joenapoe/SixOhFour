@@ -667,6 +667,12 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
 
         }
+
+        if segue.identifier == "showAddShift" {
+            let destinationVC = segue.destinationViewController as! AddShiftViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+        }
         
     }
     
