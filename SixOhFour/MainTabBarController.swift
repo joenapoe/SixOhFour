@@ -74,11 +74,27 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 
             // TEST: Check to see if 0
             runningShifts = dataManager.fetch("WorkedShift", predicate: predicateOpenWS) as! [WorkedShift]
-            println("Second checkpoint: was it converted?")
+            println("Since yes, then convert:")
             println("runningShifts.count = \(runningShifts.count)")
         }
-    }
+        
+        //Check for any timelogs that arent assigned to workedshift
+        
+        let predicateOpenTL = NSPredicate(format: "workedShift == nil")
+        var openTLs = [Timelog]()
+        openTLs = dataManager.fetch("Timelog", predicate: predicateOpenTL) as! [Timelog]
+        println("Second Checkpoint = see if there are any openTLs:")
+        println("openTLs = \(openTLs.count)")
 
+        if openTLs.count > 0 {
+            for i in openTLs {
+                dataManager.delete(i)
+            }
+            println("Since yes, then delete:")
+            println("openTLs = \(openTLs.count)")
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 import Foundation
 
-class DetailsTableViewController: UITableViewController {
+class DetailsTableViewController: UITableViewController, UITextFieldDelegate {
     
     @IBOutlet weak var jobColorDisplay: JobColorView!
     @IBOutlet weak var jobLabel: UILabel!
@@ -33,11 +33,12 @@ class DetailsTableViewController: UITableViewController {
     var hideTimePicker : Bool = true
     var jobLabelDisplay = String() // will change from pushed data Segue
     
+    var dataManager = DataManager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
 
-        
         println(nItem)
         
         entryLabel.text = nItem.type
@@ -46,8 +47,10 @@ class DetailsTableViewController: UITableViewController {
         commentTextField.text = nItem.comment
         
         
-        doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: "doneSettingDetails")
+        doneButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveDetails")
         self.navigationItem.rightBarButtonItem = doneButton
+        var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelDetails")
+        self.navigationItem.leftBarButtonItem = cancelButton
         
         timestampPicker.date = nItem.time
         
@@ -128,6 +131,13 @@ class DetailsTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+
+    
     func editItem() {
         
         nItem.type = entryLabel.text!
@@ -145,10 +155,20 @@ class DetailsTableViewController: UITableViewController {
         
     }
     
-    func doneSettingDetails () {
+    func saveDetails () {
         editItem()
         println(nItem)
-        self.performSegueWithIdentifier("unwindFromDetailsTableViewController", sender: self)
+        dataManager.save()
+        self.performSegueWithIdentifier("unwindSaveDetailsTVC", sender: self)
+        println("SAVED")
+
+    }
+    
+    func cancelDetails () {
+        self.performSegueWithIdentifier("unwindCancelDetailsTVC", sender: self)
+//        dataManager.delete(nItem)
+//        println("DELETED")
+
     }
     
     // MARK: - Date Picker
@@ -166,6 +186,10 @@ class DetailsTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+
+        commentTextField.resignFirstResponder()
+        
         if hideTimePicker == false {
             hideTimePicker(true)
             hideTimePicker = true
@@ -176,6 +200,8 @@ class DetailsTableViewController: UITableViewController {
             let addJobStoryboard: UIStoryboard = UIStoryboard(name: "CalendarStoryboard", bundle: nil)
             let jobsListVC: JobsListTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("JobsListTableViewController")
                 as! JobsListTableViewController
+            jobsListVC.source = "details"
+            jobsListVC.previousSelection = self.selectedJob.company.name
             
             self.navigationController?.pushViewController(jobsListVC, animated: true)
         }
@@ -216,12 +242,12 @@ class DetailsTableViewController: UITableViewController {
         return dateString
     }
     
-    @IBAction func unwindFromJobsListTableViewController (segue: UIStoryboardSegue) {
+    @IBAction func unwindFromJobsListTableViewControllerToDetails (segue: UIStoryboardSegue) {
         
         let sourceVC = segue.sourceViewController as! JobsListTableViewController
         
         selectedJob = sourceVC.selectedJob
-        
+
         
         // TODO : Need to fix selectedjob in display, label, and core data
         

@@ -12,6 +12,7 @@ class JobsListTableViewController: UITableViewController {
 
     var selectedJob: Job!
     var previousSelection: String!
+    var source: String!
 
     var jobs = [Job]()
     var dataManager = DataManager()
@@ -25,6 +26,20 @@ class JobsListTableViewController: UITableViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func performUnwindTo(source: String) {
+        switch source {
+        case "addSchedule":
+            self.performSegueWithIdentifier("unwindFromJobsListTableViewController", sender: self)
+        case "clockin":
+            self.performSegueWithIdentifier("unwindFromJobsListTableViewControllerToClockIn", sender: self)
+        case "details":
+            self.performSegueWithIdentifier("unwindFromJobsListTableViewControllerToDetails", sender: self)
+
+        default:
+            ()
+        }
     }
 
     
@@ -50,7 +65,7 @@ class JobsListTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.selectedJob = jobs[indexPath.row]
-                
-        self.performSegueWithIdentifier("unwindFromJobsListTableViewController", sender: self)
+        
+        performUnwindTo(source)
     }
 }

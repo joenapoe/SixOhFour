@@ -30,6 +30,8 @@ class ShiftTableViewController: UITableViewController {
     // Created to handle Incomplete
     var cellIncomp: TimelogCell!
     
+    var newItemCreated: Int = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -49,13 +51,11 @@ class ShiftTableViewController: UITableViewController {
         super.viewWillAppear(true)
         fetchTLresults()
         tableView.reloadData()
-        
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         tableView.reloadData()
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -114,12 +114,16 @@ class ShiftTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
+        
         var predicateJob = NSPredicate(format: "company.name == %@", (TLresults[indexPath.row].workedShift.job.company.name) )
         JOBresults = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         
         selectedJob = JOBresults[0]
         
         if indexPath.section == 1 {
+            
+            newItemCreated = 0
+
             nItemClockIn = TLresults[indexPath.row]
             
             selectedRowIndex = (indexPath.row)
@@ -137,22 +141,18 @@ class ShiftTableViewController: UITableViewController {
                 noMaxDate = false
                 self.nItemClockInNext = TLresults[indexPath.row + 1]
             }
+            
+            
         } else if indexPath.section == 2 {
             
+            newItemCreated = 1
+
             if indexPath.row == 1 { //clock out is sitting 2nd position so you need to add end break
-                let tempTL2 = dataManager.addItem("Timelog") as! Timelog
-                tempTL2.workedShift = selectedWorkedShift
-                tempTL2.time = TLresults.last!.time
-                tempTL2.comment = ""
-                if TLresults.count < 3 {
-                    tempTL2.type = "Ended Break"
-                } else {
-                    tempTL2.type = "Ended Break #\((TLresults.count)/2)"
-                }
+                newItemCreated = 2
             }
             
             let tempTL = dataManager.addItem("Timelog") as! Timelog
-            tempTL.workedShift = selectedWorkedShift
+//            tempTL.workedShift = selectedWorkedShift
             tempTL.comment = ""
             tempTL.time = (TLresults.last!.time).dateByAddingTimeInterval(1)
             
@@ -167,7 +167,6 @@ class ShiftTableViewController: UITableViewController {
                 selectedWorkedShift.status = 0
             }
             
-            
             nItemClockIn = tempTL
             
             noMinDate = false
@@ -175,8 +174,6 @@ class ShiftTableViewController: UITableViewController {
             
             //            noMaxDate = false
             noMaxDate = true
-            
-            
             
             // TODO : need to send up a restriction of 24hrs
             
@@ -186,7 +183,6 @@ class ShiftTableViewController: UITableViewController {
             //                noMaxDate = false
             //                self.nItemClockInNext = TLresults[indexPath.row + 1]
             //            }
-            
             
         }
         self.performSegueWithIdentifier("showDetails", sender: tableView.cellForRowAtIndexPath(indexPath))
@@ -298,7 +294,7 @@ class ShiftTableViewController: UITableViewController {
             
             let destinationVC = segue.destinationViewController as! DetailsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+//            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
 
             destinationVC.nItem = self.nItemClockIn
             destinationVC.nItemPrevious = self.nItemClockInPrevious
@@ -316,8 +312,8 @@ class ShiftTableViewController: UITableViewController {
         dataManager.save()
     }
     
-    @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
-        
+    @IBAction func unwindSaveDetailsTVC (segue: UIStoryboardSegue) {
+        //by hitting the done button
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         TLresults[selectedRowIndex] = sourceVC.nItem
         
@@ -325,24 +321,48 @@ class ShiftTableViewController: UITableViewController {
         selectedWorkedShift.hoursWorked()
         selectedWorkedShift.moneyShiftOTx2()
         tableView.reloadData()
-        dataManager.save()
+//        dataManager.save()
         println("selectedWorkedShift = \(selectedWorkedShift)")
         
         
         selectedJob = sourceVC.selectedJob
         selectedWorkedShift.job = selectedJob
+        
+        if newItemCreated == 1 {
+            sourceVC.nItem.workedShift = selectedWorkedShift
+            TLresults.append(sourceVC.nItem)
+        } else if newItemCreated == 2 {
+//            TODO: write code to hanle 2 new TLs
+            
+            let tempTL2 = dataManager.addItem("Timelog") as! Timelog
+//            tempTL2.workedShift = selectedWorkedShift
+            tempTL2.time = TLresults.last!.time
+            tempTL2.comment = ""
+            if TLresults.count < 3 {
+                tempTL2.type = "Ended Break"
+            } else {
+                tempTL2.type = "Ended Break #\((TLresults.count)/2)"
+            }
+            tempTL2.workedShift = selectedWorkedShift
+            TLresults.append(tempTL2)
 
+            sourceVC.nItem.workedShift = selectedWorkedShift
+            TLresults.append(sourceVC.nItem)
+        }
+    }
+    
+    @IBAction func unwindCancelDetailsTVC (segue: UIStoryboardSegue) {
+        //by hitting the done button
+        let sourceVC = segue.sourceViewController as! DetailsTableViewController
         
-//        if sourceVC.selectedJob != nil {
-//            selectedJob = sourceVC.selectedJob
-////            jobColorDisplay.color = selectedJob.color.getColor
-//        }
+        //TODO need to handle deleting
+        //MAYBE DO A SEARCH IN THE beginning of the app to test for all open timelogs
+
+
+        if newItemCreated > 0 {
+            dataManager.delete(sourceVC.nItem)
+        }
         
-//        if timelogList != [] {
-//            saveWorkedShiftToJob()
-//        }
-        
-        dataManager.save()
         
     }
 }

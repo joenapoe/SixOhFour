@@ -28,6 +28,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var breakButton: UIButton!
     @IBOutlet weak var editBreakButton: UIButton!
     @IBOutlet var incompleteFolderButton: UIBarButtonItem!
+    @IBOutlet var addShiftButton: UIBarButtonItem!
     
     var timer = NSTimer()
     
@@ -108,8 +109,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         let jobsList = dataManager.fetch("Job") as! [Job]
 
-        // NOTE: SELECTS THE FIRST JOB WHEN APP IS LOADED
-        if selectedJob == nil {
+        if selectedJob == nil { // NOTE: SELECTS THE FIRST JOB WHEN APP IS LOADED
             if jobsList.count > 0 {
                 //Fetches the first jobs
                 var firstJob = jobsList[0]
@@ -122,10 +122,11 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
                     startStopButton.enabled = true
                 }
                 selectedJob = jobsList[0]
-            } else if jobsList.count == 0 {
+            } else if jobsList.count == 0 { // NOTE: No Jobs exist
                 jobTitleDisplayLabel.text = "Add a Job"
                 jobTitleDisplayLabel.textColor = UIColor.blueColor()
                 jobColorDisplay.hidden = true
+                addShiftButton.enabled = false
             }
         } else {
             jobTitleDisplayLabel.text = selectedJob.company.name
@@ -143,7 +144,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         updateTable()
 
         checkForIncomplete()
-
+    
     }
     
     //MARK: IBActions:
@@ -311,6 +312,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
                 as! JobsListTableViewController
             
             jobsListVC.previousSelection = self.selectedJob.company.name
+            jobsListVC.source = "clockin"
             
             self.navigationController?.pushViewController(jobsListVC, animated: true)
         }
@@ -319,7 +321,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     //MARK: Functions
     
     func updateTable() {
-        
         lapsTableView.reloadData()
         jobColorDisplay.setNeedsDisplay()
     }
@@ -332,23 +333,18 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         newTimelog.time = NSDate()
         newTimelog.setValue("", forKey: "comment")
 
-        println("newTimelog = \(newTimelog)")
-
         // NOTE: New worked shift if Clocked In
         if timelogDescription.last == "Clocked In" {
             let newWorkedShift = dataManager.addItem("WorkedShift") as! WorkedShift
             currentWorkedShift = newWorkedShift
             currentWorkedShift.status = 2 // 2=running, 1=incomplete, 0=complete
             newTimelog.workedShift = currentWorkedShift
-//            println("newWorkedShift.objectID \(newWorkedShift.objectID)")
         } else {
             newTimelog.workedShift = currentWorkedShift
-            println("currentWorkedShift.objectID \(currentWorkedShift.objectID)")
             if timelogDescription.last == "Clocked Out"{
                 currentWorkedShift.status = 0 // 2=running, 1=incomplete, 0=complete
             }
         }
-        println(currentWorkedShift)
         timelogList.append(newTimelog)
         
         currentWorkedShift.sumUpDuration()
@@ -359,7 +355,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         var predicateJob = NSPredicate(format: "company.name == %@" , jobTitleDisplayLabel.text!)
         let assignedJob = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         currentWorkedShift.job = assignedJob[0]
-        println(assignedJob)
+        println("assignedJob = \(assignedJob[0].objectID)")
         
         
         let allTimelogs = dataManager.fetch("Timelog") as! [Timelog]
@@ -672,43 +668,35 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             let destinationVC = segue.destinationViewController as! AddShiftViewController
             destinationVC.hidesBottomBarWhenPushed = true;
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+            destinationVC.selectedJob = selectedJob
         }
         
     }
     
 // MARK: Segues (Unwind) = Getting data from sourceVC
     
-    @IBAction func unwindFromJobsListTableViewController (segue: UIStoryboardSegue) {
+    @IBAction func unwindFromJobsListTableViewControllerToClockIn (segue: UIStoryboardSegue) {
 
         let sourceVC = segue.sourceViewController as! JobsListTableViewController
         
+        println("sourceVC.selectedJob = \(sourceVC.selectedJob)")
+        println("selectedJob = \(selectedJob)")
         selectedJob = sourceVC.selectedJob
 
-        if sourceVC.selectedJob != nil {
-            selectedJob = sourceVC.selectedJob
-            jobColorDisplay.color = selectedJob.color.getColor
+        if timelogList.count > 0 {
+            currentWorkedShift.job = selectedJob
+            println("currentWorkedShift.job.objectID = \(currentWorkedShift.job.objectID)")
         }
-        
-        if timelogList != [] {
-            saveWorkedShiftToJob()
-        }
-        
         updateTable()
-        
     }
-
     
     // Same unwind func in 2 differect VCs, control each exit independently
-    @IBAction func unwindFromDetailsTableViewController (segue: UIStoryboardSegue) {
-        
+    @IBAction func unwindSaveDetailsTVC (segue: UIStoryboardSegue) {
+        //by hitting the SAVE button
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         timelogTimestamp[selectedRowIndex] = sourceVC.nItem.time
-        
+
         currentWorkedShift.sumUpDuration()
-        println(currentWorkedShift)
-        
-        
-        
         
         elapsedTime = Int(currentWorkedShift.duration)
         updateWorkTimerLabel()
@@ -724,13 +712,24 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             saveWorkedShiftToJob()
         }
         
-        
-        
-        
-        
+        saveWorkedShiftToJob()
         updateTable()
     }
     
+    @IBAction func unwindCancelDetailsTVC (segue: UIStoryboardSegue) {
+        //by hitting the CANCEL button
+        //Nothing saved!
+    }
+    
+    @IBAction func unwindAddShift (segue: UIStoryboardSegue) {
+        //by hitting the CANCEL button
+        //Nothing saved!
+    }
+    
+    @IBAction func unwindAddShiftSave (segue: UIStoryboardSegue) {
+        //by hitting the CANCEL button
+        //Nothing saved!
+    }
     
     @IBAction func unwindFromSetBreakTimeViewController (segue: UIStoryboardSegue) {
         
@@ -767,7 +766,6 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         displayBreaktime ()
     }
-
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
