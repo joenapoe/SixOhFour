@@ -32,6 +32,17 @@ class DataManager {
         return results
     }
     
+    func fetch(entityName: String, sortDescriptors: [NSSortDescriptor]) -> NSArray {
+        var request = NSFetchRequest(entityName: entityName)
+        
+        request.returnsObjectsAsFaults = false;
+        request.sortDescriptors = sortDescriptors
+        
+        var results:NSArray = context!.executeFetchRequest(request, error: nil)!
+        
+        return results
+    }
+    
     func fetch(entityName: String, predicate: NSPredicate, sortDescriptors: [NSSortDescriptor]) -> NSArray {
         var request = NSFetchRequest(entityName: entityName)
         
@@ -65,5 +76,9 @@ class DataManager {
     
     func save() {
         context!.save(nil)
+    }
+    
+    func undo() {
+        context?.rollback()
     }
 }

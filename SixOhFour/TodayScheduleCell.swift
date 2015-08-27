@@ -11,7 +11,8 @@ import UIKit
 class TodayScheduleCell: UITableViewCell {
 
     @IBOutlet weak var jobColorView: JobColorView!
-    @IBOutlet weak var jobNameLabel: UILabel!
+    @IBOutlet weak var companyLabel: UILabel!
+    @IBOutlet weak var positionLabel: UILabel!
     @IBOutlet weak var shiftTimeLabel: UILabel!
     @IBOutlet weak var nextDayLabel: UILabel!
     
@@ -19,7 +20,8 @@ class TodayScheduleCell: UITableViewCell {
         didSet {
             jobColorView.color = shift.job.color.getColor
             
-            jobNameLabel.text = shift.job.company.name
+            companyLabel.text = shift.job.company.name
+            positionLabel.text = shift.job.position
             
             let formatter = NSDateFormatter()
             formatter.dateStyle = .NoStyle
@@ -40,6 +42,13 @@ class TodayScheduleCell: UITableViewCell {
                 nextDayLabel.hidden = false
             }
         }
+    }
+    
+    func toggleLabels(bool: Bool) {
+        companyLabel.enabled = bool
+        positionLabel.enabled = bool
+        shiftTimeLabel.enabled = bool
+        nextDayLabel.enabled = bool
     }
     
     

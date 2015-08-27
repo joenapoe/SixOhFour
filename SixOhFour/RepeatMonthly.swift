@@ -11,9 +11,8 @@ import UIKit
 class RepeatMonthly: RepeatSettings {
     var viewType = 0 // 0 = Date, 1 = Day
     
-    override init() {
-        super.init()
+    override init(startDate: NSDate) {
+        super.init(startDate: startDate)
         
-        repeatEvery = 1
     }
 }

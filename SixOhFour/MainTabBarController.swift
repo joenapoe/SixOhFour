@@ -25,7 +25,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         let clockInVC: UINavigationController = clockInStoryboard.instantiateViewControllerWithIdentifier("ClockInNavController") as! UINavigationController
         let calendarVC: UINavigationController = calendarStoryboard.instantiateViewControllerWithIdentifier("CalendarNavController") as! UINavigationController
-        let addJobsVC: HomeViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("HomeViewController") as! HomeViewController
+        let addJobsVC: UINavigationController = addJobStoryboard.instantiateViewControllerWithIdentifier("JobsNavController") as! UINavigationController
         
         let homeIcon = UITabBarItem(title: "", image:UIImage(named: "home.png"), tag: 1)
         let clockInIcon = UITabBarItem(title: "", image:UIImage(named: "clock.png"), tag: 2)
@@ -35,9 +35,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         clockInVC.tabBarItem = clockInIcon
         calendarVC.tabBarItem = calendarIcon
         
-        self.viewControllers = [UINavigationController(rootViewController: addJobsVC), clockInVC, calendarVC ]
+        self.viewControllers = [addJobsVC, clockInVC, calendarVC ]
         
-
         // Pre-populate the Color table when the app is opened for the first time
         
         var colors = dataManager.fetch("Color") as! [Color]

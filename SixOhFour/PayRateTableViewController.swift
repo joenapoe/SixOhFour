@@ -15,7 +15,7 @@ class PayRateTableViewController: UITableViewController, UITextFieldDelegate {
     var job: Job!
     var currentString = ""
     
-    let context = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+    let dataManager = DataManager()
 
     @IBOutlet weak var payTextField: UITextField!
     @IBOutlet weak var toggleOvertime: UISwitch!

@@ -72,9 +72,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let mySettings:UIUserNotificationSettings = UIUserNotificationSettings(forTypes: types, categories: nil)
         UIApplication.sharedApplication().registerUserNotificationSettings(mySettings)
         
-        //Ask user if they want to allow notifications
-        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: UIUserNotificationType.Sound |
-            UIUserNotificationType.Alert | UIUserNotificationType.Badge, categories: nil))
+        // Ask user if they want to allow notifications
+        // Types are UIUserNotificationType members
+        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Badge | .Sound, categories: nil))
         
         return true
     }

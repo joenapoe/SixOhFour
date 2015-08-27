@@ -9,12 +9,27 @@
 import UIKit
 
 class RepeatWeekly: RepeatSettings {
-    var daysToRepeat = Array<Array<Bool>>()
+    var daysToRepeat: Array<Array<Bool>>!
     
-    override init() {
-        super.init()
+    override init(startDate: NSDate) {
+        super.init(startDate: startDate)
         
-        repeatEvery = 1
         daysToRepeat = Array(count: 4, repeatedValue: Array(count: 7, repeatedValue: false))
     }
+    
+    func getRepeat() -> Array<Array<Bool>> {
+        var repeatArray = Array(count: repeatEvery, repeatedValue: Array(count: 7, repeatedValue: false))
+        
+        var row = repeatEvery-1
+        
+        for x in 0...row {
+            for y in 0...6 {
+                repeatArray[x][y] = daysToRepeat[x][y]
+            }
+        }
+        
+        return repeatArray
+    }
+    
+    
 }

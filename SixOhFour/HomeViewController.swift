@@ -12,18 +12,15 @@ import CoreData
 class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var addButton: UIBarButtonItem!
     
+    var jobs = [Job]()
     var job: Job!
-    var jobsList = [Job]()
     
-    lazy var managedObjectContext : NSManagedObjectContext? = {
-        let appDelegate : AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        if let managedContext : NSManagedObjectContext? = appDelegate.managedObjectContext {
-            return managedContext
-        } else {
-            return nil
-        }
-    }()
+    let dataManager = DataManager()
+    var previousColor: Color!
+    var selectedColor: Color!
+    var colors = [Color]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,19 +36,21 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
         fetchData()
         
+        toggleAddButton()
+        
         tableView.reloadData()
     }
     
+    func toggleAddButton() {
+        if jobs.count == 10 {
+            addButton.enabled = false
+        } else {
+            addButton.enabled = true
+        }
+    }
+    
     func fetchData() {
-        var appDel:AppDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        var context:NSManagedObjectContext = appDel.managedObjectContext!
-        
-        var request = NSFetchRequest(entityName: "Job")
-        request.returnsObjectsAsFaults = false ;
-        
-        var results:NSArray = context.executeFetchRequest(request, error: nil)!
-        
-        jobsList = results as! [Job]
+        jobs = dataManager.fetch("Job") as! [Job]
     }
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -59,31 +58,40 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            managedObjectContext?.deleteObject(jobsList[indexPath.row] as Job)
+        if (editingStyle == .Delete) {
+            tableView.beginUpdates()
             
-//            let alert : UIAlertController = UIAlertController(title: "Warning", message: "Deleting this job will also delete all associated time logs!", preferredStyle: UIAlertControllerStyle.Alert)
-//            
-//            let deleteAction : UIAlertAction = UIAlertAction(title: "Delete", style: UIAlertActionStyle.Default) { (action: UIAlertAction!) -> Void in
-//                self.tableView.reloadData()
-//            }
-//            
-//            let cancelAction : UIAlertAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default) { (action: UIAlertAction!) -> Void in
-//            }
-//            
-//            alert.addAction(deleteAction)
-//            alert.addAction(cancelAction)
-//            
-//            presentViewController(alert, animated: true, completion: nil)
+            let jobDelete = jobs[indexPath.row]
+            let color = jobDelete.color
+
+            let updateColor = dataManager.editItem(color, entityName: "Color") as! Color
+            updateColor.isSelected = false
             
-            var error: NSError? = nil
-            if !managedObjectContext!.save(&error) {
-                println("Failed to delete the item \(error), \(error?.userInfo)")
-            } else {
-                jobsList.removeAtIndex(indexPath.row)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-            }
+            println(color)
+            
+            jobs.removeAtIndex(indexPath.row)
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+            dataManager.delete(jobDelete)
+            
+            tableView.endUpdates()
+            
+            toggleAddButton()
         }
+    }
+    
+    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 30
+    }
+    
+    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        let header: UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
+        header.textLabel.textAlignment = NSTextAlignment.Justified
+        
+        header.textLabel.text = "My Jobs"
+    }
+    
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return ""
     }
 
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -91,26 +99,22 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       return jobsList.count
+       return jobs.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("JobsListCell", forIndexPath: indexPath) as! JobsListCell
         
-        cell.jobNameLabel.text = jobsList[indexPath.row].company.name
-        cell.jobPositionLabel.text = jobsList[indexPath.row].position
-
-        // DELETE: Review and Delete
-//        var jc = JobColor()
-//        cell.jobColorView.color = jc.getJobColor(jobsList[indexPath.row].color.name)
-
-        cell.jobColorView.color = jobsList[indexPath.row].color.getColor
+        cell.jobNameLabel.text = jobs[indexPath.row].company.name
+        cell.jobPositionLabel.text = jobs[indexPath.row].position
+        cell.jobColorView.color = jobs[indexPath.row].color.getColor
+        cell.jobColorView.setNeedsDisplay()
         
         return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.job = jobsList[indexPath.row]
+        self.job = jobs[indexPath.row]
 
         self.performSegueWithIdentifier("jobOverview", sender: self)
     }
@@ -122,10 +126,20 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         
+        if segue.identifier == "add" {
+            let destinationVC = segue.destinationViewController as! AddJobTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            
+        }
+        
         if segue.identifier == "jobOverview" {
             let destinationVC = segue.destinationViewController as! JobOverviewViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            
+            println(job)
             destinationVC.job = self.job
         }
+        
     }
     
 }

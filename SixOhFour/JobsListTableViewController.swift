@@ -54,7 +54,6 @@ class JobsListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier("JobsListCell", forIndexPath: indexPath) as! JobsListCell
         
         cell.job = jobs[indexPath.row]
-
         
         if cell.jobNameLabel.text == previousSelection {
             cell.accessoryType = UITableViewCellAccessoryType.Checkmark

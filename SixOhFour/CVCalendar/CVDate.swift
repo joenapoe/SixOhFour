@@ -59,14 +59,14 @@ extension CVDate {
 }
 
 extension CVDate {
-    var globalDescription: String {
+    var monthYear: String {
         get {
             let month = dateFormattedStringWithFormat("MMMM", fromDate: date)
             return "\(month) \(year)"
         }
     }
     
-    var currentDay: String {
+    var monthDayYear: String {
         get {
             let month = dateFormattedStringWithFormat("MMMM", fromDate: date)
             return "\(month) \(day), \(year)"

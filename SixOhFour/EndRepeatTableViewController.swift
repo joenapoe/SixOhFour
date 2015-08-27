@@ -13,8 +13,10 @@ class EndRepeatTableViewController: UITableViewController {
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var neverCell: UITableViewCell!
     @IBOutlet weak var onDateCell: UITableViewCell!
+    @IBOutlet weak var endDateLabel: UILabel!
     
-    var endRepeat: String!
+    var startDate: NSDate!
+    var endDate: NSDate!
     var doneButton: UIBarButtonItem!
     
     var backButtonTitle = ""
@@ -23,13 +25,19 @@ class EndRepeatTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if endRepeat == "Never" {
-            neverCell.accessoryType = UITableViewCellAccessoryType.Checkmark
-            neverCell.selected = true
-        } else {
-            onDateCell.accessoryType = UITableViewCellAccessoryType.Checkmark
-            onDateCell.selected = true
-        }
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
+        
+        endDateLabel.text = dateFormatter.stringFromDate(endDate)
+        
+        
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let maxDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitMonth, value: 12, toDate: startDate, options: nil)
+        
+        datePicker.minimumDate = startDate
+        datePicker.maximumDate = maxDate
+        datePicker.date = endDate
         
         doneButton = UIBarButtonItem(title:"Done", style: .Plain, target: self, action: "setEndRepeat")
         self.navigationItem.rightBarButtonItem = self.doneButton
@@ -48,7 +56,8 @@ class EndRepeatTableViewController: UITableViewController {
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
         
-        endRepeat = dateFormatter.stringFromDate(datePicker.date)
+        endDate = datePicker.date
+        endDateLabel.text = dateFormatter.stringFromDate(endDate)
     }
     
     
@@ -71,9 +80,6 @@ class EndRepeatTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
-    }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 3
@@ -83,17 +89,16 @@ class EndRepeatTableViewController: UITableViewController {
         if indexPath.row == 1 {
             togglePicker("onDate")
             datePickerChanged(self)
-            onDateCell.accessoryType = UITableViewCellAccessoryType.Checkmark
-            neverCell.accessoryType = UITableViewCellAccessoryType.None
-        } else {
-            togglePicker("close")
-            endRepeat = "Never"
-            neverCell.accessoryType = UITableViewCellAccessoryType.Checkmark
-            onDateCell.accessoryType = UITableViewCellAccessoryType.None
         }
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        
+        // Unlimited repeat disabled
+        if indexPath.row == 0 {
+            return 0
+        }
+    
         if pickerHidden && indexPath.row == 2 {
             return 0
         } else {

@@ -22,11 +22,11 @@ class AddScheduleTableViewController: UITableViewController {
     @IBOutlet weak var endRepeatLabel: UILabel!
     
     var saveButton: UIBarButtonItem!
-    var schedule: [ScheduledShift]!
     var startTime: NSDate!
     var endTime: NSDate!
     var job: Job!
     var shift: ScheduledShift!
+
     
     var isNewSchedule = true
     var startDatePickerHidden = true
@@ -35,7 +35,9 @@ class AddScheduleTableViewController: UITableViewController {
     var jobListEmpty = true;
     var reminderMinutes = 16 // Maximum reminder = 15 minutes
     var dataManager = DataManager()
-    var repeatSettings = RepeatSettings()
+    var repeatSettings: RepeatSettings!
+    var conflicts = [ScheduledShift]()
+    var schedule = [ScheduledShift]()
 
     
     override func viewDidLoad() {
@@ -45,11 +47,12 @@ class AddScheduleTableViewController: UITableViewController {
         self.navigationItem.rightBarButtonItem = saveButton
         saveButton.enabled = false
         
-        repeatLabel.text = repeatSettings.type
         
-        // TODO: Change to repeatSettings.endDate
-        endRepeatLabel.text = "Never"
-                
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
+        
+    
         if shift != nil {
             job = shift.job
             jobNameLabel.text = job.company.name
@@ -58,8 +61,6 @@ class AddScheduleTableViewController: UITableViewController {
             
             startDatePicker.date = shift.startTime
             endDatePicker.date = shift.endTime
-            
-            datePickerChanged(startLabel, datePicker: startDatePicker)
             
         } else {
             
@@ -79,13 +80,22 @@ class AddScheduleTableViewController: UITableViewController {
             startDatePicker.date = startTime
             endDatePicker.date = endTime
             
-            datePickerChanged(startLabel, datePicker: startDatePicker)
-
         }
+        
+        repeatSettings = RepeatSettings(startDate: startDatePicker.date)
+        repeatLabel.text = repeatSettings.type
+        
+        endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
+
+        startDatePicker.minimumDate = NSDate()
+        endDatePicker.minimumDate = NSDate()
+
+        datePickerChanged(startLabel, datePicker: startDatePicker)
         
         // Reminder Picker
         self.reminderPicker.dataSource = self
         self.reminderPicker.delegate = self
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -122,6 +132,12 @@ class AddScheduleTableViewController: UITableViewController {
         repeatLabel.text = repeatSettings.type
         
         
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
+        endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
+
+        
         tableView.beginUpdates()
         tableView.endUpdates()
     }
@@ -129,99 +145,38 @@ class AddScheduleTableViewController: UITableViewController {
     @IBAction func unwindFromEndRepeatTableViewController(segue: UIStoryboardSegue) {
         let sourceVC = segue.sourceViewController as! EndRepeatTableViewController
         
-        endRepeatLabel.text = sourceVC.endRepeat
-    }
+        repeatSettings.endDate = sourceVC.endDate
 
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
+        
+        endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
+    }
     
     // MARK: - Class Functions
     
     func saveSchedule() {
-        
-//        // TODO: Validate Shift
-//        let alertController = UIAlertController(title: "Schedule Conflict", message:
-//            "Shift already exists", preferredStyle: UIAlertControllerStyle.Alert)
-//        alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
-//        
-//        self.presentViewController(alertController, animated: true, completion: nil)
+        conflicts = []
         
         if isNewSchedule {
-            addSchedule()
+            if repeatSettings.type == "Never" {
+                addShift()
+            } else {
+                addWeeklySchedule()
+            }
         } else {
             editSchedule()
         }
+        
+        resolveConflicts()
     }
     
-    // TODO: Validate Shift
-    
-//    func validateShift(shift: ScheduledShift) {
-//        let startPredicate = NSPredicate(format: "startTime >= %@ AND %@ <= endTime", shift.startTime, shift.startTime)
-//        let endPredicate = NSPredicate(format: "startTime >= %@ AND %@ <= endTime", shift.endTime, shift.endTime)
-//        
-//        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
-//        let sortDescriptors = [sortDescriptor]
-//        
-//        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [startPredicate, endPredicate])
-//
-//        let results = dataManager.fetch("ScheduledShift", predicate: predicate, sortDescriptors: sortDescriptors)
-//        
-//        if results.count == 0 {
-//            println("no conflicts")
-//        } else {
-//            println(shift.startTime)
-//            println(shift.endTime)
-//            println()
-//            
-//            var shifts = results as! [ScheduledShift]
-//            
-//            for s in shifts {
-//                println("conflicts with")
-//                println(s.startTime)
-//                println(s.endTime)
-//            }
-//        }
-//        
-//    }
-    
-    func addSchedule() {
-        
-        let newShift = dataManager.addItem("ScheduledShift") as! ScheduledShift
-        
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .LongStyle
-        formatter.timeStyle = .NoStyle
-        
-        newShift.startDate = formatter.stringFromDate(self.startTime)
-        newShift.startTime = self.startTime
-        newShift.endTime = self.endTime
-        newShift.job = self.job
-        
-//        validateShift(newShift)
-        
-        dataManager.save()
-        
-        self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
-        
-    }
-    
-    func editSchedule() {        
-        let editShift = dataManager.editItem(shift, entityName: "ScheduledShift") as! ScheduledShift
-        
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .LongStyle
-        formatter.timeStyle = .NoStyle
-        
-        editShift.startDate = formatter.stringFromDate(self.startTime)
-        editShift.startTime = self.startTime
-        editShift.endTime = self.endTime
-        editShift.job = self.job
-        
-//        validateShift(editShift)
-        
-        dataManager.save()
-        
+    func unwind() {
         self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
     }
     
+
     // MARK: - Toggles
     
     func togglePicker(picker: String) {
@@ -306,6 +261,11 @@ class AddScheduleTableViewController: UITableViewController {
                 return 0
             }
             
+            // TODO: Enable reminder for next version
+            if indexPath.section == 2 {
+                return 0
+            }
+            
             return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
         } else {
             if indexPath.section == 0 {
@@ -316,57 +276,185 @@ class AddScheduleTableViewController: UITableViewController {
             
         }
     }
+}
+
+
+// MARK:  - Scheduler functions
+
+extension AddScheduleTableViewController {
     
+    func addShift() {
+        
+        let newShift = dataManager.addItem("ScheduledShift") as! ScheduledShift
+        
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .LongStyle
+        formatter.timeStyle = .NoStyle
+        
+        newShift.startDate = formatter.stringFromDate(self.startTime)
+        newShift.startTime = self.startTime
+        newShift.endTime = self.endTime
+        newShift.job = self.job
+        
+        checkConflicts(newShift)
+        schedule.append(newShift)
+    }
+    
+    func editSchedule() {
+        
+        let editShift = dataManager.editItem(shift, entityName: "ScheduledShift") as! ScheduledShift
+        
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .LongStyle
+        formatter.timeStyle = .NoStyle
+        
+        editShift.startDate = formatter.stringFromDate(self.startTime)
+        editShift.startTime = self.startTime
+        editShift.endTime = self.endTime
+        editShift.job = self.job
 
-    // MARK: - Navigation
-
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "selectJob" {
-            let destinationVC = segue.destinationViewController as! JobsListTableViewController
-            destinationVC.previousSelection = jobNameLabel.text
-        }
-
-        if segue.identifier == "setRepeat" {
-            let destinationVC = segue.destinationViewController as! SetRepeatTableViewController
+        checkConflicts(editShift)
+        schedule.append(editShift)
+    }
+    
+    func addWeeklySchedule() {
+        var shifts = [NSDate]()
+        var startRepeat = startTime
+    
+        if let repeatSettings = self.repeatSettings as? RepeatWeekly  {
+            var repeatArray = repeatSettings.getRepeat()
             
-            // TODO: Set selected day = true
-            if let repeatSettings = repeatSettings as? RepeatWeekly {
-                repeatSettings.daysToRepeat[0][repeatSettings.daySelectedIndex] = true
-                self.repeatSettings = repeatSettings
+            var row = repeatSettings.repeatEvery - 1
+            
+            let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+            var difference = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: startRepeat, toDate: repeatSettings.endDate, options: nil).day
+            
+            var offset = 0 - repeatSettings.daySelectedIndex
+            
+            while offset < difference {
+                for x in 0...row{
+                    for y in 0...6 {
+                        
+                        if repeatArray[x][y] == true {
+                            var date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: startRepeat, options: nil)
+                            
+                            if date!.compare(startRepeat) == NSComparisonResult.OrderedDescending || date!.compare(startRepeat) == NSComparisonResult.OrderedSame {
+                                    
+                                shifts.append(date!)
+                            }
+                        }
+                        
+                        offset++
+                        
+                        if offset > difference {
+                            break
+                        }
+                    }
+                }
             }
-
-            destinationVC.repeatSettings = self.repeatSettings
-
         }
         
-        if segue.identifier == "setEndRepeat" {
-            let destinationVC = segue.destinationViewController as! EndRepeatTableViewController
+        for shift in shifts {
+            var difference = endTime.timeIntervalSinceDate(startTime)
             
-            destinationVC.endRepeat = endRepeatLabel.text
+            startTime = shift
+            endTime = startTime.dateByAddingTimeInterval(difference)
+            
+            addShift()
+        }
+    }
+
+    func checkConflicts(shift: ScheduledShift) {
+        let startPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", shift.startTime, shift.startTime)
+        let endPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", shift.endTime, shift.endTime)
+        let startPredicate1 = NSPredicate(format: "%@ <= startTime AND startTime <= %@", shift.startTime, shift.endTime)
+        let endPredicate2 = NSPredicate(format: "%@ <= endTime AND endTime <= %@", shift.startTime, shift.endTime)
+        
+        let shiftPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType,
+            subpredicates: [startPredicate, endPredicate, startPredicate1, endPredicate2])
+        
+        let selfPredicate = NSPredicate(format: "SELF != %@", shift)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [shiftPredicate, selfPredicate])
+        
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        
+        let results = dataManager.fetch("ScheduledShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [ScheduledShift]
+        
+        for result in results {
+            conflicts.append(result)
         }
     }
     
-    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
-        if identifier == "selectJob" {
-            if jobListEmpty {
-                let addJobStoryboard: UIStoryboard = UIStoryboard(name: "AddJobStoryboard", bundle: nil)
-                let addJobsVC: AddJobTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("AddJobTableViewController")
-                    as! AddJobTableViewController
-                
-                self.navigationController?.pushViewController(addJobsVC, animated: true)
-
-                return false
-            } else {
-                return true
+    func resolveConflicts() {
+        if conflicts.count == 0 {
+            save(schedule)
+            unwind()
+        } else {
+            
+            var message = "\(conflicts.count) Schedule Conflict"
+            var replaceTitle = "Replace"
+            
+            if conflicts.count > 1 {
+                message += "s"
+                replaceTitle += " All (\(conflicts.count))"
             }
+            
+            let alertController = UIAlertController(title: nil, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            
+            let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
+                for conflict in self.conflicts {
+                    self.dataManager.delete(conflict)
+                }
+                
+                self.save(self.schedule)
+                self.unwind()
+            }
+            
+            let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                if self.isNewSchedule {
+                    for shift in self.schedule {
+                        self.dataManager.delete(shift)
+                        self.schedule.removeAtIndex(0)
+                    }
+                } else {
+                    self.dataManager.undo()
+                }
+            }
+            
+            alertController.addAction(replace)
+            alertController.addAction(cancel)
+            
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    func save(schedule: [ScheduledShift]) {
+        
+        for shift in schedule {
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            formatter.timeZone = NSTimeZone()
+            
+            let start = formatter.stringFromDate(shift.startTime)
+            
+            var notification = UILocalNotification()
+            notification.alertBody = "REMINDER: You have a shift at \(start)"
+            notification.alertAction = "clockin"
+            notification.fireDate = shift.startTime
+            notification.soundName = UILocalNotificationDefaultSoundName
+            UIApplication.sharedApplication().scheduleLocalNotification(notification)
         }
         
-        return true
+        dataManager.save()
     }
 }
 
+
+// MARK: - Date Picker
+
 extension AddScheduleTableViewController: UIPickerViewDataSource, UIPickerViewDelegate {
-    // MARK: - Date Picker
     
     func datePickerChanged(label: UILabel, datePicker: UIDatePicker) {
         let dateFormatter = NSDateFormatter()
@@ -396,6 +484,11 @@ extension AddScheduleTableViewController: UIPickerViewDataSource, UIPickerViewDe
             
             startTime = datePicker.date
             endTime = endDatePicker.date
+            
+            let cal = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
+            let myComponents = cal!.components(NSCalendarUnit.CalendarUnitWeekday, fromDate: datePicker.date)
+            
+            repeatSettings.daySelectedIndex = myComponents.weekday - 1
         }
         
         if datePicker == endDatePicker {
@@ -422,11 +515,7 @@ extension AddScheduleTableViewController: UIPickerViewDataSource, UIPickerViewDe
             startTime = startDatePicker.date
         }
         
-        // TODO: Set selected day as true on daysToRepeat
-        
-        let cal = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
-        let myComponents = cal!.components(NSCalendarUnit.CalendarUnitWeekday, fromDate: datePicker.date)
-        repeatSettings.daySelectedIndex = myComponents.weekday - 1
+        repeatSettings.startDate = startTime
         
         toggleSaveButton()
     }
@@ -456,3 +545,50 @@ extension AddScheduleTableViewController: UIPickerViewDataSource, UIPickerViewDe
     }
 }
 
+
+// MARK: - Navigation
+
+extension AddScheduleTableViewController {
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "selectJob" {
+            let destinationVC = segue.destinationViewController as! JobsListTableViewController
+            destinationVC.previousSelection = jobNameLabel.text
+            destinationVC.source = "addSchedule"
+        }
+        
+        if segue.identifier == "setRepeat" {
+            let destinationVC = segue.destinationViewController as! SetRepeatTableViewController
+            
+            destinationVC.selectedDay = startTime
+            destinationVC.repeatSettings = self.repeatSettings
+            
+        }
+        
+        if segue.identifier == "setEndRepeat" {
+            let destinationVC = segue.destinationViewController as! EndRepeatTableViewController
+            
+            destinationVC.startDate = repeatSettings.startDate
+            destinationVC.endDate = repeatSettings.endDate
+            
+        }
+    }
+    
+    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
+        if identifier == "selectJob" {
+            if jobListEmpty {
+                let addJobStoryboard: UIStoryboard = UIStoryboard(name: "AddJobStoryboard", bundle: nil)
+                let addJobsVC: AddJobTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("AddJobTableViewController")
+                    as! AddJobTableViewController
+                
+                self.navigationController?.pushViewController(addJobsVC, animated: true)
+                
+                return false
+            } else {
+                return true
+            }
+        }
+        
+        return true
+    }
+}
