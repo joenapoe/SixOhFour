@@ -32,6 +32,7 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
     var timelog: Timelog!
     var workedshift: WorkedShift!
     var allWorkedShifts = [WorkedShift]()
+    var totalTime: Double = 0.0
     
     var selectedDate: NSDate!
     var monthSchedule: [ScheduledShift]!
@@ -64,6 +65,13 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         payLabel.text = "\(numberFormatter.stringFromNumber(pay)!)/hr"
         
         fetchData()
+        
+        
+        calcWorkTime7Days()
+        totalHoursLabel.text = "\(totalTime)"
+        regularHoursLabel.text = "TODO"
+        overtimeLabel.text = "TODO"
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -116,6 +124,27 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
     func fetchData() {
         jobs = dataManager.fetch("Job") as! [Job]
     }
+
+    func calcWorkTime7Days() {
+        
+        let predicateOpenWS = NSPredicate(format: "workedShift.job == %@", job)
+        let predicateCI = NSPredicate(format: "type == %@ && time > %@", "Clocked In", NSDate().dateByAddingTimeInterval(-7*24*60*60) )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
+
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+        
+        for i in 0...(allWorkedShifts.count-1) {
+            var partialTime = allWorkedShifts[i].hoursWorked()
+            totalTime += partialTime
+        }
+    }
+    
     
     func calculateRegHours() {
         regularHoursLabel.text = "\(workedshift.duration)"
@@ -132,6 +161,15 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: nil, action: nil)
             destinationVC.hidesBottomBarWhenPushed = true
             destinationVC.job = self.job
+        }
+        
+        if segue.identifier == "showTimesheet" {
+            let destinationVC = segue.destinationViewController as! TimesheetTableViewController
+            
+//            destinationVC.navigationItem.title = "Edit Job"
+//            self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: nil, action: nil)
+            destinationVC.hidesBottomBarWhenPushed = true
+            destinationVC.selectedJob = self.job
         }
     }
     

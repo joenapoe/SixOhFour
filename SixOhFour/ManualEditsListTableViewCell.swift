@@ -30,7 +30,7 @@ class ManualEditsListTableViewCell: UITableViewCell {
 
     var clockInTL: Timelog! {
         didSet {
-            dateLabel.text = NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .FullStyle,  timeStyle: .NoStyle)
+            dateLabel.text = NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .LongStyle,  timeStyle: .NoStyle)
             timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
 
         }

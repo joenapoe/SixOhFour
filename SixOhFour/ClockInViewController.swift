@@ -23,6 +23,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var jobColorDisplay: JobColorView!
     @IBOutlet weak var jobTitleDisplayButton: UIButton!
     @IBOutlet weak var jobTitleDisplayLabel: UILabel!
+    @IBOutlet var positionLabel: UILabel!
     @IBOutlet weak var lapsTableView: UITableView!
     @IBOutlet weak var startStopButton: UIButton!
     @IBOutlet weak var breakButton: UIButton!
@@ -115,6 +116,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
                 var firstJob = jobsList[0]
                 jobTitleDisplayLabel.text = firstJob.company.name
                 jobTitleDisplayLabel.textColor = UIColor.blackColor()
+                positionLabel.text = firstJob.position
                 jobColorDisplay.hidden = false
                 jobColorDisplay.color = firstJob.color.getColor
                 jobListEmpty = false
@@ -125,12 +127,14 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
             } else if jobsList.count == 0 { // NOTE: No Jobs exist
                 jobTitleDisplayLabel.text = "Add a Job"
                 jobTitleDisplayLabel.textColor = UIColor.blueColor()
+                positionLabel.text = ""
                 jobColorDisplay.hidden = true
                 addShiftButton.enabled = false
             }
         } else {
             jobTitleDisplayLabel.text = selectedJob.company.name
             jobColorDisplay.color = selectedJob.color.getColor
+            positionLabel.text = selectedJob.position
         }
         
         if flow == "clockedOut" {
@@ -352,7 +356,7 @@ class ClockInViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func saveWorkedShiftToJob() {
-        var predicateJob = NSPredicate(format: "company.name == %@" , jobTitleDisplayLabel.text!)
+        var predicateJob = NSPredicate(format: "company.name == %@ && position == %@" , selectedJob.company.name, selectedJob.position)
         let assignedJob = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         currentWorkedShift.job = assignedJob[0]
         println("assignedJob = \(assignedJob[0].objectID)")

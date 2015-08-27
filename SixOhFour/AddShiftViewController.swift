@@ -61,6 +61,7 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewDidAppear(animated: Bool) {
         selectedJob.color.getColor
+        newShift.sumUpDuration()
         timelogTable.reloadData()
 
     }
@@ -314,8 +315,8 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
             //by hitting the SAVE button
             let sourceVC = segue.sourceViewController as! DetailsTableViewController
             nItemClockIn = sourceVC.nItem
-    
-            newShift.sumUpDuration()
+
+            newShift.hoursWorked()
             worktimeLabel.text = "Work time = \( newShift.hoursWorked() ) hrs"
             earnedLabel.text = "You earned $\( newShift.moneyShiftOTx2()) for this shift"
             selectedJob = sourceVC.selectedJob

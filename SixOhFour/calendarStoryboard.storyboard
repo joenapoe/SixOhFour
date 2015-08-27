@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14C1510" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
     </dependencies>
@@ -1096,21 +1096,21 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Job" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OEC-6O-vuS">
-                                            <rect key="frame" x="40" y="11" width="29" height="21"/>
+                                            <rect key="frame" x="35" y="12" width="29" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CmY-Nh-Dsf" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
-                                            <rect key="frame" x="20" y="17" width="10" height="10"/>
+                                            <rect key="frame" x="15" y="17" width="10" height="10"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="10" id="63l-T0-awd"/>
                                                 <constraint firstAttribute="height" constant="10" id="95q-SC-x0r"/>
                                             </constraints>
                                         </view>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wuE-EM-l4H">
-                                            <rect key="frame" x="40" y="32" width="23" height="11"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wuE-EM-l4H">
+                                            <rect key="frame" x="35" y="32" width="23" height="11"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="9"/>
                                             <color key="textColor" red="0.50196081400000003" green="0.50196081400000003" blue="0.50196081400000003" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
@@ -1122,7 +1122,7 @@
                                         <constraint firstItem="OEC-6O-vuS" firstAttribute="leading" secondItem="wuE-EM-l4H" secondAttribute="leading" id="GGZ-a7-W8o"/>
                                         <constraint firstItem="wuE-EM-l4H" firstAttribute="top" secondItem="OEC-6O-vuS" secondAttribute="bottom" id="KTT-qG-MFd"/>
                                         <constraint firstAttribute="centerY" secondItem="CmY-Nh-Dsf" secondAttribute="centerY" id="Nhz-Vt-a6F"/>
-                                        <constraint firstItem="CmY-Nh-Dsf" firstAttribute="leading" secondItem="QaR-iu-EYv" secondAttribute="leading" constant="20" id="rl6-NF-LQs"/>
+                                        <constraint firstItem="CmY-Nh-Dsf" firstAttribute="leading" secondItem="QaR-iu-EYv" secondAttribute="leading" constant="15" id="rl6-NF-LQs"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>

@@ -25,6 +25,7 @@ class WorkedShift: NSManagedObject {
     var sortedTLnsarr = [Timelog]()
     
     func hoursWorked() -> Double {
+        sumUpDuration()
         var hoursWorked: Double = (round( 100 * ( duration / 3600 ) ) / 100 )
         return hoursWorked
     }
@@ -58,6 +59,7 @@ class WorkedShift: NSManagedObject {
     }
     
     func sumUpDuration() {
+
         
         var TLset = self.timelogs //NSSet
 //        var arr = set.allObjects //Swift Array
@@ -97,7 +99,7 @@ class WorkedShift: NSManagedObject {
             open = 1 //last entry = "clocked out" so need to subtract 1 from array.count
         }
         
-        if ((self.status == 1) && (sortedTLnsarr.count > 1)) || ((self.status == 0) && (sortedTLnsarr.count > 2)) {
+        if ((self.status != 0) && (sortedTLnsarr.count > 1)) || ((self.status == 0) && (sortedTLnsarr.count > 2)) {
             
             var breakCount: Int =  (( sortedTLnsarr.count - open )/2)
             println("breakCount = \(breakCount)")

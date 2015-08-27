@@ -33,22 +33,37 @@ class TimesheetTableViewController: UITableViewController {
     var startDate: NSDate!
     var endDate: NSDate!
     
+    var dataManager = DataManager()
+    var allWorkedShifts = [WorkedShift]()
+    var selectedJob : Job!
+    var totalTime = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.title = "Timesheet"
         
-        endDate = NSDate()
         
         let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
         
-        let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay, fromDate: endDate)
+        endDate = NSDate()
+        endDatePicker.date = endDate
         startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: -6, toDate: endDate, options: nil)
+        startDatePicker.date = startDate
+        
+        startDatePicker.maximumDate = NSDate()
+        endDatePicker.maximumDate = NSDate()
+
         
         datePickerChanged(startDetailLabel, datePicker: startDatePicker)
 
         tableView.dataSource = self
         tableView.delegate = self
+        
+        
+        calcWorkTime()
+        totalHoursLabel.text = "\(totalTime)"
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -145,6 +160,7 @@ class TimesheetTableViewController: UITableViewController {
             startDate = startDatePicker.date
         }
         
+        calcWorkTime()
     }
     
     func togglePicker(picker: String) {
@@ -208,4 +224,30 @@ class TimesheetTableViewController: UITableViewController {
     }
     */
 
+    func calcWorkTime() {
+        
+        totalTime = 0.0
+        allWorkedShifts = []
+        
+        let predicateOpenWS = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
+ 
+        let predicateCI = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
+        
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+        
+        for shift in allWorkedShifts {
+            var partialTime = shift.hoursWorked()
+            totalTime += partialTime
+        }
+        
+        totalHoursLabel.text = "\(totalTime)"
+    }
+    
 }

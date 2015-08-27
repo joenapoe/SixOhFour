@@ -76,8 +76,14 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate {
         if noMaxDate == true {
             //No NextTimeStamp for Maxium Data
             //And no MinDate to set 24hr restriction
-            timestampPicker.maximumDate = NSDate()
-            maxTimeLabel.text = "Cannot select a future time."
+
+            if nItem.type == "Clocked Out" {
+                timestampPicker.maximumDate = NSDate().dateByAddingTimeInterval(8*60*60)
+                maxTimeLabel.text = "Cannot exceed 8 hrs from now."
+            } else {
+                timestampPicker.maximumDate = NSDate()
+                maxTimeLabel.text = "Cannot select a future time."
+            }
             
 //        } else if noMaxDate == true && nItemPrevious.time > 24hours ago {
 //
