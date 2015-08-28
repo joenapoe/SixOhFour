@@ -36,7 +36,6 @@ class TimesheetTableViewController: UITableViewController {
     var dataManager = DataManager()
     var allWorkedShifts = [WorkedShift]()
     var selectedJob : Job!
-    var totalTime = 0.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,8 +61,7 @@ class TimesheetTableViewController: UITableViewController {
         
         
         calcWorkTime()
-        totalHoursLabel.text = "\(totalTime)"
-        
+        calculatePayDaysAgo()
     }
 
     override func didReceiveMemoryWarning() {
@@ -161,6 +159,7 @@ class TimesheetTableViewController: UITableViewController {
         }
         
         calcWorkTime()
+        calculatePayDaysAgo()
     }
     
     func togglePicker(picker: String) {
@@ -226,13 +225,14 @@ class TimesheetTableViewController: UITableViewController {
 
     func calcWorkTime() {
         
-        totalTime = 0.0
+        var totalTime = 0.0
+        var regTotalTime = 0.0
+        var oTTotalTime = 0.0
         allWorkedShifts = []
         
-        let predicateOpenWS = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
- 
-        let predicateCI = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
+        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
         
         var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
         
@@ -245,9 +245,39 @@ class TimesheetTableViewController: UITableViewController {
         for shift in allWorkedShifts {
             var partialTime = shift.hoursWorked()
             totalTime += partialTime
+            
+            var oTPartialTime = shift.hoursWorkedOT()
+            oTTotalTime += oTPartialTime
+            
+            var regPartialTime = shift.hoursWorkedReg()
+            regTotalTime += regPartialTime
         }
         
+        regularHoursLabel.text = "\(regTotalTime)"
+        overtimeHoursLabel.text = "\(oTTotalTime)"
         totalHoursLabel.text = "\(totalTime)"
     }
+    
+    func calculatePayDaysAgo() {
+        
+        var totalPay = 0.00
+        allWorkedShifts = []
+        
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
+        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+        for shift in allWorkedShifts {
+            var partialPay = shift.moneyShiftOTx2()
+            totalPay += partialPay
+//            println(totalPay)
+        }
+        earningsLabel.text = "$\(totalPay)"
+    }
+    
     
 }

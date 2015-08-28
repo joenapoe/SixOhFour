@@ -30,6 +30,25 @@ class WorkedShift: NSManagedObject {
         return hoursWorked
     }
     
+    func hoursWorkedReg() -> Double {
+        sumUpDuration()
+        if duration < 8*60*60 {
+            var hoursWorkedReg: Double = (round( 100 * ( duration / 3600 ) ) / 100 )
+            return hoursWorkedReg
+        } else {
+            return (8)
+        }
+    }
+    
+    func hoursWorkedOT() -> Double {
+        if duration >= 8*60*60 {
+            var hoursWorkedOT: Double = ( (round( 100 * ( duration / 3600 ) ) / 100 ) - 8)
+            return hoursWorkedOT
+        } else {
+            return 0.0
+        }
+    }
+    
     func moneyShift() -> Double {
         pay  = (round( 100 * (duration / 3600) * ( Double(self.job.payRate) ) ) / 100)
         return pay

@@ -32,7 +32,7 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
     var timelog: Timelog!
     var workedshift: WorkedShift!
     var allWorkedShifts = [WorkedShift]()
-    var totalTime: Double = 0.0
+//    var totalTime: Double = 0.0
     
     var selectedDate: NSDate!
     var monthSchedule: [ScheduledShift]!
@@ -68,9 +68,10 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         
         
         calcWorkTime7Days()
-        totalHoursLabel.text = "\(totalTime)"
-        regularHoursLabel.text = "TODO"
-        overtimeLabel.text = "TODO"
+
+        calculatePayDaysAgo(7, labelName: weekEarningLabel)
+        calculatePayDaysAgo(30, labelName: lastThirtyDaysLabel)
+        calculatePayYearToDate(yearToDateLabel)
         
     }
 
@@ -127,22 +128,91 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
 
     func calcWorkTime7Days() {
         
-        let predicateOpenWS = NSPredicate(format: "workedShift.job == %@", job)
-        let predicateCI = NSPredicate(format: "type == %@ && time > %@", "Clocked In", NSDate().dateByAddingTimeInterval(-7*24*60*60) )
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
-
+        var totalTime = 0.0
+        var regTotalTime = 0.0
+        var oTTotalTime = 0.0
+        allWorkedShifts = []
+        
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", job, "Clocked In")
+        let predicateTime = NSPredicate(format: " time > %@", NSDate().dateByAddingTimeInterval(-7*24*60*60) )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
         var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
-        
         var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        
         for timelog in openShiftsCIs {
             allWorkedShifts.append(timelog.workedShift)
         }
         
-        for i in 0...(allWorkedShifts.count-1) {
-            var partialTime = allWorkedShifts[i].hoursWorked()
+        
+        for shift in allWorkedShifts {
+            var partialTime = shift.hoursWorked()
             totalTime += partialTime
+            
+            var oTPartialTime = shift.hoursWorkedOT()
+            oTTotalTime += oTPartialTime
+            
+            var regPartialTime = shift.hoursWorkedReg()
+            regTotalTime += regPartialTime
         }
+        
+        regularHoursLabel.text = "\(regTotalTime)"
+        overtimeLabel.text = "\(oTTotalTime)"
+        totalHoursLabel.text = "\(totalTime)"
+        
+    }
+    
+    func calculatePayDaysAgo(daysAgo: Double, labelName: UILabel) {
+
+        var totalPay = 0.00
+        allWorkedShifts = []
+        
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", job, "Clocked In")
+        let predicateTime = NSPredicate(format: "time > %@", NSDate().dateByAddingTimeInterval(-daysAgo*24*60*60) )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+        for shift in allWorkedShifts {
+            var partialPay = shift.moneyShiftOTx2()
+            totalPay += partialPay
+        }
+        labelName.text = "$\(totalPay)"
+    }
+    
+    func calculatePayYearToDate(labelName: UILabel) {
+        
+        
+        let today = NSDate()
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay, fromDate: today)
+        
+        dateComponents.setValue(1, forComponent: NSCalendarUnit.CalendarUnitMonth)
+        dateComponents.setValue(1, forComponent: NSCalendarUnit.CalendarUnitDay)
+ 
+        var date = calendar.dateFromComponents(dateComponents)
+        
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .MediumStyle
+        formatter.timeStyle = .NoStyle
+        formatter.timeZone = NSTimeZone()
+        
+        var totalPay = 0.00
+        allWorkedShifts = []
+        
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", job, "Clocked In")
+        let predicateTime = NSPredicate(format: "time > %@", date!)
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+        for shift in allWorkedShifts {
+            var partialPay = shift.moneyShiftOTx2()
+            totalPay += partialPay
+        }
+        labelName.text = "$\(totalPay)"
     }
     
     
