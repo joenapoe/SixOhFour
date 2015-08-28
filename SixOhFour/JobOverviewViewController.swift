@@ -66,12 +66,12 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         
         fetchData()
         
-        
-        calcWorkTime7Days()
-        totalHoursLabel.text = "\(totalTime)"
-        regularHoursLabel.text = "TODO"
-        overtimeLabel.text = "TODO"
-        
+        if workedshift != nil {
+            calcWorkTime7Days()
+            totalHoursLabel.text = "\(totalTime)"
+            regularHoursLabel.text = "TODO"
+            overtimeLabel.text = "TODO"
+        }
     }
 
     override func didReceiveMemoryWarning() {
