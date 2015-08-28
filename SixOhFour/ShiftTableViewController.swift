@@ -321,9 +321,6 @@ class ShiftTableViewController: UITableViewController {
         selectedWorkedShift.hoursWorked()
         selectedWorkedShift.moneyShiftOTx2()
         tableView.reloadData()
-//        dataManager.save()
-        println("selectedWorkedShift = \(selectedWorkedShift)")
-        
         
         selectedJob = sourceVC.selectedJob
         selectedWorkedShift.job = selectedJob
@@ -333,9 +330,7 @@ class ShiftTableViewController: UITableViewController {
             TLresults.append(sourceVC.nItem)
         } else if newItemCreated == 2 {
 //            TODO: write code to hanle 2 new TLs
-            
             let tempTL2 = dataManager.addItem("Timelog") as! Timelog
-//            tempTL2.workedShift = selectedWorkedShift
             tempTL2.time = TLresults.last!.time
             tempTL2.comment = ""
             if TLresults.count < 3 {
@@ -354,15 +349,8 @@ class ShiftTableViewController: UITableViewController {
     @IBAction func unwindCancelDetailsTVC (segue: UIStoryboardSegue) {
         //by hitting the done button
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
-        
-        //TODO need to handle deleting
-        //MAYBE DO A SEARCH IN THE beginning of the app to test for all open timelogs
-
-
         if newItemCreated > 0 {
             dataManager.delete(sourceVC.nItem)
         }
-        
-        
     }
 }

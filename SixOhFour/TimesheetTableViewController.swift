@@ -19,6 +19,7 @@ class TimesheetTableViewController: UITableViewController {
     @IBOutlet var startDatePicker: UIDatePicker!
     @IBOutlet var endDatePicker: UIDatePicker!
     
+
     @IBAction func startDatePickerValue(sender: AnyObject) {
         datePickerChanged(startDetailLabel, datePicker: startDatePicker)
     }
@@ -32,16 +33,18 @@ class TimesheetTableViewController: UITableViewController {
     
     var startDate: NSDate!
     var endDate: NSDate!
+    var startDateMidnight: NSDate!
+    var endDateMidnightNextDay: NSDate!
     
     var dataManager = DataManager()
     var allWorkedShifts = [WorkedShift]()
     var selectedJob : Job!
+    var openShiftsCIs = [Timelog]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        tableView.reloadData()
         self.title = "Timesheet"
-        
         
         let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
         
@@ -63,6 +66,14 @@ class TimesheetTableViewController: UITableViewController {
         calcWorkTime()
         calculatePayDaysAgo()
     }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        calcWorkTime()
+        calculatePayDaysAgo()
+//        tableView.reloadData()
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -91,6 +102,8 @@ class TimesheetTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+
         if indexPath.section == 2 && indexPath.row == 0 {
             togglePicker("startDate")
         } else if indexPath.section == 2 && indexPath.row == 2 {
@@ -100,6 +113,10 @@ class TimesheetTableViewController: UITableViewController {
         }
     }
     
+    @IBAction func individualButton(sender: AnyObject) {
+        self.performSegueWithIdentifier("showIndividual", sender: self)
+        
+    }
     
     // Tableview Headers
     
@@ -148,6 +165,8 @@ class TimesheetTableViewController: UITableViewController {
         }
         
         if datePicker == endDatePicker {
+            //TODO : End Date Picker when moved it changes NSDate() to same date but midnight... missing out on current day info
+            
             if datePicker.date.compare(startDatePicker.date) == NSComparisonResult.OrderedAscending {
                 startDetailLabel.text = label.text
                 startDatePicker.date = datePicker.date
@@ -213,34 +232,71 @@ class TimesheetTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using [segue destinationViewController].
         // Pass the selected object to the new view controller.
+        
+        if segue.identifier == "showIndividual" {
+            let destinationVC = segue.destinationViewController as! DailyTimesheetTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+//            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+            
+            pullShiftsInTimeFrame()
+            destinationVC.startDate = startDateMidnight
+            destinationVC.endDate = endDateMidnightNextDay
+            destinationVC.selectedJob = selectedJob
+        }
     }
-    */
+    
 
+    func pullShiftsInTimeFrame() {
+        openShiftsCIs = []
+        allWorkedShifts = []
+        let predicateCurrent = NSPredicate(format: "workedShift.status != 2")
+        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
+        
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .MediumStyle
+        formatter.timeStyle = .LongStyle
+        formatter.timeZone = NSTimeZone()
+    
+        startDateMidnight = makeDateMidnight(startDate)
+        endDateMidnightNextDay = makeDateMidnight(endDate).dateByAddingTimeInterval(60*60*24)
+        
+        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDateMidnight , endDateMidnightNextDay )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob, predicateCurrent])
+        
+        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        
+        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        
+        for timelog in openShiftsCIs {
+            allWorkedShifts.append(timelog.workedShift)
+        }
+    }
+    
+    func makeDateMidnight(date: NSDate) -> NSDate{
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay, fromDate: date)
+        dateComponents.setValue(0, forComponent: NSCalendarUnit.CalendarUnitHour)
+        dateComponents.setValue(0, forComponent: NSCalendarUnit.CalendarUnitMinute)
+        dateComponents.setValue(0, forComponent: NSCalendarUnit.CalendarUnitSecond)
+        dateComponents.setValue(0, forComponent: NSCalendarUnit.CalendarUnitNanosecond)
+        var date2 = calendar.dateFromComponents(dateComponents)
+        return date2!
+    }
+    
     func calcWorkTime() {
         
         var totalTime = 0.0
         var regTotalTime = 0.0
         var oTTotalTime = 0.0
-        allWorkedShifts = []
         
-        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
-        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
-        
-        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
-        
-        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        
-        for timelog in openShiftsCIs {
-            allWorkedShifts.append(timelog.workedShift)
-        }
+        pullShiftsInTimeFrame()
         
         for shift in allWorkedShifts {
             var partialTime = shift.hoursWorked()
@@ -261,16 +317,8 @@ class TimesheetTableViewController: UITableViewController {
     func calculatePayDaysAgo() {
         
         var totalPay = 0.00
-        allWorkedShifts = []
+        pullShiftsInTimeFrame()
         
-        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
-        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDatePicker.date, endDatePicker.date )
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob])
-        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
-        var openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        for timelog in openShiftsCIs {
-            allWorkedShifts.append(timelog.workedShift)
-        }
         for shift in allWorkedShifts {
             var partialPay = shift.moneyShiftOTx2()
             totalPay += partialPay
@@ -279,5 +327,11 @@ class TimesheetTableViewController: UITableViewController {
         earningsLabel.text = "$\(totalPay)"
     }
     
+    @IBAction func unwindShift (segue: UIStoryboardSegue) {
+        //by hitting the done button
+//        let sourceVC = segue.sourceViewController as! ShiftTableViewController
+        tableView.reloadData()
+        println("UPDATED!!!")
+    }
     
 }

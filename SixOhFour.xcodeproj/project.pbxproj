@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		000E10E41B8FF7C000ABC332 /* DayCellTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000E10E31B8FF7C000ABC332 /* DayCellTableViewCell.swift */; };
 		001464781B4E06D400AC0C9F /* ClockInStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 001464771B4E06D400AC0C9F /* ClockInStoryboard.storyboard */; };
 		004999FE1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */; };
 		00499A001B8787C900BD7A08 /* ShiftTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */; };
@@ -97,6 +98,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		000E10E31B8FF7C000ABC332 /* DayCellTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayCellTableViewCell.swift; sourceTree = "<group>"; };
 		001464771B4E06D400AC0C9F /* ClockInStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ClockInStoryboard.storyboard; sourceTree = "<group>"; };
 		004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncompleteShiftsTableViewController.swift; sourceTree = "<group>"; };
 		004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShiftTableViewController.swift; sourceTree = "<group>"; };
@@ -328,6 +330,7 @@
 				87B57CD61B509B4400D9B438 /* JobsListCell.swift */,
 				87EAE1361B6B18FA00EBEF78 /* DetailsCell.swift */,
 				8772D0F21B7D8931007DB395 /* TimesheetDateTableView.swift */,
+				000E10E31B8FF7C000ABC332 /* DayCellTableViewCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -575,6 +578,7 @@
 				B9CF32A61B6B046900757E43 /* CVSet.swift in Sources */,
 				B9CF32A51B6B046900757E43 /* CVSelectionType.swift in Sources */,
 				B9A0BFF01B5993BB00433C96 /* WeekDayCollectionViewCell.swift in Sources */,
+				000E10E41B8FF7C000ABC332 /* DayCellTableViewCell.swift in Sources */,
 				B9CF32981B6B046900757E43 /* CVCalendarView.swift in Sources */,
 				B9CF32941B6B046900757E43 /* CVCalendarMenuViewDelegate.swift in Sources */,
 				B9CF32901B6B046900757E43 /* CVCalendarDayView.swift in Sources */,
@@ -593,7 +597,7 @@
 				B9E34BCB1B50D21800B9FD88 /* JobsListTableViewController.swift in Sources */,
 				879277011B5868E90023CBA6 /* JobOverviewViewController.swift in Sources */,
 				87B7C1881B69C22800C65C96 /* RepeatingSchedule.swift in Sources */,
-                00941E341B7D828500656726 /* ManualEditsListTableViewCell.swift in Sources */,
+				00941E341B7D828500656726 /* ManualEditsListTableViewCell.swift in Sources */,
 				87B7C1861B69C22800C65C96 /* Job.swift in Sources */,
 				B9CF32991B6B046900757E43 /* CVCalendarViewAnimator.swift in Sources */,
 				004C09911B7CF9ED004F4527 /* WatchCounter.swift in Sources */,

@@ -85,17 +85,10 @@ class WorkedShift: NSManagedObject {
         var TLnsarr = TLset.allObjects as NSArray  //NSArray
         sortedTLnsarr = (TLnsarr).sortedArrayUsingDescriptors([NSSortDescriptor(key: "time", ascending: true)]) as! [Timelog]
         
-        println("SELF timelogslist count = \(sortedTLnsarr.count)")
-//        println("SELF timelogslist = \(sortedTLnsarr)")
         
         //SUM UP TOTAL
         let totalShiftTimeInterval = (sortedTLnsarr.last!.time).timeIntervalSinceDate(sortedTLnsarr.first!.time)
         duration = (totalShiftTimeInterval) - ( sumUpBreaktime() )
-        
-        println("totalBreaktime from workedshit.class = \(totalBreaktime)")
-        println("duration from workedshit.class = \(duration)")
-        println("workedshift from workedshit.class = \(self)")
-
     }
 
     func sumUpBreaktime() -> Double{
@@ -121,8 +114,6 @@ class WorkedShift: NSManagedObject {
         if ((self.status != 0) && (sortedTLnsarr.count > 1)) || ((self.status == 0) && (sortedTLnsarr.count > 2)) {
             
             var breakCount: Int =  (( sortedTLnsarr.count - open )/2)
-            println("breakCount = \(breakCount)")
-            println("subtractor = \(subtractor)")
             
             var tempTotalBreaktime = Double()
             var breakCountdown =  ( (breakCount) - subtractor) * 2
@@ -132,15 +123,10 @@ class WorkedShift: NSManagedObject {
             // NOTE : Calculates Break times for all the breakSets the user has in the shift
             if breakCount-subtractor >= 1 {
                 for i in 1...(breakCount-subtractor) {
-                    println("PERFORMING TASK#1")
-                    
                     var endBreak = sortedTLnsarr[breakCountdown].time
                     var startBreak = sortedTLnsarr[breakCountdown-1].time
                     partialBreaktime = endBreak.timeIntervalSinceDate(startBreak)
-                    
-                    println("partialBreaktime from workedshit.class = \(partialBreaktime)")
                     tempTotalBreaktime = tempTotalBreaktime + partialBreaktime
-                    println("tempTotalBreaktime from workedshit.class = \(tempTotalBreaktime)")
                     breakCountdown = breakCountdown - 2
                 }
             }

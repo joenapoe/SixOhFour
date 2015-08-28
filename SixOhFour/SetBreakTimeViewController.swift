@@ -33,9 +33,6 @@ class SetBreakTimeViewController: UIViewController {
         SetBreakTimePicker.selectRow(breakHours, inComponent: 0, animated: true)
         SetBreakTimePicker.selectRow(breakMinutes, inComponent: 1, animated: true)
         
-        println("breakMinutesSet from Clockin = \(breakMinutes)")
-        println("breakHoursSet from Clockin = \(breakHours)")
-        
         doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: "doneSettingBreak")
         self.navigationItem.rightBarButtonItem = doneButton
         

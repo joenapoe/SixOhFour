@@ -115,6 +115,12 @@ class IncompleteShiftsTableViewController: UITableViewController {
         let shiftToDelete = openShifts[indexPath.row]
         openShifts.removeAtIndex(indexPath.row)
 
+        //TODO: Remove with new DataManager Funct.
+        for timelog in shiftToDelete.timelogs {
+            dataManager.delete(timelog as! Timelog)
+        }
+
+        
         dataManager.delete(shiftToDelete)
 
         tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)

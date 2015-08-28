@@ -43,8 +43,6 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
         newShift.setValue(3, forKey: "status")
         newShift.job = selectedJob
         
-        println(newShift)
-        
         var saveButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveWS")
         self.navigationItem.rightBarButtonItem = saveButton
         var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelWS")
@@ -213,14 +211,7 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
         newTL.comment = ""
         newTL.type = type
         newTL.time = NSDate()
-        println(newTL)
-        
         allTLsArrary.append(newTL)
-
-        //test
-        for i in allTLsArrary {
-            println(i.type)
-        }
     }
 
     func createTLinsert(type: String){
@@ -229,28 +220,15 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
         newTL.comment = ""
         newTL.type = type
         newTL.time = allTLsArrary[breakCount*2-1].time
-        println(newTL)
-        
         allTLsArrary.insert(newTL, atIndex: (breakCount*2-1))
-        
-        //test
-        for i in allTLsArrary {
-            println(i.type)
-        }
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
     {
-        
         if segue.identifier == "showDetails" {
-            
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            
             let destinationVC = segue.destinationViewController as! DetailsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
-            
-            println(nItemClockIn)
-            
             destinationVC.nItem = self.nItemClockIn
             destinationVC.nItemPrevious = self.nItemClockInPrevious
             destinationVC.nItemNext = self.nItemClockInNext
@@ -263,17 +241,14 @@ class AddShiftViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         
         let header:UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
-        
         header.textLabel.textColor = UIColor.blackColor()
         header.textLabel.frame = header.frame
         header.textLabel.textAlignment = NSTextAlignment.Justified
-
         if section == 0 {
             header.textLabel.text = "Job"
         } else if section == 1 {
             header.textLabel.text = "Entries"
         }
-
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
