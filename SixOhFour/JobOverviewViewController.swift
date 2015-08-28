@@ -66,7 +66,6 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         
         fetchData()
         
-        
         calcWorkTime7Days()
 
         calculatePayDaysAgo(7, labelName: weekEarningLabel)
