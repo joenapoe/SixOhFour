@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDelegate, UITableViewDelegate, UITableViewDataSource {
+class JobOverviewViewController: UIViewController {
 
     @IBOutlet weak var menuView: CVCalendarMenuView!
     @IBOutlet weak var calendarView: CVCalendarView!
@@ -31,13 +31,10 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
     var timelog: Timelog!
     var workedshift: WorkedShift!
     var allWorkedShifts = [WorkedShift]()
-//    var totalTime: Double = 0.0
-    
     var selectedDate: NSDate!
     var monthSchedule: [ScheduledShift]!
     var daySchedule: [ScheduledShift]!
     var shift: ScheduledShift!
-    
     var shouldShowDaysOut = true
     var animationFinished = true
     var currentMonth = CVDate(date: NSDate()).currentMonth
@@ -80,42 +77,6 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         
         calendarView.commitCalendarViewUpdate()
         menuView.commitMenuViewUpdate()
-    }
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
-
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-            if indexPath.section == 0 && indexPath.row == 0 {
-                let cell = tableView.dequeueReusableCellWithIdentifier("tsCell", forIndexPath: indexPath) as! UITableViewCell
-                return cell
-                
-            } else if indexPath.section == 0 && indexPath.row == 1 {
-                let cell = tableView.dequeueReusableCellWithIdentifier("startCell", forIndexPath: indexPath) as! UITableViewCell
-                return cell
-        
-            } else if indexPath.section == 0 && indexPath.row == 2 {
-                let cell = tableView.dequeueReusableCellWithIdentifier("startDateCell", forIndexPath: indexPath) as! UITableViewCell
-                return cell
-        
-            } else if indexPath.section == 0 && indexPath.row == 3 {
-                let cell = tableView.dequeueReusableCellWithIdentifier("endCell", forIndexPath: indexPath) as! UITableViewCell
-                return cell
-        
-            } else if indexPath.section == 0 && indexPath.row == 4 {
-                let cell = tableView.dequeueReusableCellWithIdentifier("endDateCell", forIndexPath: indexPath) as! UITableViewCell
-                return cell
-            
-        }
-        return UITableViewCell()
-    }
-    
-
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-
     }
     
     func fetchData() {
@@ -239,8 +200,6 @@ class JobOverviewViewController: UIViewController, NSFetchedResultsControllerDel
         if segue.identifier == "showTimesheet" {
             let destinationVC = segue.destinationViewController as! TimesheetTableViewController
             
-//            destinationVC.navigationItem.title = "Edit Job"
-//            self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: nil, action: nil)
             destinationVC.hidesBottomBarWhenPushed = true
             destinationVC.selectedJob = self.job
         }
@@ -325,12 +284,6 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
         
         var monthSchedule = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
         
-        //        // TODO: Optimize dotmarker generation
-        //        for m in monthSchedule {
-        //            println(m.startDate)
-        //        }
-        
-        
         let day = dayView.date.monthDayYear
         var shouldShowDot = false
         
@@ -389,12 +342,13 @@ extension JobOverviewViewController: CVCalendarViewAppearanceDelegate {
     func spaceBetweenDayViews() -> CGFloat {
         return 2
     }
+    
 }
 
 
 // MARK: - CVCalendarMenuViewDelegate
 
 extension JobOverviewViewController: CVCalendarMenuViewDelegate {
-    // firstWeekday() has been already implemented.
+    
 }
 

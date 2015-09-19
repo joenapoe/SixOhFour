@@ -9,18 +9,18 @@
 import UIKit
 import CoreData
 
-class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class HomeViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var addButton: UIBarButtonItem!
     
     var jobs = [Job]()
     var job: Job!
-    
-    let dataManager = DataManager()
     var previousColor: Color!
     var selectedColor: Color!
     var colors = [Color]()
+    
+    let dataManager = DataManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +52,31 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func fetchJobData() {
         jobs = dataManager.fetch("Job") as! [Job]
     }
+
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "add" {
+            let destinationVC = segue.destinationViewController as! AddJobTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            
+        }
+        
+        if segue.identifier == "jobOverview" {
+            let destinationVC = segue.destinationViewController as! JobOverviewViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            
+            println(job)
+            destinationVC.job = self.job
+        }
+        
+    }
+    
+}
+
+
+// MARK: TableView Data Source and Delegate
+
+extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
@@ -68,17 +93,17 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
             
             let delete = UIAlertAction(title: "Delete", style: .Destructive) { (action) in
-            
+                
                 let jobDelete = self.jobs[indexPath.row]
                 let color = jobDelete.color
-
+                
                 let updateColor = self.dataManager.editItem(color, entityName: "Color") as! Color
                 updateColor.isSelected = false
-                        
+                
                 self.jobs.removeAtIndex(indexPath.row)
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                 self.dataManager.delete(jobDelete)
-
+                
             }
             
             let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
@@ -102,7 +127,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         let header: UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
         header.textLabel.textAlignment = NSTextAlignment.Justified
-
+        
         if jobs.count > 1 {
             header.textLabel.text = "My Jobs"
         } else if jobs.count > 0 {
@@ -115,13 +140,13 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return ""
     }
-
+    
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       return jobs.count
+        return jobs.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -137,31 +162,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.job = jobs[indexPath.row]
-
+        
         self.performSegueWithIdentifier("jobOverview", sender: self)
-    }
-    
-    // MARK: - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        
-        if segue.identifier == "add" {
-            let destinationVC = segue.destinationViewController as! AddJobTableViewController
-            destinationVC.hidesBottomBarWhenPushed = true;
-            
-        }
-        
-        if segue.identifier == "jobOverview" {
-            let destinationVC = segue.destinationViewController as! JobOverviewViewController
-            destinationVC.hidesBottomBarWhenPushed = true;
-            
-            println(job)
-            destinationVC.job = self.job
-        }
-        
     }
     
 }

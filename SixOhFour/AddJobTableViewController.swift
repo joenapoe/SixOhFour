@@ -27,9 +27,9 @@ class AddJobTableViewController: UITableViewController {
     var currentString = ""
     var companyName = ""
     var position = ""
+    var colors = [Color]()
     
     let dataManager = DataManager()
-    var colors = [Color]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -120,27 +120,9 @@ class AddJobTableViewController: UITableViewController {
         navigationController?.popToRootViewControllerAnimated(true)
     }
     
-//    @IBAction func unwindFromPayRateTableViewController(segue: UIStoryboardSegue) {
-//        let sourceVC = segue.sourceViewController as! PayRateTableViewController
-//        payTextField.text = "\(sourceVC.payTextField.text)"
-//        
-//        var str = sourceVC.payTextField.text
-//        str = str.stringByReplacingOccurrencesOfString(",", withString: "")
-//        str = str.stringByReplacingOccurrencesOfString("$", withString: "")
-//        
-//        print("str ")
-//        println(str)
-//        
-//        payRate = NSDecimalNumber(string: str)
-//        
-//        tableView.beginUpdates()
-//        tableView.endUpdates()
-//    }
-    
-    
     // MARK: - Class functions
     
-    func dismissKeyboard(){
+    func dismissKeyboard() {
         self.view.endEditing(true)
     }
     
@@ -183,7 +165,6 @@ class AddJobTableViewController: UITableViewController {
     }
     
     func newItem() {
-        // TODO: We should pass job.position to coredata instead of positionTextField.text
         
         let color = dataManager.editItem(selectedColor, entityName: "Color") as! Color
         color.isSelected = true
@@ -286,10 +267,8 @@ extension AddJobTableViewController: UITextFieldDelegate {
     
     func textFieldDidChange(textField: UITextField) {
         let whitespaceSet = NSCharacterSet.whitespaceCharacterSet()
-//        if textField.text.stringByTrimmingCharactersInSet(whitespaceSet) != "" {
-//            self.navigationItem.rightBarButtonItem!.enabled = true
-//        }
         
         toggleSaveButton()
-    }    
+    }
+    
 }
