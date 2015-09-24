@@ -25,14 +25,14 @@ class JobOverviewViewController: UIViewController {
     @IBOutlet weak var yearToDateLabel: UILabel!
     
     var editButton: UIBarButtonItem!
-    var jobs = [Job]()
+//    var jobs = [Job]()
     var job: Job!
     var company: Company!
-    var timelog: Timelog!
-    var workedshift: WorkedShift!
+//    var timelog: Timelog!
+//    var workedshift: WorkedShift!
     var allWorkedShifts = [WorkedShift]()
-    var selectedDate: NSDate!
-    var monthSchedule: [ScheduledShift]!
+//    var selectedDate: NSDate!
+//    var monthSchedule: [ScheduledShift]!
     var daySchedule: [ScheduledShift]!
     var shift: ScheduledShift!
     var shouldShowDaysOut = true
@@ -80,7 +80,7 @@ class JobOverviewViewController: UIViewController {
     }
     
     func fetchData() {
-        jobs = dataManager.fetch("Job") as! [Job]
+//        jobs = dataManager.fetch("Job") as! [Job]
         calcWorkTime7Days()
         calculatePayDaysAgo(7, labelName: weekEarningLabel)
         calculatePayDaysAgo(30, labelName: lastThirtyDaysLabel)
@@ -145,7 +145,6 @@ class JobOverviewViewController: UIViewController {
     
     func calculatePayYearToDate(labelName: UILabel) {
         
-        
         let today = NSDate()
         let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
         let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay, fromDate: today)
@@ -179,10 +178,9 @@ class JobOverviewViewController: UIViewController {
         labelName.text = "$\(totalPay)"
     }
     
-    
-    func calculateRegHours() {
-        regularHoursLabel.text = "\(workedshift.duration)"
-    }
+//    func calculateRegHours() {
+//        regularHoursLabel.text = "\(workedshift.duration)"
+//    }
     
     func editJob() {
         self.performSegueWithIdentifier("editJob", sender: self)
@@ -232,7 +230,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
             
             currentMonth = date.currentMonth
             let predicate = NSPredicate(format: "startDate contains[c] %@", currentMonth)
-            monthSchedule = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
+            var monthSchedule = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
             
             let updatedMonthLabel = UILabel()
             updatedMonthLabel.textColor = monthLabel.textColor

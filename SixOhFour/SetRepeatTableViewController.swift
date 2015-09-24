@@ -16,7 +16,7 @@ class SetRepeatTableViewController: UITableViewController {
     @IBOutlet weak var repeatLabel: UILabel!
     @IBOutlet weak var frequencyLabel: UILabel!
     @IBOutlet weak var viewByLabel: UILabel!
-    @IBOutlet var collectionView: [UICollectionView]!
+    @IBOutlet var collectionView: [UICollectionView]! //Youre a beast!!!!!!
     
     var doneButton: UIBarButtonItem!
     var repeatSettings: RepeatSettings!

@@ -26,9 +26,9 @@ class AddScheduleTableViewController: UITableViewController {
     var shift: ScheduledShift!
     
     var isNewSchedule = true
-    var startDatePickerHidden = true
-    var endDatePickerHidden = true
-    var jobListEmpty = true;
+    var isStartDatePickerHidden = true
+    var isEndDatePickerHidden = true
+    var isJobListEmpty = true;
     var dataManager = DataManager()
     var repeatSettings: RepeatSettings!
     var conflicts = [ScheduledShift]()
@@ -46,7 +46,7 @@ class AddScheduleTableViewController: UITableViewController {
             job = shift.job
             jobNameLabel.text = job.company.name
             jobColorView.color = job.color.getColor
-            jobListEmpty = false
+            isJobListEmpty = false
             
             startDatePicker.date = shift.startTime
             endDatePicker.date = shift.endTime
@@ -59,7 +59,7 @@ class AddScheduleTableViewController: UITableViewController {
                 job = results[0] as! Job
                 jobNameLabel.text = job.company.name
                 jobColorView.color = job.color.getColor
-                jobListEmpty = false
+                isJobListEmpty = false
             } else {
                 jobNameLabel.text = "Add a Job"
                 jobNameLabel.textColor = UIColor.lightGrayColor()
@@ -166,26 +166,24 @@ class AddScheduleTableViewController: UITableViewController {
     
     func togglePicker(picker: String) {
         if picker == "startDate" {
-            startDatePickerHidden = !startDatePickerHidden
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
-            endDatePickerHidden = true
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
+            isStartDatePickerHidden = !isStartDatePickerHidden
+            toggleLabelColor(isStartDatePickerHidden, label: startLabel)
+            isEndDatePickerHidden = true
+            toggleLabelColor(isEndDatePickerHidden, label: endLabel)
         } else if picker == "endDate" {
-            endDatePickerHidden = !endDatePickerHidden
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
-            startDatePickerHidden = true
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
+            isEndDatePickerHidden = !isEndDatePickerHidden
+            toggleLabelColor(isEndDatePickerHidden, label: endLabel)
+            isStartDatePickerHidden = true
+            toggleLabelColor(isStartDatePickerHidden, label: startLabel)
         } else {
             // Close datepickers
-            startDatePickerHidden = true
-            endDatePickerHidden = true
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
+            isStartDatePickerHidden = true
+            isEndDatePickerHidden = true
+            toggleLabelColor(isStartDatePickerHidden, label: startLabel)
+            toggleLabelColor(isEndDatePickerHidden, label: endLabel)
         }
-        
         tableView.beginUpdates()
         tableView.endUpdates()
-        
     }
     
     func toggleLabelColor(hidden: Bool, label: UILabel) {
@@ -197,10 +195,10 @@ class AddScheduleTableViewController: UITableViewController {
     }
     
     func toggleSaveButton() {
-        if jobListEmpty {
+        if isJobListEmpty {
             saveButton.enabled = false
         } else if startDatePicker.date.compare(endDatePicker.date) == NSComparisonResult.OrderedAscending {
-            saveButton.enabled = true
+            saveButton.enabled = true // Question: When is this case not true?
         } else {
             saveButton.enabled = false
         }

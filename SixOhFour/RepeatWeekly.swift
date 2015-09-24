@@ -27,9 +27,6 @@ class RepeatWeekly: RepeatSettings {
                 repeatArray[x][y] = daysToRepeat[x][y]
             }
         }
-        
         return repeatArray
     }
-    
-    
 }

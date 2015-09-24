@@ -15,7 +15,7 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var addButton: UIBarButtonItem!
     
     var jobs = [Job]()
-    var job: Job!
+    var selectedJob: Job!
     var previousColor: Color!
     var selectedColor: Color!
     var colors = [Color]()
@@ -64,9 +64,7 @@ class HomeViewController: UIViewController {
         if segue.identifier == "jobOverview" {
             let destinationVC = segue.destinationViewController as! JobOverviewViewController
             destinationVC.hidesBottomBarWhenPushed = true;
-            
-            println(job)
-            destinationVC.job = self.job
+            destinationVC.job = self.selectedJob
         }
         
     }
@@ -87,9 +85,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
             tableView.beginUpdates()
             
             var title = "Warning!"
-            
             var message = "Deleting this job will also delete all associated shifts with it!"
-            
             let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
             
             let delete = UIAlertAction(title: "Delete", style: .Destructive) { (action) in
@@ -161,8 +157,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.job = jobs[indexPath.row]
-        
+        self.selectedJob = jobs[indexPath.row]
         self.performSegueWithIdentifier("jobOverview", sender: self)
     }
     

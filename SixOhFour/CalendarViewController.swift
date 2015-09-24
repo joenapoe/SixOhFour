@@ -12,7 +12,7 @@ class CalendarViewController: UIViewController {
     
     @IBOutlet weak var monthLabel: UILabel!
     @IBOutlet weak var todayLabel: UILabel!
-    @IBOutlet weak var menuView: CVCalendarMenuView!
+    @IBOutlet weak var menuView: CVCalendarMenuView! //why is this called "menuView"?
     @IBOutlet weak var calendarView: CVCalendarView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var addButton: UIBarButtonItem!
@@ -25,7 +25,7 @@ class CalendarViewController: UIViewController {
     
     var isMonthView = true
     var shouldShowDaysOut = true
-    var animationFinished = true
+    var isAnimationFinished = true
     var currentMonth = CVDate(date: NSDate()).currentMonth
     var deleteSchedule = [ScheduledShift]()
     
@@ -390,7 +390,7 @@ extension CalendarViewController: CVCalendarViewDelegate {
     }
     
     func presentedDateUpdated(date: CVDate) {
-        if monthLabel.text != date.monthYear && self.animationFinished {
+        if monthLabel.text != date.monthYear && self.isAnimationFinished {
             
             currentMonth = date.currentMonth
             fetchMonthSchedule()
@@ -409,7 +409,7 @@ extension CalendarViewController: CVCalendarViewDelegate {
             updatedMonthLabel.transform = CGAffineTransformMakeScale(1, 0.1)
             
             UIView.animateWithDuration(0.35, delay: 0, options: UIViewAnimationOptions.CurveEaseIn, animations: {
-                self.animationFinished = false
+                self.isAnimationFinished = false
                 self.monthLabel.transform = CGAffineTransformMakeTranslation(0, -offset)
                 self.monthLabel.transform = CGAffineTransformMakeScale(1, 0.1)
                 self.monthLabel.alpha = 0
@@ -419,7 +419,7 @@ extension CalendarViewController: CVCalendarViewDelegate {
                 
                 }) { _ in
                     
-                    self.animationFinished = true
+                    self.isAnimationFinished = true
                     self.monthLabel.frame = updatedMonthLabel.frame
                     self.monthLabel.text = updatedMonthLabel.text
                     self.monthLabel.transform = CGAffineTransformIdentity

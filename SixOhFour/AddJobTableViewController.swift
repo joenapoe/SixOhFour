@@ -20,7 +20,7 @@ class AddJobTableViewController: UITableViewController {
     @IBOutlet weak var payTextField: UITextField!
     
     var job: Job!
-    var pickerVisible = false
+    var isPickerVisible = false
     var payRate: NSDecimalNumber!
     var previousColor: Color!
     var selectedColor: Color!
@@ -74,7 +74,6 @@ class AddJobTableViewController: UITableViewController {
         } else {
             colorLabel.text = selectedColor.name
             jobColorView.color = colors[0].getColor
-
         }
         
         toggleSaveButton()
@@ -156,7 +155,6 @@ class AddJobTableViewController: UITableViewController {
     }
     
     func formatCurrency(#string: String) {
-        println("format \(string)")
         let formatter = NSNumberFormatter()
         formatter.numberStyle = NSNumberFormatterStyle.CurrencyStyle
         formatter.locale = NSLocale(localeIdentifier: "en_US")
@@ -204,16 +202,23 @@ class AddJobTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.section == 1 && indexPath.row == 1 {
-            pickerVisible = !pickerVisible
-            
+            isPickerVisible = !isPickerVisible
             tableView.reloadData()
+        } else {
+//      TODO: Need to be able to click anywhere else to change isPickerVisible = falie
+//            isPickerVisible = false
+//            println(isPickerVisible)
+//
+//            tableView.beginUpdates()
+//            tableView.endUpdates()
         }
+        
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if indexPath.section == 1 && indexPath.row == 2 {
-            if pickerVisible == false {
+            if isPickerVisible == false {
                 return 0.0
             }
             return 150.0
