@@ -25,7 +25,7 @@ class TimesheetTableViewController: UITableViewController {
     var endDate: NSDate!
     var startDateMidnight: NSDate!
     var endDateMidnightNextDay: NSDate!
-    var dataManager = DataManager()
+    let dataManager = DataManager()
     var allWorkedShifts = [WorkedShift]()
     var selectedJob : Job!
     var openShiftsCIs = [Timelog]()

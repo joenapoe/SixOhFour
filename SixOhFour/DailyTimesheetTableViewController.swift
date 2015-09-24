@@ -11,8 +11,8 @@ import CoreData
 
 class DailyTimesheetTableViewController: UITableViewController {
 
-    var allWorkedShifts = [WorkedShift]()
-    var openShiftsCIs = [Timelog]()
+    var workedShifts = [WorkedShift]()
+    var clockInTimelogs = [Timelog]()
     var selectedWorkedShift : WorkedShift!
     var startDate: NSDate!
     var endDate: NSDate!
@@ -39,8 +39,8 @@ class DailyTimesheetTableViewController: UITableViewController {
     
     func pullShiftsInTimeFrame() {
         
-        openShiftsCIs = []
-        allWorkedShifts = []
+        clockInTimelogs = []
+        workedShifts = []
         
         let predicateCurrent = NSPredicate(format: "workedShift.status != 2")
         let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
@@ -49,12 +49,12 @@ class DailyTimesheetTableViewController: UITableViewController {
         
         var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
         
-        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
+        clockInTimelogs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
         
-        for timelog in openShiftsCIs {
-            allWorkedShifts.append(timelog.workedShift)
+        for timelog in clockInTimelogs {
+            workedShifts.append(timelog.workedShift)
         }
-        for shift in allWorkedShifts {
+        for shift in workedShifts {
             println(shift.status)
         }
     }
@@ -70,13 +70,13 @@ class DailyTimesheetTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        return allWorkedShifts.count
+        return workedShifts.count
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("DayCellTableViewCell", forIndexPath: indexPath) as! DayCellTableViewCell
-        cell.workedShift = allWorkedShifts[indexPath.row]
-        cell.clockInTL = openShiftsCIs[indexPath.row]
+        cell.workedShift = workedShifts[indexPath.row]
+        cell.clockInTL = clockInTimelogs[indexPath.row]
         
         if cell.workedShift.status == 1 {
             cell.dateLabel.textColor = UIColor.redColor()
@@ -89,7 +89,7 @@ class DailyTimesheetTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
 
-        selectedWorkedShift = allWorkedShifts[indexPath.row]
+        selectedWorkedShift = workedShifts[indexPath.row]
         
         let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
         let shiftVC: ShiftTableViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftTableViewController")
@@ -108,8 +108,8 @@ class DailyTimesheetTableViewController: UITableViewController {
         if editingStyle == .Delete {
             tableView.beginUpdates()
             
-            let shiftToDelete = allWorkedShifts[indexPath.row]
-            allWorkedShifts.removeAtIndex(indexPath.row)
+            let shiftToDelete = workedShifts[indexPath.row]
+            workedShifts.removeAtIndex(indexPath.row)
             
             for timelog in shiftToDelete.timelogs {
                 dataManager.delete(timelog as! Timelog)

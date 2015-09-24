@@ -462,10 +462,10 @@ class AddScheduleTableViewController: UITableViewController {
     }
 
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if !jobListEmpty {
-            if startDatePickerHidden && indexPath.section == 1 && indexPath.row == 1 {
+        if !isJobListEmpty {
+            if isStartDatePickerHidden && indexPath.section == 1 && indexPath.row == 1 {
                 return 0
-            } else if endDatePickerHidden && indexPath.section == 1 && indexPath.row == 3 {
+            } else if isEndDatePickerHidden && indexPath.section == 1 && indexPath.row == 3 {
                 return 0
             }
             
@@ -508,7 +508,7 @@ class AddScheduleTableViewController: UITableViewController {
     
     override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
         if identifier == "selectJob" {
-            if jobListEmpty {
+            if isJobListEmpty {
                 let addJobStoryboard: UIStoryboard = UIStoryboard(name: "AddJobStoryboard", bundle: nil)
                 let addJobsVC: AddJobTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("AddJobTableViewController")
                     as! AddJobTableViewController

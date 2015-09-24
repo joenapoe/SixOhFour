@@ -52,7 +52,7 @@ class IncompleteShiftsTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ShiftListTableViewCell", forIndexPath: indexPath) as! ManualEditsListTableViewCell
         cell.workedShift = openShifts[indexPath.row]
-        cell.clockInTL = openShiftsCIs[indexPath.row]
+        cell.clockInTimelog = openShiftsCIs[indexPath.row]
         return cell
     }
     
