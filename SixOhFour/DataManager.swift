@@ -55,6 +55,40 @@ class DataManager {
         return results
     }
     
+    func fetchRepeatingSchedule(shift: ScheduledShift) -> [ScheduledShift]{
+        var schedule = [ScheduledShift]()
+        
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: false)
+        let sortDescriptors = [sortDescriptor]
+        let results = fetch("ScheduledShift", sortDescriptors: sortDescriptors)
+        let lastShift = results[0] as! ScheduledShift
+        
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        
+        var startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: shift.startTime, options: nil)!
+        var endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: shift.endTime, options: nil)!
+        var shifts = [ScheduledShift]()
+        
+        while startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedAscending {
+            
+            let predicate = NSPredicate(format: "startTime == %@ && endTime == %@", startDate, endDate)
+            let results = fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
+            
+            if results.count > 0 {
+                schedule.append(results[0])
+            }
+            
+            startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: startDate, options: nil)!
+            endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: endDate, options: nil)!
+        }
+        
+        if startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedSame && endDate.compare(lastShift.endTime) == NSComparisonResult.OrderedSame {
+            schedule.append(lastShift)
+        }
+        
+        return schedule
+    }
+    
     func delete(objectToDelete: NSManagedObject) {
         if let job = objectToDelete as? Job {
 
@@ -81,11 +115,11 @@ class DataManager {
                 let notification = event as! UILocalNotification
                 let startTime = notification.fireDate
                 
-                if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
+                if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame && notification.alertAction == "clock in"{
                     app.cancelLocalNotification(notification)
                     break
                 }
-            }            
+            }
         }
         
         context?.deleteObject(objectToDelete)
@@ -98,6 +132,7 @@ class DataManager {
         
         return object
     }
+    
     
     func editItem(entity: NSManagedObject, entityName: String) -> NSManagedObject {
         let predicate = NSPredicate(format: "SELF == %@", entity)

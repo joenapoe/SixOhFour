@@ -54,6 +54,27 @@ class CalendarViewController: UIViewController {
         fetchMonthSchedule()
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
+        
+        fetchMonthSchedule()
+        
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .LongStyle
+        formatter.timeStyle = .NoStyle
+        
+        let selectedDay = formatter.stringFromDate(selectedDate)
+        
+        updateDaySchedule(selectedDay)
+        
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        
+        tableView.reloadData()
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -81,18 +102,6 @@ class CalendarViewController: UIViewController {
         
     @IBAction func unwindAfterSaveSchedule(segue: UIStoryboardSegue) {
         calendarView.toggleViewWithDate(selectedDate)
-        
-        fetchMonthSchedule()
-        
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .LongStyle
-        formatter.timeStyle = .NoStyle
-        
-        let selectedDay = formatter.stringFromDate(selectedDate)
-        
-        updateDaySchedule(selectedDay)
-        
-        tableView.reloadData()
     }
     
     
@@ -105,10 +114,10 @@ class CalendarViewController: UIViewController {
     func toggleAddButton() {
         var today = NSDate()
         let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-        let comps = (NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay)
+        let components = (NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay)
         
-        let selectedDateComponents = calendar.components(comps, fromDate: selectedDate)
-        let todayComponents = calendar.components(comps, fromDate: today)
+        let selectedDateComponents = calendar.components(components, fromDate: selectedDate)
+        let todayComponents = calendar.components(components, fromDate: today)
         
         today = calendar.dateFromComponents(todayComponents)!
         let dateToCompare = calendar.dateFromComponents(selectedDateComponents)
@@ -138,39 +147,6 @@ class CalendarViewController: UIViewController {
         
         monthSchedule = dataManager.fetch("ScheduledShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [ScheduledShift]
     }
-    
-    func fetchRepeats(shift: ScheduledShift) {
-        
-        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: false)
-        let sortDescriptors = [sortDescriptor]
-        let results = dataManager.fetch("ScheduledShift", sortDescriptors: sortDescriptors)
-        
-        let lastShift = results[0] as! ScheduledShift
-        
-        var startDate = shift.startTime
-        var endDate = shift.endTime
-        var shifts = [ScheduledShift]()
-        
-        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-        
-        while startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedAscending {
-            
-            let predicate = NSPredicate(format: "startTime == %@ && endTime == %@", startDate, endDate)
-            let results = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
-            
-            if results.count > 0 {
-                deleteSchedule.append(results[0])
-            }
-            
-            startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: startDate, options: nil)!
-            endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: endDate, options: nil)!
-        }
-        
-        if startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedSame {
-            deleteSchedule.append(lastShift)
-        }
-    }
-    
     
     // MARK: - Navigation
     
@@ -267,7 +243,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             
             let shiftToDelete = daySchedule[indexPath.row]
             
-            fetchRepeats(shiftToDelete)
+            deleteSchedule = dataManager.fetchRepeatingSchedule(shiftToDelete)
 
             var alertTitle = "\(deleteSchedule.count) similar shift"
             var deleteTitle = "Confirm Delete"
@@ -289,18 +265,10 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                 
                 let deleteAll = UIAlertAction(title: "Delete All (\(deleteSchedule.count))", style: .Destructive) { (action) in
                     for shift in self.deleteSchedule {
-                        for event in app.scheduledLocalNotifications {
-                            let notification = event as! UILocalNotification
-                            let startTime = notification.fireDate
-                            
-                            if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
-                                app.cancelLocalNotification(notification)
-                                break
-                            }
-                        }
-                        
                         self.dataManager.delete(shift)
                     }
+                    
+                    self.dataManager.delete(shiftToDelete)
                     
                     self.deleteSchedule = []
                     self.daySchedule.removeAtIndex(indexPath.row)
@@ -321,16 +289,6 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             
             
             let delete = UIAlertAction(title: deleteTitle, style: .Destructive) { (action) in
-                for event in app.scheduledLocalNotifications {
-                    let notification = event as! UILocalNotification
-                    let startTime = notification.fireDate
-                    
-                    if shiftToDelete.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
-                        app.cancelLocalNotification(notification)
-                        break
-                    }
-                }
-                
                 self.dataManager.delete(shiftToDelete)
     
                 self.deleteSchedule = []

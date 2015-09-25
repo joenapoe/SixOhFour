@@ -15,7 +15,8 @@ class JobsListTableViewController: UITableViewController {
     var source: String!
 
     var jobs = [Job]()
-    var dataManager = DataManager()
+    
+    let dataManager = DataManager()
     
 
     override func viewDidLoad() {

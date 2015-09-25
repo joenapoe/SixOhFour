@@ -15,6 +15,7 @@ class AddScheduleTableViewController: UITableViewController {
     @IBOutlet weak var startDatePicker: UIDatePicker!
     @IBOutlet weak var endDatePicker: UIDatePicker!
     @IBOutlet weak var jobNameLabel: UILabel!
+    @IBOutlet weak var positionLabel: UILabel!
     @IBOutlet weak var jobColorView: JobColorView!
     @IBOutlet weak var repeatLabel: UILabel!
     @IBOutlet weak var endRepeatLabel: UILabel!
@@ -28,29 +29,34 @@ class AddScheduleTableViewController: UITableViewController {
     var isNewSchedule = true
     var startDatePickerHidden = true
     var endDatePickerHidden = true
-    var jobListEmpty = true;
-    var dataManager = DataManager()
+    var isJobListEmpty = true;
     var repeatSettings: RepeatSettings!
     var conflicts = [ScheduledShift]()
     var schedule = [ScheduledShift]()
+    var repeatingSchedule = [ScheduledShift]()
+
+    let dataManager = DataManager()
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        saveButton = UIBarButtonItem(title:"Save", style: .Plain, target: self, action: "saveSchedule")
+        saveButton = UIBarButtonItem(title:"Save", style: .Plain, target: self, action: "saveButtonPressed")
         self.navigationItem.rightBarButtonItem = saveButton
         saveButton.enabled = false
         
         if shift != nil {
             job = shift.job
             jobNameLabel.text = job.company.name
+            positionLabel.text = job.position
             jobColorView.color = job.color.getColor
-            jobListEmpty = false
+            isJobListEmpty = false
             
             startDatePicker.date = shift.startTime
             endDatePicker.date = shift.endTime
             
+            repeatingSchedule = dataManager.fetchRepeatingSchedule(shift)
+  
         } else {
             
             var results = dataManager.fetch("Job")
@@ -58,10 +64,12 @@ class AddScheduleTableViewController: UITableViewController {
             if results.count > 0 {
                 job = results[0] as! Job
                 jobNameLabel.text = job.company.name
+                positionLabel.text = job.position
                 jobColorView.color = job.color.getColor
-                jobListEmpty = false
+                isJobListEmpty = false
             } else {
                 jobNameLabel.text = "Add a Job"
+                positionLabel.text = ""
                 jobNameLabel.textColor = UIColor.lightGrayColor()
                 jobColorView.color = UIColor.lightGrayColor()
             }
@@ -94,6 +102,17 @@ class AddScheduleTableViewController: UITableViewController {
     
     // MARK: - IB Actions
     
+    @IBAction func setShiftDuration(sender: AnyObject) {
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let dateComponents = NSDateComponents()
+        
+        dateComponents.hour = sender.tag // tag values are 4, 8, 12. Values are set on the storyboad
+        
+        endDatePicker.date = calendar.dateByAddingComponents(dateComponents, toDate: startDatePicker.date, options: nil)!
+        
+        datePickerChanged(endLabel, datePicker: endDatePicker)
+    }
+    
     @IBAction func startDatePickerValue(sender: AnyObject) {
         datePickerChanged(startLabel, datePicker: startDatePicker)
     }
@@ -108,7 +127,8 @@ class AddScheduleTableViewController: UITableViewController {
         if sourceVC.selectedJob != nil {
             job = sourceVC.selectedJob
             jobNameLabel.text = sourceVC.selectedJob.company.name
-            
+            positionLabel.text = sourceVC.selectedJob.position
+
             jobColorView.color = sourceVC.selectedJob.color.getColor
         }
     }
@@ -119,13 +139,11 @@ class AddScheduleTableViewController: UITableViewController {
         self.repeatSettings = sourceVC.repeatSettings
         repeatLabel.text = repeatSettings.type
         
-        
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
         dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
         endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
 
-        
         tableView.beginUpdates()
         tableView.endUpdates()
     }
@@ -144,7 +162,7 @@ class AddScheduleTableViewController: UITableViewController {
     
     // MARK: - Class Functions
     
-    func saveSchedule() {
+    func saveButtonPressed() {
         conflicts = []
         
         if isNewSchedule {
@@ -153,11 +171,35 @@ class AddScheduleTableViewController: UITableViewController {
             } else {
                 addWeeklySchedule()
             }
+            resolveConflicts()
         } else {
-            editSchedule()
+            if repeatingSchedule.count == 0 {
+                editShift(shift)
+                resolveConflicts()
+            } else {
+                editSchedule()
+            }
+        }
+    }
+    
+    func save(schedule: [ScheduledShift]) {
+        for shift in schedule {
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            formatter.timeZone = NSTimeZone()
+            
+            let start = formatter.stringFromDate(shift.startTime)
+            
+            var notification = UILocalNotification()
+            notification.alertBody = "You have a shift at \(start)"
+            notification.alertAction = "clock in"
+            notification.fireDate = shift.startTime
+            notification.soundName = UILocalNotificationDefaultSoundName
+            UIApplication.sharedApplication().scheduleLocalNotification(notification)
         }
         
-        resolveConflicts()
+        dataManager.save()
     }
     
     func unwind() {
@@ -197,7 +239,7 @@ class AddScheduleTableViewController: UITableViewController {
     }
     
     func toggleSaveButton() {
-        if jobListEmpty {
+        if isJobListEmpty {
             saveButton.enabled = false
         } else if startDatePicker.date.compare(endDatePicker.date) == NSComparisonResult.OrderedAscending {
             saveButton.enabled = true
@@ -223,26 +265,84 @@ class AddScheduleTableViewController: UITableViewController {
         schedule.append(newShift)
     }
     
+    func editShift(shift: ScheduledShift) {
+        if repeatSettings.type == "Weekly" { // Delete repeats enables creation on a new repeating schedule
+            // Delete the existing shift
+            dataManager.delete(shift)
+            
+            // Then create a new repeating schedule
+            addWeeklySchedule()
+        } else {
+            // Delete the existing shift then create a new one
+            // Edits are handled this way to also handle notifications automatically
+            dataManager.delete(shift)
+            addShift()
+        }
+    }
+    
     func editSchedule() {
         
-        let editShift = dataManager.editItem(shift, entityName: "ScheduledShift") as! ScheduledShift
-        
+        var alertTitle = "Found \(repeatingSchedule.count) similar shifts"
+        var editTitle = "Confirm changes"
+
         let formatter = NSDateFormatter()
-        formatter.dateStyle = .LongStyle
-        formatter.timeStyle = .NoStyle
+        formatter.dateFormat = "EEEE"
         
-        editShift.startDate = formatter.stringFromDate(self.startTime)
-        editShift.startTime = self.startTime
-        editShift.endTime = self.endTime
-        editShift.job = self.job
+        let day = formatter.stringFromDate(shift.startTime)
         
-        checkConflicts(editShift)
-        schedule.append(editShift)
+        formatter.dateStyle = .NoStyle
+        formatter.timeStyle = .ShortStyle
+        formatter.timeZone = NSTimeZone()
+        
+        let startDifference = startTime.timeIntervalSinceDate(shift.startTime)
+        let endDifference = endTime.timeIntervalSinceDate(shift.endTime)
+        
+        
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
+        
+        if repeatingSchedule.count > 0 {
+            let editAll = UIAlertAction(title: "Edit All", style: .Destructive) { (action) in
+                self.editShift(self.shift)
+
+                for shift in self.repeatingSchedule {
+                    self.startTime = shift.startTime.dateByAddingTimeInterval(startDifference)
+                    self.endTime = shift.endTime.dateByAddingTimeInterval(endDifference)
+            
+                    self.editShift(shift)
+                }
+                
+                self.resolveConflicts()
+            }
+            
+            let start = formatter.stringFromDate(shift.startTime)
+            let end = formatter.stringFromDate(shift.endTime)
+            let message = String(format: "\n%@\n%@ - %@\n", day, start, end)
+            
+            alertController.message = message
+            alertController.title = alertTitle
+            alertController.addAction(editAll)
+            
+            editTitle = "Edit this shift only"
+        }
+        
+        let edit = UIAlertAction(title: editTitle, style: .Destructive) { (action) in
+            self.editShift(self.shift)
+            self.resolveConflicts()
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+            
+        }
+        
+        alertController.addAction(edit)
+        alertController.addAction(cancel)
+        
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
     
     func addWeeklySchedule() {
         var shifts = [NSDate]()
-        var startRepeat = startTime
+        let startRepeat = startTime
         
         if let repeatSettings = self.repeatSettings as? RepeatWeekly  {
             var repeatArray = repeatSettings.getRepeat()
@@ -315,15 +415,28 @@ class AddScheduleTableViewController: UITableViewController {
             unwind()
         } else {
             
-            var message = "\(conflicts.count) Schedule Conflict"
+            let formatter = NSDateFormatter()
+            formatter.dateFormat = "EEEE"
+            
+            let day = formatter.stringFromDate(conflicts[0].startTime)
+            
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            formatter.timeZone = NSTimeZone()
+            
+            let start = formatter.stringFromDate(conflicts[0].startTime)
+            let end = formatter.stringFromDate(conflicts[0].endTime)
+            let message = String(format: "\nReplace the following schedule: \n%@\n%@ - %@\n", day, start, end)
+            
+            var title = "\(conflicts.count) Schedule Conflict"
             var replaceTitle = "Replace"
             
             if conflicts.count > 1 {
-                message += "s"
+                title += "s"
                 replaceTitle += " All (\(conflicts.count))"
             }
             
-            let alertController = UIAlertController(title: nil, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
             
             let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
                 for conflict in self.conflicts {
@@ -351,7 +464,7 @@ class AddScheduleTableViewController: UITableViewController {
                     for shift in self.schedule {
                         self.dataManager.delete(shift)
                         self.schedule.removeAtIndex(0)
-                    }
+                        }
                 } else {
                     self.dataManager.undo()
                 }
@@ -362,27 +475,6 @@ class AddScheduleTableViewController: UITableViewController {
             
             self.presentViewController(alertController, animated: true, completion: nil)
         }
-    }
-    
-    func save(schedule: [ScheduledShift]) {
-        
-        for shift in schedule {
-            let formatter = NSDateFormatter()
-            formatter.dateStyle = .NoStyle
-            formatter.timeStyle = .ShortStyle
-            formatter.timeZone = NSTimeZone()
-            
-            let start = formatter.stringFromDate(shift.startTime)
-            
-            var notification = UILocalNotification()
-            notification.alertBody = "REMINDER: You have a shift at \(start)"
-            notification.alertAction = "Clock in"
-            notification.fireDate = shift.startTime
-            notification.soundName = UILocalNotificationDefaultSoundName
-            UIApplication.sharedApplication().scheduleLocalNotification(notification)
-        }
-        
-        dataManager.save()
     }
     
     func datePickerChanged(label: UILabel, datePicker: UIDatePicker) {
@@ -449,40 +541,104 @@ class AddScheduleTableViewController: UITableViewController {
         toggleSaveButton()
     }
     
+    func deleteRepeats() {
+        let alertTitle = "Warning!\nThis will delete all instances of the following shift EXCEPT this one.\nThis action cannot be undone."
+        
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "EEEE"
+        
+        let day = formatter.stringFromDate(shift.startTime)
+    
+        formatter.dateStyle = .NoStyle
+        formatter.timeStyle = .ShortStyle
+        formatter.timeZone = NSTimeZone()
+        
+        let start = formatter.stringFromDate(shift.startTime)
+        let end = formatter.stringFromDate(shift.endTime)
+        let message = String(format: "\n%@\n%@ - %@\n", day, start, end)
+        
+        let alertController = UIAlertController(title: alertTitle, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
+
+        let app = UIApplication.sharedApplication()
+        
+        let delete = UIAlertAction(title: "Delete Repeats (\(repeatingSchedule.count))", style: .Destructive) { (action) in
+            for shift in self.repeatingSchedule {
+                self.dataManager.delete(shift)
+            }
+            
+            self.repeatingSchedule = []
+            self.tableView.beginUpdates()
+            self.tableView.endUpdates()
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+            
+        }
+        
+        alertController.addAction(delete)
+        alertController.addAction(cancel)
+        
+        self.presentViewController(alertController, animated: true, completion: nil)
+
+    }
+    
     
     // MARK: - Tableview DataSource & Delegate
     
+    override func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        if indexPath.section == 1 {
+            return false
+        }
+        
+        return true
+    }
+    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        if indexPath.section == 1 && indexPath.row == 0 {
+        if indexPath.section == 2 && indexPath.row == 0 {
             togglePicker("startDate")
-        } else if indexPath.section == 1 && indexPath.row == 2 {
+        } else if indexPath.section == 2 && indexPath.row == 2 {
             togglePicker("endDate")
         } else {
             togglePicker("Close")
         }
+        
+        if indexPath.section == 4 {
+            deleteRepeats()
+        }
     }
 
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if !jobListEmpty {
-            if startDatePickerHidden && indexPath.section == 1 && indexPath.row == 1 {
-                return 0
-            } else if endDatePickerHidden && indexPath.section == 1 && indexPath.row == 3 {
-                return 0
-            }
-            
-            if repeatLabel.text == "Never" && indexPath.section == 1 && indexPath.row == 5 {
-                return 0
-            }
-
-            return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
-        } else {
+        if isJobListEmpty {
             if indexPath.section == 0 {
                 return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
             } else {
                 return 0
             }
+        } else {
+            if startDatePickerHidden && indexPath.section == 2 && indexPath.row == 1 {
+                return 0
+            } else if endDatePickerHidden && indexPath.section == 2 && indexPath.row == 3 {
+                return 0
+            }
             
+            if repeatLabel.text == "Never" && indexPath.section == 3 && indexPath.row == 1 {
+                return 0
+            }
+            
+            if isNewSchedule {
+                if indexPath.section == 4 {
+                    return 0
+                }
+            } else {
+                if repeatingSchedule.count > 0 && indexPath.section == 3 {
+                    return 0
+                } else if repeatingSchedule.count == 0 && indexPath.section == 4 {
+                    return 0
+                }
+            }
+            
+            return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
         }
     }
     
@@ -510,7 +666,7 @@ class AddScheduleTableViewController: UITableViewController {
     
     override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
         if identifier == "selectJob" {
-            if jobListEmpty {
+            if isJobListEmpty {
                 let addJobStoryboard: UIStoryboard = UIStoryboard(name: "AddJobStoryboard", bundle: nil)
                 let addJobsVC: AddJobTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("AddJobTableViewController")
                     as! AddJobTableViewController
