@@ -55,6 +55,56 @@ class DataManager {
         return results
     }
     
+    func fetchRepeatingSchedule(shift: ScheduledShift) -> [ScheduledShift]{
+        var schedule = [ScheduledShift]()
+        
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        let results = fetch("ScheduledShift", sortDescriptors: sortDescriptors)
+        let firstShift = results[0] as! ScheduledShift
+        let lastShift = results[results.count-1] as! ScheduledShift
+        
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        
+        var today = NSDate()
+        today = calendar.startOfDayForDate(today)
+        
+        let selectedDay = calendar.startOfDayForDate(shift.startTime)
+        let components = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: today, toDate: selectedDay, options: nil)
+        let offset = components.day % 7
+        
+        let timeComps = (NSCalendarUnit.CalendarUnitHour | NSCalendarUnit.CalendarUnitMinute | NSCalendarUnit.CalendarUnitSecond)
+        let startTimeComponents = calendar.components(timeComps, fromDate: shift.startTime)
+        let endTimeComponents = calendar.components(timeComps, fromDate: shift.endTime)
+        
+        var startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: today, options: nil)!
+        var endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: today, options: nil)!
+
+        startDate = calendar.dateByAddingComponents(startTimeComponents, toDate: startDate, options: nil)!
+        endDate = calendar.dateByAddingComponents(endTimeComponents, toDate: endDate, options: nil)!
+        
+        while startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedAscending {
+            
+            let predicate = NSPredicate(format: "startTime == %@ && endTime == %@", startDate, endDate)
+            let results = fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
+
+            if results.count > 0 {
+                if shift != results[0] {
+                    schedule.append(results[0])
+                }
+            }
+            
+            startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: startDate, options: nil)!
+            endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 7, toDate: endDate, options: nil)!
+        }
+        
+        if shift != lastShift && startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedSame && endDate.compare(lastShift.endTime) == NSComparisonResult.OrderedSame {
+            schedule.append(lastShift)
+        }
+
+        return schedule
+    }
+    
     func delete(objectToDelete: NSManagedObject) {
         if let job = objectToDelete as? Job {
 
@@ -81,11 +131,11 @@ class DataManager {
                 let notification = event as! UILocalNotification
                 let startTime = notification.fireDate
                 
-                if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
+                if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame && notification.alertAction == "clock in"{
                     app.cancelLocalNotification(notification)
                     break
                 }
-            }            
+            }
         }
         
         context?.deleteObject(objectToDelete)
@@ -98,6 +148,7 @@ class DataManager {
         
         return object
     }
+    
     
     func editItem(entity: NSManagedObject, entityName: String) -> NSManagedObject {
         let predicate = NSPredicate(format: "SELF == %@", entity)
