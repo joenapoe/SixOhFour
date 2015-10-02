@@ -64,40 +64,31 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
      
         // Check to see if last running shift (status = 2) needs to be convert to incomplete (status = 1)
         
-        let predicateOpenWS = NSPredicate(format: "status == 2")
+        let predicateRunning = NSPredicate(format: "status == 2")
         var runningShifts = [WorkedShift]()
-        runningShifts = dataManager.fetch("WorkedShift", predicate: predicateOpenWS) as! [WorkedShift]
-        println("First Checkpoint = see if there are any runningShifts:")
-        println("runningShifts.count = \(runningShifts.count)")
+        runningShifts = dataManager.fetch("WorkedShift", predicate: predicateRunning) as! [WorkedShift]
     
         if runningShifts.count > 0 {
 
             //convert all status = 1
-            for WorkedShift in runningShifts {
-                WorkedShift.status = 1
+            for workedShift in runningShifts {
+                workedShift.status = 1
             }
             dataManager.save()
-
-            // TEST: Check to see if 0
-            runningShifts = dataManager.fetch("WorkedShift", predicate: predicateOpenWS) as! [WorkedShift]
-            println("Since yes, then convert:")
-            println("runningShifts.count = \(runningShifts.count)")
         }
         
         //Check for any timelogs that arent assigned to workedshift
-        
-        let predicateOpenTL = NSPredicate(format: "workedShift == nil")
-        var openTLs = [Timelog]()
-        openTLs = dataManager.fetch("Timelog", predicate: predicateOpenTL) as! [Timelog]
-        println("Second Checkpoint = see if there are any openTLs:")
-        println("openTLs = \(openTLs.count)")
+        //TODO: Remove this checkpoint when fully tested and confirmed that there are no timelog leaks
+        let predicateLeak = NSPredicate(format: "workedShift == nil")
+        var timelogs = [Timelog]()
+        timelogs = dataManager.fetch("Timelog", predicate: predicateLeak) as! [Timelog]
 
-        if openTLs.count > 0 {
-            for i in openTLs {
+        if timelogs.count > 0 {
+            println("Second Checkpoint = see if there are any openTLs:")
+            println("openTLs = \(timelogs.count)")
+            for i in timelogs {
                 dataManager.delete(i)
             }
-            println("Since yes, then delete:")
-            println("openTLs = \(openTLs.count)")
         }
     }
     

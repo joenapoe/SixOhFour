@@ -16,11 +16,21 @@ class SetBreakTimeViewController: UIViewController {
     var breakHoursRange = 3
     var breakMinutesRange = 60
     
+//    //Variable values are passed in when segue
+//    var breakHours = 0
+//    var breakMinutes = 0
+
+
     //Variable values are passed in when segue
+    var breaktimeSecondsSet = 0.0
+
+    //Calculated Variables
     var breakHours = 0
     var breakMinutes = 0
-    var breakHoursSetIntial = 0
-    var breakMinutesSetIntial = 0
+    
+    //Constants
+    var minuteInSeconds = 60.0
+    var hourInSeconds = 60.0 * 60.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,11 +38,21 @@ class SetBreakTimeViewController: UIViewController {
         self.SetBreakTimePicker.dataSource = self
         self.SetBreakTimePicker.delegate = self
         
+        if breaktimeSecondsSet >= 3600 {
+            breakMinutes = Int ((breaktimeSecondsSet % 3600 ) / 60)
+            breakHours = Int (breaktimeSecondsSet / 60 / 60)
+        } else if breaktimeSecondsSet >= 60 {
+            breakMinutes = Int(breaktimeSecondsSet / 60)
+            breakHours = Int(0)
+        }
+        
         SetBreakTimePicker.selectRow(breakHours, inComponent: 0, animated: true)
         SetBreakTimePicker.selectRow(breakMinutes, inComponent: 1, animated: true)
         
         doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: "doneSettingBreak")
         self.navigationItem.rightBarButtonItem = doneButton
+     
+//        breaktimeSecondsSet = Double(breakHours) * hourInSeconds + Double(breakMinutes) * minuteInSeconds
         
     }
     
@@ -81,8 +101,9 @@ extension SetBreakTimeViewController: UIPickerViewDataSource, UIPickerViewDelega
             if breakMinutes == 0 && breakHours == 0 {
                 breakMinutes = 1
                 SetBreakTimePicker.selectRow(1, inComponent: 1, animated: true)
-            } else {
             }
         }
+        breaktimeSecondsSet = Double(breakHours) * hourInSeconds + Double(breakMinutes) * minuteInSeconds
+        println(breaktimeSecondsSet)
     }
 }

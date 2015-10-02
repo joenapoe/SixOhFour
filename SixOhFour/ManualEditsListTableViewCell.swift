@@ -23,27 +23,17 @@ class ManualEditsListTableViewCell: UITableViewCell {
             companyLabel.text = workedShift.job.company.name
             positionLabel.text = workedShift.job.position
             jobColorView.color = workedShift.job.color.getColor
-        }
-    }
-
-
-    var clockInTL: Timelog! {
-        didSet {
-            dateLabel.text = NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .LongStyle,  timeStyle: .NoStyle)
-            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
-
+            dateLabel.text = NSDateFormatter.localizedStringFromDate( (workedShift.startDate) ,dateStyle: .LongStyle,  timeStyle: .NoStyle)
+            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate( (workedShift.startDate) ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
         }
     }
     
         override func awakeFromNib() {
             super.awakeFromNib()
-
     }
         
         override func setSelected(selected: Bool, animated: Bool) {
             super.setSelected(selected, animated: animated)
-            
             // Configure the view for the selected state
         }
-        
 }
