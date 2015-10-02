@@ -27,7 +27,7 @@ class CalendarViewController: UIViewController {
     var shouldShowDaysOut = true
     var animationFinished = true
     var currentMonth = CVDate(date: NSDate()).currentMonth
-    var deleteSchedule = [ScheduledShift]()
+    var repeatSchedule = [ScheduledShift]()
     
     let dataManager = DataManager()
     
@@ -243,9 +243,8 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             
             let shiftToDelete = daySchedule[indexPath.row]
             
-            deleteSchedule = dataManager.fetchRepeatingSchedule(shiftToDelete)
+            repeatSchedule = dataManager.fetchRepeatingSchedule(shiftToDelete)
 
-            var alertTitle = "\(deleteSchedule.count) similar shift"
             var deleteTitle = "Confirm Delete"
             
             let formatter = NSDateFormatter()
@@ -257,20 +256,18 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             formatter.timeStyle = .ShortStyle
             formatter.timeZone = NSTimeZone()
             
-            
             let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
-
-            if deleteSchedule.count > 1 {
-                alertTitle += "s"
+            
+            if repeatSchedule.count > 0 {
                 
-                let deleteAll = UIAlertAction(title: "Delete All (\(deleteSchedule.count))", style: .Destructive) { (action) in
-                    for shift in self.deleteSchedule {
+                let deleteAll = UIAlertAction(title: "Delete All (\(repeatSchedule.count+1))", style: .Destructive) { (action) in
+                    for shift in self.repeatSchedule {
                         self.dataManager.delete(shift)
                     }
                     
                     self.dataManager.delete(shiftToDelete)
                     
-                    self.deleteSchedule = []
+                    self.repeatSchedule = []
                     self.daySchedule.removeAtIndex(indexPath.row)
                     self.fetchMonthSchedule()
                     tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
@@ -281,7 +278,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                 let message = String(format: "\n%@\n%@ - %@\n", day, start, end)
                 
                 alertController.message = message
-                alertController.title = alertTitle
+                alertController.title = "This shift is part of a repeating schedule"
                 alertController.addAction(deleteAll)
                 
                 deleteTitle = "Delete this shift only"
@@ -291,14 +288,14 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             let delete = UIAlertAction(title: deleteTitle, style: .Destructive) { (action) in
                 self.dataManager.delete(shiftToDelete)
     
-                self.deleteSchedule = []
+                self.repeatSchedule = []
                 self.daySchedule.removeAtIndex(indexPath.row)
                 self.fetchMonthSchedule()
                 tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
             }
         
             let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
-                self.deleteSchedule = []
+                self.repeatSchedule = []
             }
             
             alertController.addAction(delete)

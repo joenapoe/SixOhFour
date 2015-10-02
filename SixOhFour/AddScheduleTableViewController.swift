@@ -542,7 +542,7 @@ class AddScheduleTableViewController: UITableViewController {
     }
     
     func deleteRepeats() {
-        let alertTitle = "Warning!\nThis will delete all instances of the following shift EXCEPT this one.\nThis action cannot be undone."
+        let alertTitle = "Warning!\nThis will delete instances of the following shift EXCEPT this one.\nThis action cannot be undone."
         
         let formatter = NSDateFormatter()
         formatter.dateFormat = "EEEE"
@@ -561,7 +561,7 @@ class AddScheduleTableViewController: UITableViewController {
 
         let app = UIApplication.sharedApplication()
         
-        let delete = UIAlertAction(title: "Delete Repeats (\(repeatingSchedule.count))", style: .Destructive) { (action) in
+        let deleteALL = UIAlertAction(title: "Delete All Repeats (\(repeatingSchedule.count))", style: .Destructive) { (action) in
             for shift in self.repeatingSchedule {
                 self.dataManager.delete(shift)
             }
@@ -571,11 +571,34 @@ class AddScheduleTableViewController: UITableViewController {
             self.tableView.endUpdates()
         }
         
+        alertController.addAction(deleteALL)
+        
+        var futureRepeatingSchedule = [ScheduledShift]()
+        
+        for repeatShift in repeatingSchedule {
+            if shift.startTime.compare(repeatShift.startTime) == NSComparisonResult.OrderedAscending {
+                futureRepeatingSchedule.append(repeatShift)
+            }
+        }
+        
+        if futureRepeatingSchedule.count > 0 && futureRepeatingSchedule.count != repeatingSchedule.count {
+            let deleteFuture = UIAlertAction(title: "Delete Future Repeats (\(futureRepeatingSchedule.count))", style: .Destructive) { (action) in
+                for shift in futureRepeatingSchedule {
+                    self.dataManager.delete(shift)
+                }
+                
+                self.repeatingSchedule = self.dataManager.fetchRepeatingSchedule(self.shift)
+                self.tableView.beginUpdates()
+                self.tableView.endUpdates()
+            }
+            
+            alertController.addAction(deleteFuture)
+        }
+        
         let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
             
         }
         
-        alertController.addAction(delete)
         alertController.addAction(cancel)
         
         self.presentViewController(alertController, animated: true, completion: nil)
