@@ -292,7 +292,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                 println(futureRepeatingSchedule.count)
                 
                 if futureRepeatingSchedule.count > 0 && futureRepeatingSchedule.count != repeatingSchedule.count {
-                    let deleteFuture = UIAlertAction(title: "Delete This and All Following (\(futureRepeatingSchedule.count+1))", style: .Destructive) { (action) in
+                    let deleteFuture = UIAlertAction(title: "Delete This and All Future (\(futureRepeatingSchedule.count+1))", style: .Destructive) { (action) in
                         for shift in futureRepeatingSchedule {
                             self.dataManager.delete(shift)
                         }

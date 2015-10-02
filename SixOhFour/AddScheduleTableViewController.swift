@@ -561,7 +561,7 @@ class AddScheduleTableViewController: UITableViewController {
 
         let app = UIApplication.sharedApplication()
         
-        let deleteALL = UIAlertAction(title: "Delete All Repeats (\(repeatingSchedule.count))", style: .Destructive) { (action) in
+        let deleteALL = UIAlertAction(title: "All Similar Shifts (\(repeatingSchedule.count))", style: .Destructive) { (action) in
             for shift in self.repeatingSchedule {
                 self.dataManager.delete(shift)
             }
@@ -582,7 +582,7 @@ class AddScheduleTableViewController: UITableViewController {
         }
         
         if futureRepeatingSchedule.count > 0 && futureRepeatingSchedule.count != repeatingSchedule.count {
-            let deleteFuture = UIAlertAction(title: "Delete Future Repeats (\(futureRepeatingSchedule.count))", style: .Destructive) { (action) in
+            let deleteFuture = UIAlertAction(title: "Future Similar Shifts (\(futureRepeatingSchedule.count))", style: .Destructive) { (action) in
                 for shift in futureRepeatingSchedule {
                     self.dataManager.delete(shift)
                 }
