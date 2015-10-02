@@ -68,20 +68,35 @@ class DataManager {
         
         var today = NSDate()
         today = calendar.startOfDayForDate(today)
-        
-        let selectedDay = calendar.startOfDayForDate(shift.startTime)
-        let components = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: today, toDate: selectedDay, options: nil)
-        let offset = components.day % 7
-        
+        let startDateMidnight = calendar.startOfDayForDate(shift.startTime)
+        let endDateMidnight = calendar.startOfDayForDate(shift.endTime)
+
+        let startComponents = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: today, toDate: startDateMidnight, options: nil)
+        let endComponents = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: today, toDate: endDateMidnight, options: nil)
+        let startOffset = startComponents.day % 7
+        let endOffset = startOffset + (endComponents.day - startComponents.day)
+
         let timeComps = (NSCalendarUnit.CalendarUnitHour | NSCalendarUnit.CalendarUnitMinute | NSCalendarUnit.CalendarUnitSecond)
         let startTimeComponents = calendar.components(timeComps, fromDate: shift.startTime)
         let endTimeComponents = calendar.components(timeComps, fromDate: shift.endTime)
         
-        var startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: today, options: nil)!
-        var endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: today, options: nil)!
+        var startDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: startOffset, toDate: today, options: nil)!
+        var endDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: endOffset, toDate: today, options: nil)!
 
         startDate = calendar.dateByAddingComponents(startTimeComponents, toDate: startDate, options: nil)!
         endDate = calendar.dateByAddingComponents(endTimeComponents, toDate: endDate, options: nil)!
+        
+        // DELETE TEST
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .MediumStyle
+        formatter.timeStyle = .ShortStyle
+        formatter.timeZone = NSTimeZone()
+        
+        println(formatter.stringFromDate(shift.startTime))
+        println(formatter.stringFromDate(shift.endTime))
+        
+        println(formatter.stringFromDate(startDate))
+        println(formatter.stringFromDate(endDate))
         
         while startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedAscending {
             
