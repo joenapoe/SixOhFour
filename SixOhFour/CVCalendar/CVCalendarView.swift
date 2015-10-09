@@ -206,7 +206,8 @@ extension CVCalendarView {
             presentedDate = dayView.date
             delegate?.didSelectDayView?(dayView)
             controller.performedDayViewSelection(dayView) // TODO: Update to range selection
-        }
+        
+        }        
     }
 }
 
@@ -262,9 +263,29 @@ extension CVCalendarView {
             }
         }
     }
+    
+    func reloadMonthView(selectedDate: NSDate) {
+        let newController: ContentController
+        
+        contentController.updateHeight(contentController.presentedMonthView.potentialSize.height, animated: true)
+        newController = MonthContentViewController(calendarView: self, frame: bounds, presentedDate: selectedDate)
+        
+        newController.updateFrames(bounds)
+        newController.scrollView.alpha = 0
+        addSubview(newController.scrollView)
+        
+        UIView.animateWithDuration(0.5, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
+            self.contentController.scrollView.alpha = 0
+            newController.scrollView.alpha = 1
+            }) { _ in
+                self.contentController.scrollView.removeAllSubviews()
+                self.contentController.scrollView.removeFromSuperview()
+                self.contentController = newController
+        }
+    }
 }
 
-// MARK: - Mode load 
+// MARK: - Mode load
 
 private extension CVCalendarView {
     func loadCalendarMode() {

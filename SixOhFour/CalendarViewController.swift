@@ -19,6 +19,7 @@ class CalendarViewController: UIViewController {
     
     var todayButton: UIBarButtonItem!
     var selectedDate: NSDate!
+    var monthWorkedShifts: [WorkedShift]!
     var monthSchedule: [ScheduledShift]!
     var daySchedule: [ScheduledShift]!
     var shift: ScheduledShift!
@@ -99,9 +100,34 @@ class CalendarViewController: UIViewController {
         isMonthView = !isMonthView
     }
     
+    @IBAction func addButtonPressed(sender: AnyObject) {
+        var today = NSDate()
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let components = (NSCalendarUnit.CalendarUnitYear | NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay)
         
+        let selectedDateComponents = calendar.components(components, fromDate: selectedDate)
+        let todayComponents = calendar.components(components, fromDate: today)
+        
+        today = calendar.dateFromComponents(todayComponents)!
+        let dateToCompare = calendar.dateFromComponents(selectedDateComponents)
+        
+        if dateToCompare!.compare(today) == NSComparisonResult.OrderedAscending {
+            let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
+            let addWorkedShiftVC: AddShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("AddShiftViewController")
+                as! AddShiftViewController
+            
+            let results = dataManager.fetch("Job")
+            
+            addWorkedShiftVC.selectedJob = results[0] as! Job
+            
+            self.navigationController?.pushViewController(addWorkedShiftVC, animated: true)
+        } else {
+            self.performSegueWithIdentifier("addScheduleSegue", sender: self)
+        }
+    }
+    
     @IBAction func unwindAfterSaveSchedule(segue: UIStoryboardSegue) {
-        calendarView.toggleViewWithDate(selectedDate)
+        calendarView.reloadMonthView(selectedDate)
     }
     
     
@@ -173,6 +199,7 @@ class CalendarViewController: UIViewController {
             destinationVC.endTime = self.selectedDate
             destinationVC.isNewSchedule = true
         }
+        
         
         if segue.identifier == "editSchedule" {
             let destinationVC = segue.destinationViewController as! AddScheduleTableViewController
@@ -271,6 +298,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                     self.daySchedule.removeAtIndex(indexPath.row)
                     self.fetchMonthSchedule()
                     tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
+                    self.calendarView.reloadMonthView(self.selectedDate)
                 }
                 
                 let start = formatter.stringFromDate(shiftToDelete.startTime)
@@ -303,6 +331,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                         self.daySchedule.removeAtIndex(indexPath.row)
                         self.fetchMonthSchedule()
                         tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
+                        self.calendarView.reloadMonthView(self.selectedDate)
                     }
                 
                     alertController.addAction(deleteFuture)
@@ -319,6 +348,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                 self.daySchedule.removeAtIndex(indexPath.row)
                 self.fetchMonthSchedule()
                 tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
+                self.calendarView.reloadMonthView(self.selectedDate)
             }
         
             let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
@@ -366,8 +396,8 @@ extension CalendarViewController: CVCalendarViewDelegate {
         updateDaySchedule(selectedDay)
         
         selectedDate = dayView.date.convertedDate()
-        toggleAddButton()
 
+        dayView.circleView?.setNeedsDisplay()
         tableView.reloadData()
     }
     
@@ -440,14 +470,28 @@ extension CalendarViewController: CVCalendarViewDelegate {
         let predicate = NSPredicate(format: "startDate == %@", day)
         let results = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
         
+        // TODO: DELETE IF SWITCHING TO COLORS
+//        if results.count == 2 {
+//            return [color, color]
+//        } else if results.count >= 3 {
+//            return [color, color, color]
+//        } else {
+//            return [color]
+//        }
         
-        if results.count == 2 {
-            return [color, color]
-        } else if results.count >= 3 {
-            return [color, color, color]
-        } else {
-            return [color]
+        var colors = [UIColor]()
+        var count = 0
+        
+        for shift in results {
+            colors.append(shift.job.color.getColor)
+            
+            count++
+            if count == 3 {
+                break
+            }
         }
+        
+        return colors
     }
     
     func dotMarker(shouldMoveOnHighlightingOnDayView dayView: CVCalendarDayView) -> Bool {

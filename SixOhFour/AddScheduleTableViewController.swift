@@ -19,6 +19,9 @@ class AddScheduleTableViewController: UITableViewController {
     @IBOutlet weak var jobColorView: JobColorView!
     @IBOutlet weak var repeatLabel: UILabel!
     @IBOutlet weak var endRepeatLabel: UILabel!
+    @IBOutlet weak var hoursTextField: UITextField!
+    @IBOutlet weak var minutesTextField: UITextField!
+    @IBOutlet weak var maxDurationLabel: UILabel!
     
     var saveButton: UIBarButtonItem!
     var startTime: NSDate!
@@ -29,12 +32,15 @@ class AddScheduleTableViewController: UITableViewController {
     var isNewSchedule = true
     var startDatePickerHidden = true
     var endDatePickerHidden = true
-    var isJobListEmpty = true;
+    var isJobListEmpty = true
+    var isValidShift = false
     var repeatSettings: RepeatSettings!
     var conflicts = [ScheduledShift]()
     var schedule = [ScheduledShift]()
     var repeatingSchedule = [ScheduledShift]()
-
+    var hours = 0
+    var minutes = 0
+ 
     let dataManager = DataManager()
 
     
@@ -45,6 +51,13 @@ class AddScheduleTableViewController: UITableViewController {
         self.navigationItem.rightBarButtonItem = saveButton
         saveButton.enabled = false
         
+        hoursTextField.delegate = self
+        minutesTextField.delegate = self
+        
+        var tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        tap.cancelsTouchesInView = false
+        tableView.addGestureRecognizer(tap)
+        
         if shift != nil {
             job = shift.job
             jobNameLabel.text = job.company.name
@@ -54,6 +67,16 @@ class AddScheduleTableViewController: UITableViewController {
             
             startDatePicker.date = shift.startTime
             endDatePicker.date = shift.endTime
+            
+            let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+            let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitMinute, fromDate: startDatePicker.date, toDate: endDatePicker.date, options: nil)
+            let duration = dateComponents.minute
+            
+            hours = duration / 60
+            minutes = duration % 60
+            hoursTextField.text = String(hours)
+            minutesTextField.text = String(minutes)
+            isValidShift = true
             
             repeatingSchedule = dataManager.fetchRepeatingSchedule(shift)
   
@@ -88,31 +111,29 @@ class AddScheduleTableViewController: UITableViewController {
         
         endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
 
-        startDatePicker.minimumDate = NSDate()
-        endDatePicker.minimumDate = NSDate()
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let minDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitMinute, value: 5, toDate: NSDate(), options: nil)
+        
+        startDatePicker.minimumDate = minDate
+        endDatePicker.minimumDate = minDate
 
         datePickerChanged(startLabel, datePicker: startDatePicker)
     }
-
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        hoursTextField.addTarget(self, action: "textFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+        minutesTextField.addTarget(self, action: "textFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    
     // MARK: - IB Actions
-    
-    @IBAction func setShiftDuration(sender: AnyObject) {
-        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-        let dateComponents = NSDateComponents()
         
-        dateComponents.hour = sender.tag // tag values are 4, 8, 12. Values are set on the storyboad
-        
-        endDatePicker.date = calendar.dateByAddingComponents(dateComponents, toDate: startDatePicker.date, options: nil)!
-        
-        datePickerChanged(endLabel, datePicker: endDatePicker)
-    }
-    
     @IBAction func startDatePickerValue(sender: AnyObject) {
         datePickerChanged(startLabel, datePicker: startDatePicker)
     }
@@ -162,6 +183,29 @@ class AddScheduleTableViewController: UITableViewController {
     
     // MARK: - Class Functions
     
+    func dismissKeyboard() {
+        self.view.endEditing(true)
+    }
+    
+    func validateDuration() {
+        let max = 1440
+        let duration = (hours * 60) + minutes
+        
+        if duration > max {
+            maxDurationLabel.hidden = false
+            hours = 24
+            minutes = 0
+        } else {
+            maxDurationLabel.hidden = true
+        }
+        
+        if duration <= 0 {
+            isValidShift = false
+        } else {
+            isValidShift = true
+        }
+    }
+    
     func saveButtonPressed() {
         conflicts = []
         
@@ -209,20 +253,14 @@ class AddScheduleTableViewController: UITableViewController {
     func togglePicker(picker: String) {
         if picker == "startDate" {
             startDatePickerHidden = !startDatePickerHidden
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
             endDatePickerHidden = true
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
         } else if picker == "endDate" {
             endDatePickerHidden = !endDatePickerHidden
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
             startDatePickerHidden = true
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
         } else {
             // Close datepickers
             startDatePickerHidden = true
             endDatePickerHidden = true
-            toggleLabelColor(startDatePickerHidden, label: startLabel)
-            toggleLabelColor(endDatePickerHidden, label: endLabel)
         }
         
         tableView.beginUpdates()
@@ -230,21 +268,11 @@ class AddScheduleTableViewController: UITableViewController {
         
     }
     
-    func toggleLabelColor(hidden: Bool, label: UILabel) {
-        if hidden{
-            label.textColor = UIColor.blackColor()
-        } else {
-            label.textColor = UIColor.redColor()
-        }
-    }
-    
     func toggleSaveButton() {
-        if isJobListEmpty {
+        if isJobListEmpty || !isValidShift{
             saveButton.enabled = false
-        } else if startDatePicker.date.compare(endDatePicker.date) == NSComparisonResult.OrderedAscending {
-            saveButton.enabled = true
         } else {
-            saveButton.enabled = false
+            saveButton.enabled = true
         }
     }
     
@@ -483,62 +511,57 @@ class AddScheduleTableViewController: UITableViewController {
         dateFormatter.timeStyle = NSDateFormatterStyle.ShortStyle
         
         label.text = dateFormatter.stringFromDate(datePicker.date)
+
+        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
         
         if datePicker == startDatePicker {
-            if datePicker.date.compare(endDatePicker.date) == NSComparisonResult.OrderedDescending {
-                endLabel.text = label.text
-                endDatePicker.date = datePicker.date
-            } else {
-                let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-                
-                let dateComponents = NSDateComponents()
-                dateComponents.day = 1
-                
-                let maxDate = calendar.dateByAddingComponents(dateComponents, toDate: datePicker.date, options: nil)
-                
-                if maxDate!.compare(endDatePicker.date) == NSComparisonResult.OrderedAscending {
-                    endDatePicker.date = maxDate!
-                }
-                
-                endLabel.text = dateFormatter.stringFromDate(endDatePicker.date)
-            }
+            endDatePicker.date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitMinute, value: minutes, toDate: datePicker.date, options: nil)!
+            endDatePicker.date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitHour, value: hours, toDate: endDatePicker.date, options: nil)!
+            endLabel.text = dateFormatter.stringFromDate(endDatePicker.date)
             
             startTime = datePicker.date
             endTime = endDatePicker.date
-            
+        
             let cal = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
             let myComponents = cal!.components(NSCalendarUnit.CalendarUnitWeekday, fromDate: datePicker.date)
-            
             repeatSettings.daySelectedIndex = myComponents.weekday - 1
-        }
-        
-        if datePicker == endDatePicker {
-            if datePicker.date.compare(startDatePicker.date) == NSComparisonResult.OrderedAscending {
-                startLabel.text = label.text
-                startDatePicker.date = datePicker.date
-            } else {
-                let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-                
-                let dateComponents = NSDateComponents()
-                dateComponents.day = -1
-                
-                let minDate = calendar.dateByAddingComponents(dateComponents, toDate: datePicker.date, options: nil)
-                
-                if minDate!.compare(startDatePicker.date) == NSComparisonResult.OrderedDescending {
-                    startDatePicker.date = minDate!
-                }
-                
-                startLabel.text = dateFormatter.stringFromDate(startDatePicker.date)
-                
-                
+            
+            toggleLabelColor()
+            
+        } else if datePicker == endDatePicker {
+            let dateComponents = calendar.components(NSCalendarUnit.CalendarUnitMinute, fromDate: startDatePicker.date, toDate: endDatePicker.date, options: nil)
+            let duration = dateComponents.minute
+            let maxDuration = 1440
+            
+            hours = duration / 60
+            minutes = duration % 60
+            
+            validateDuration()
+            hoursTextField.text = String(hours)
+            minutesTextField.text = String(minutes)
+
+            if duration >= maxDuration {
+                datePicker.date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitMinute, value: maxDuration, toDate: startDatePicker.date, options: nil)!
+                label.text = dateFormatter.stringFromDate(datePicker.date)
             }
+            
             endTime = datePicker.date
             startTime = startDatePicker.date
+            
+            toggleLabelColor()
         }
         
         repeatSettings.startDate = startTime
         
         toggleSaveButton()
+    }
+    
+    func toggleLabelColor() {
+        if endDatePicker.date.compare(startDatePicker.date) == NSComparisonResult.OrderedAscending {
+            endLabel.textColor = UIColor.redColor()
+        } else {
+            endLabel.textColor = UIColor.darkGrayColor()
+        }
     }
     
     func deleteRepeats() {
@@ -704,4 +727,46 @@ class AddScheduleTableViewController: UITableViewController {
         
         return true
     }
+}
+
+
+// MARK: - TextField Delegate
+
+extension AddScheduleTableViewController: UITextFieldDelegate {
+    
+    func textFieldDidChange(textField: UITextField) {
+        if textField == hoursTextField {
+            if let input = hoursTextField.text.toInt() {
+                hours = input
+            } else {
+                hours = 0
+            }
+        } else if textField == minutesTextField {
+            if let input = minutesTextField.text.toInt() {
+                if input >= 60 {
+                    hours += input / 60
+                    minutes = input % 60
+                } else {
+                    minutes = input
+                }
+            } else {
+                minutes = 0
+            }
+        }
+        
+        validateDuration()
+        hoursTextField.text = String(hours)
+        minutesTextField.text = String(minutes)
+
+        datePickerChanged(startLabel, datePicker: startDatePicker)
+        
+        toggleSaveButton()
+    }
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        textField.becomeFirstResponder()
+        textField.selectedTextRange = textField.textRangeFromPosition(textField.beginningOfDocument, toPosition: textField.endOfDocument)
+    }
+    
+
 }

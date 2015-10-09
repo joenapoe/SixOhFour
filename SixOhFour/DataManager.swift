@@ -127,10 +127,7 @@ class DataManager {
             let workedShifts = wArray as! [WorkedShift]
     
             for shift in workedShifts{
-                for timelog in shift.timelogs {
-                    context?.deleteObject(timelog as! NSManagedObject)
-                }
-                context?.deleteObject(shift)
+                delete(shift)
             }
             
             let sArray = job.scheduledShifts.allObjects as NSArray
@@ -151,6 +148,10 @@ class DataManager {
                     break
                 }
             }
+        } else if let shift = objectToDelete as? WorkedShift {
+            for timelog in shift.timelogs {
+                context?.deleteObject(timelog as! NSManagedObject)
+            } 
         }
         
         context?.deleteObject(objectToDelete)
