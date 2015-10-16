@@ -25,7 +25,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         let calendarVC: UINavigationController = calendarStoryboard.instantiateViewControllerWithIdentifier("CalendarNavController") as! UINavigationController
         let addJobsVC: UINavigationController = addJobStoryboard.instantiateViewControllerWithIdentifier("JobsNavController") as! UINavigationController
         
-        let jobsIcon = UITabBarItem(title: "", image:UIImage(named: "list.png"), tag: 1)
+        let jobsIcon = UITabBarItem(title: "", image:UIImage(named: "jobs.png"), tag: 1)
         let clockInIcon = UITabBarItem(title: "", image:UIImage(named: "clock.png"), tag: 2)
         let calendarIcon = UITabBarItem(title: "", image:UIImage(named: "calendar.png"), tag: 3)
 
