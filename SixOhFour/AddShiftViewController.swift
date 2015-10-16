@@ -17,17 +17,16 @@ class AddShiftViewController: UIViewController {
     
     var newShift : WorkedShift!
     var breakCount = 0
-    var dataManager = DataManager()
-    var breakTLs : [Timelog]!
-    var allTLsArrary : [Timelog]!
+    let dataManager = DataManager()
+    var timelogs : [Timelog]!
     
     //Variables for Segue: "showDetails"
-    var nItemClockIn : Timelog!
-    var nItemClockInPrevious : Timelog!
-    var nItemClockInNext : Timelog!
+    var selectedTimelog : Timelog!
+    var previousTimelog : Timelog!
+    var nextTimelog : Timelog!
     var selectedJob : Job!
-    var noMinDate = false
-    var noMaxDate = false
+    var hasMinDate = false
+    var hasMaxDate = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,15 +40,15 @@ class AddShiftViewController: UIViewController {
         newShift.setValue(3, forKey: "status")
         newShift.job = selectedJob
         
-        var saveButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveWS")
+        var saveButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveWorkedShift")
         self.navigationItem.rightBarButtonItem = saveButton
-        var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelWS")
+        var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelWorkedShift")
         self.navigationItem.leftBarButtonItem = cancelButton
         
-        allTLsArrary = []
+        timelogs = []
         
-        createTLappend("Clocked In")
-        createTLappend("Clocked Out")
+        createTimelog("Clocked In")
+        createTimelog("Clocked Out")
         
         worktimeLabel.text = "Work time = \( newShift.hoursWorked() ) hrs"
         earnedLabel.text = "You earned $\( newShift.moneyShiftOTx2()) for this shift"
@@ -67,68 +66,22 @@ class AddShiftViewController: UIViewController {
     }
     
     @IBAction func addBreakPressed(sender: AnyObject) {
-        ++breakCount
+        
+        breakCount++
         
         if breakCount == 1 {
-            createTLinsert("Ended Break")
-            createTLinsert("Started Break")
+            insertTimelog("Ended Break")
+            insertTimelog("Started Break")
         } else if breakCount > 1 {
             for i in 2...breakCount{
-                createTLinsert("Ended Break #\(breakCount)")
-                createTLinsert("Started Break #\(breakCount)")
+                insertTimelog("Ended Break #\(breakCount)")
+                insertTimelog("Started Break #\(breakCount)")
             }
         }
         
         var indexPathScroll = NSIndexPath(forRow: 0, inSection: 3)
         self.timelogTable.scrollToRowAtIndexPath(indexPathScroll, atScrollPosition: UITableViewScrollPosition.Top, animated: true)
         timelogTable.reloadData()
-    }
-    
-    func saveWS() {
-        dataManager.save()
-        self.performSegueWithIdentifier("unwindAddShiftSave", sender: self)
-    }
-    
-    func cancelWS() {
-        for i in allTLsArrary {
-            dataManager.delete(i)
-        }
-        
-        dataManager.delete(newShift)
-        self.performSegueWithIdentifier("unwindAddShift", sender: self)
-    }
-    
-    func createTLappend(type: String){
-        let newTL = dataManager.addItem("Timelog") as! Timelog
-        newTL.workedShift = newShift
-        newTL.comment = ""
-        newTL.type = type
-        newTL.time = NSDate()
-        allTLsArrary.append(newTL)
-    }
-    
-    func createTLinsert(type: String){
-        let newTL = dataManager.addItem("Timelog") as! Timelog
-        newTL.workedShift = newShift
-        newTL.comment = ""
-        newTL.type = type
-        newTL.time = allTLsArrary[breakCount*2-1].time
-        allTLsArrary.insert(newTL, atIndex: (breakCount*2-1))
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
-    {
-        if segue.identifier == "showDetails" {
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            let destinationVC = segue.destinationViewController as! DetailsTableViewController
-            destinationVC.hidesBottomBarWhenPushed = true;
-            destinationVC.nItem = self.nItemClockIn
-            destinationVC.nItemPrevious = self.nItemClockInPrevious
-            destinationVC.nItemNext = self.nItemClockInNext
-            destinationVC.noMinDate = self.noMinDate
-            destinationVC.noMaxDate = self.noMaxDate
-            destinationVC.selectedJob = self.selectedJob
-        }
     }
     
     @IBAction func unwindFromJobsListTableViewControllerToDetails (segue: UIStoryboardSegue) {
@@ -141,7 +94,7 @@ class AddShiftViewController: UIViewController {
     @IBAction func unwindSaveDetailsTVC (segue: UIStoryboardSegue) {
         //by hitting the SAVE button
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
-        nItemClockIn = sourceVC.nItem
+        selectedTimelog = sourceVC.selectedTimelog
         
         newShift.hoursWorked()
         worktimeLabel.text = "Work time = \( newShift.hoursWorked() ) hrs"
@@ -153,6 +106,55 @@ class AddShiftViewController: UIViewController {
     @IBAction func unwindCancelDetailsTVC (segue: UIStoryboardSegue) {
         //by hitting the CANCEL button
         //Nothing saved!
+    }
+    
+    
+    func saveWorkedShift() {
+        newShift.startDate = timelogs.first!.time
+        dataManager.save()
+        self.performSegueWithIdentifier("unwindAddShiftSave", sender: self)
+    }
+    
+    func cancelWorkedShift() {
+        for timelog in timelogs {
+            dataManager.delete(timelog)
+        }
+        
+        dataManager.delete(newShift)
+        self.performSegueWithIdentifier("unwindAddShiftCancel", sender: self)
+    }
+    
+    func createTimelog(type: String){
+        let newTimelog = dataManager.addItem("Timelog") as! Timelog
+        newTimelog.workedShift = newShift
+        newTimelog.comment = ""
+        newTimelog.type = type
+        newTimelog.time = NSDate()
+        timelogs.append(newTimelog)
+    }
+    
+    func insertTimelog(type: String){
+        let newTimelog = dataManager.addItem("Timelog") as! Timelog
+        newTimelog.workedShift = newShift
+        newTimelog.comment = ""
+        newTimelog.type = type
+        newTimelog.time = timelogs[breakCount*2-1].time
+        timelogs.insert(newTimelog, atIndex: (breakCount*2-1))
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
+    {
+        if segue.identifier == "showDetails" {
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+            let destinationVC = segue.destinationViewController as! DetailsTableViewController
+            destinationVC.hidesBottomBarWhenPushed = true;
+            destinationVC.selectedTimelog = self.selectedTimelog
+            destinationVC.previousTimelog = self.previousTimelog
+            destinationVC.nextTimelog = self.nextTimelog
+            destinationVC.hasMinDate = self.hasMinDate
+            destinationVC.hasMaxDate = self.hasMaxDate
+            destinationVC.selectedJob = self.selectedJob
+        }
     }
 }
 
@@ -168,11 +170,11 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
             
             //TODO: Change the TLs so that NSDATE is not choosen for new entries
             if indexPath.section == 1 {
-                cell.timelog = allTLsArrary.first
+                cell.timelog = timelogs.first
             } else if indexPath.section == 3 {
-                cell.timelog = allTLsArrary.last
+                cell.timelog = timelogs.last
             } else {
-                cell.timelog = allTLsArrary[indexPath.row+1]
+                cell.timelog = timelogs[indexPath.row+1]
             }
             cell.job = selectedJob
             cell.jobColorView.setNeedsDisplay()
@@ -214,31 +216,31 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
             self.navigationController?.pushViewController(jobsListVC, animated: true)
         } else {
             if indexPath.section == 1 {
-                noMinDate = true // user select CLOCKIN so noMinDate
-                nItemClockIn = allTLsArrary.first
+                hasMinDate = false // user select CLOCKIN so noMinDate
+                selectedTimelog = timelogs.first
             } else {
-                noMinDate = false
+                hasMinDate = true
                 
                 if indexPath.section == 3 {
-                    nItemClockIn = allTLsArrary.last
-                    self.nItemClockInPrevious = allTLsArrary[allTLsArrary.count-2]
+                    selectedTimelog = timelogs.last
+                    self.previousTimelog = timelogs[timelogs.count-2]
                 } else {
-                    nItemClockIn = allTLsArrary[indexPath.row+1]
-                    self.nItemClockInPrevious = allTLsArrary[indexPath.row]
+                    selectedTimelog = timelogs[indexPath.row+1]
+                    self.previousTimelog = timelogs[indexPath.row]
                 }
             }
             if indexPath.section == 3 {
-                nItemClockIn = allTLsArrary.last
-                noMaxDate = true //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
+                selectedTimelog = timelogs.last
+                hasMaxDate = false //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
             } else {
-                noMaxDate = false
+                hasMaxDate = true
                 
                 if indexPath.section == 1 {
-                    nItemClockIn = allTLsArrary.first
-                    self.nItemClockInNext = allTLsArrary[1]
+                    selectedTimelog = timelogs.first
+                    self.nextTimelog = timelogs[1]
                 } else {
-                    nItemClockIn = allTLsArrary[indexPath.row+1]
-                    self.nItemClockInNext = allTLsArrary[indexPath.row+2]
+                    selectedTimelog = timelogs[indexPath.row+1]
+                    self.nextTimelog = timelogs[indexPath.row+2]
                 }
             }
             self.performSegueWithIdentifier("showDetails", sender: tableView.cellForRowAtIndexPath(indexPath))

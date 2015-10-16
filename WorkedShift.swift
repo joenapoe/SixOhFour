@@ -18,11 +18,12 @@ class WorkedShift: NSManagedObject {
     @NSManaged var status: NSNumber
     @NSManaged var job: Job
     @NSManaged var timelogs: NSSet
-    
+    @NSManaged var startDate: NSDate
+
     var pay: Double!
-    var dataManager = DataManager()
+    let dataManager = DataManager()
     var totalBreaktime : Double = 0.0
-    var sortedTLnsarr = [Timelog]()
+    var sortedTimelogs = [Timelog]()
     
     func hoursWorked() -> Double {
         sumUpDuration()
@@ -79,15 +80,11 @@ class WorkedShift: NSManagedObject {
     
     func sumUpDuration() {
 
-        
-        var TLset = self.timelogs //NSSet
-//        var arr = set.allObjects //Swift Array
-        var TLnsarr = TLset.allObjects as NSArray  //NSArray
-        sortedTLnsarr = (TLnsarr).sortedArrayUsingDescriptors([NSSortDescriptor(key: "time", ascending: true)]) as! [Timelog]
-        
+        var timelogsArray = timelogs.allObjects as NSArray  //NSArray
+        sortedTimelogs = (timelogsArray).sortedArrayUsingDescriptors([NSSortDescriptor(key: "time", ascending: true)]) as! [Timelog]
         
         //SUM UP TOTAL
-        let totalShiftTimeInterval = (sortedTLnsarr.last!.time).timeIntervalSinceDate(sortedTLnsarr.first!.time)
+        let totalShiftTimeInterval = (sortedTimelogs.last!.time).timeIntervalSinceDate(sortedTimelogs.first!.time)
         duration = (totalShiftTimeInterval) - ( sumUpBreaktime() )
     }
 
@@ -101,7 +98,7 @@ class WorkedShift: NSManagedObject {
         
         if self.status == 1 { //if open status, then need to add in subrator for possible open breaks
             
-            if sortedTLnsarr.count % 2 == 0  { //last entry = "start break" // currently on break
+            if sortedTimelogs.count % 2 == 0  { //last entry = "start break" // currently on break
                 subtractor = 1
             } else { //last entry = "end break"
                 subtractor = 0
@@ -111,9 +108,9 @@ class WorkedShift: NSManagedObject {
             open = 1 //last entry = "clocked out" so need to subtract 1 from array.count
         }
         
-        if ((self.status != 0) && (sortedTLnsarr.count > 1)) || ((self.status == 0) && (sortedTLnsarr.count > 2)) {
+        if ((self.status != 0) && (sortedTimelogs.count > 1)) || ((self.status == 0) && (sortedTimelogs.count > 2)) {
             
-            var breakCount: Int =  (( sortedTLnsarr.count - open )/2)
+            var breakCount: Int =  (( sortedTimelogs.count - open )/2)
             
             var tempTotalBreaktime = Double()
             var breakCountdown =  ( (breakCount) - subtractor) * 2
@@ -123,8 +120,8 @@ class WorkedShift: NSManagedObject {
             // NOTE : Calculates Break times for all the breakSets the user has in the shift
             if breakCount-subtractor >= 1 {
                 for i in 1...(breakCount-subtractor) {
-                    var endBreak = sortedTLnsarr[breakCountdown].time
-                    var startBreak = sortedTLnsarr[breakCountdown-1].time
+                    var endBreak = sortedTimelogs[breakCountdown].time
+                    var startBreak = sortedTimelogs[breakCountdown-1].time
                     partialBreaktime = endBreak.timeIntervalSinceDate(startBreak)
                     tempTotalBreaktime = tempTotalBreaktime + partialBreaktime
                     breakCountdown = breakCountdown - 2

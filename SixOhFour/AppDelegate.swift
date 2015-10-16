@@ -15,57 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
-            
+        
         UITabBar.appearance().barTintColor = UIColor.whiteColor()
-        
-//        var navigationBarAppearace = UINavigationBar.appearance()
-        
-//        navigationBarAppearace.tintColor = UIColor.whiteColor()  // Back buttons and such
-//        navigationBarAppearace.barTintColor = UIColor.grayColor()  // Bar's background color
-//        navigationBarAppearace.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
-        
-        //Actions
-        var firstAction:UIMutableUserNotificationAction = UIMutableUserNotificationAction()
-        firstAction.identifier = "FIRST_ACTION"
-        firstAction.title = "First Action"
-        
-        firstAction.activationMode = UIUserNotificationActivationMode.Background
-        firstAction.destructive = true
-        firstAction.authenticationRequired = false
-        
-        var secondAction:UIMutableUserNotificationAction = UIMutableUserNotificationAction()
-        secondAction.identifier = "SECOND_ACTION"
-        secondAction.title = "Second Action"
-        
-        secondAction.activationMode = UIUserNotificationActivationMode.Background
-        secondAction.destructive = false
-        secondAction.authenticationRequired = false
-        
-        var thirdAction:UIMutableUserNotificationAction = UIMutableUserNotificationAction()
-        thirdAction.identifier = "THIRD_ACTION"
-        thirdAction.title = "Third Action"
-        
-        thirdAction.activationMode = UIUserNotificationActivationMode.Background
-        thirdAction.destructive = false
-        thirdAction.authenticationRequired = false
-        
-        //category
-        
-        var firstCatergory:UIMutableUserNotificationCategory = UIMutableUserNotificationCategory()
-        firstCatergory.identifier = "FIRST_CATEGORY"
-        
-        let defaultActions:NSArray = [firstAction, secondAction, thirdAction]
-        let minimalActions:NSArray = [firstAction, secondAction]
-
-        firstCatergory.setActions(defaultActions as [AnyObject], forContext: UIUserNotificationActionContext.Default)
-        firstCatergory.setActions(minimalActions as [AnyObject], forContext: UIUserNotificationActionContext.Minimal)
-
-        //NSSet of all our categories
-        
-        let categories:NSSet = NSSet(objects: firstCatergory)
-        
-        
         
         //Ask user if they want to allow notifications
         let types:UIUserNotificationType = UIUserNotificationType.Alert | UIUserNotificationType.Badge

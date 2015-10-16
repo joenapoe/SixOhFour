@@ -20,29 +20,29 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     @IBOutlet weak var timestampPicker: UIDatePicker!
     @IBOutlet weak var minTimeLabel: UILabel!
     @IBOutlet weak var maxTimeLabel: UILabel!
+    @IBOutlet weak var positionLabel: UILabel!
     
     var doneButton : UIBarButtonItem!
     
     //PUSHED IN DATA when segued
     var selectedJob : Job!
-    var noMinDate = false
-    var noMaxDate = false
-    var nItem : Timelog!
-    var nItemPrevious : Timelog!
-    var nItemNext : Timelog!
-    var jobLabelDisplay = String()
+    var hasMinDate = false
+    var hasMaxDate = false
+    var selectedTimelog : Timelog!
+    var previousTimelog : Timelog!
+    var nextTimelog : Timelog!
     
     var hideTimePicker = true
     
-    var dataManager = DataManager()
+    let dataManager = DataManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        entryLabel.text = nItem.type
-        timestampLabel.text = "\(nItem.time)"
+        entryLabel.text = selectedTimelog.type
+        timestampLabel.text = "\(selectedTimelog.time)"
         minTimeLabel.hidden = true
-        commentTextView.text = nItem.comment
+        commentTextView.text = selectedTimelog.comment
         commentTextView.delegate = self
         
         doneButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveDetails")
@@ -50,7 +50,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelDetails")
         self.navigationItem.leftBarButtonItem = cancelButton
         
-        timestampPicker.date = nItem.time
+        timestampPicker.date = selectedTimelog.time
         
         datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
         
@@ -59,20 +59,20 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         tableView.addGestureRecognizer(tap)
         
         // TODO : Need to set restrictions of 24hrs when picking times for both min and max. Hurdle = how are you going to handle when the WS only has 1 entry CI.. what is the min?
-        if noMinDate == true {
+        if !hasMinDate {
             //No Minimum Data
             minTimeLabel.text = ""
         } else {
-            timestampPicker.minimumDate = nItemPrevious.time
-            minTimeLabel.text = "\(nItemPrevious.type): \(dateFormatter(nItemPrevious.time))"
+            timestampPicker.minimumDate = previousTimelog.time
+            minTimeLabel.text = "\(previousTimelog.type): \(dateFormatter(previousTimelog.time))"
         }
         
         // TODO : Need to set restrictions of 24hrs when picking times for both min and max
-        if noMaxDate == true {
+        if !hasMaxDate {
             //No NextTimeStamp for Maxium Data
             //And no MinDate to set 24hr restriction
             
-            if nItem.type == "Clocked Out" {
+            if selectedTimelog.type == "Clocked Out" {
                 timestampPicker.maximumDate = NSDate().dateByAddingTimeInterval(8*60*60)
                 maxTimeLabel.text = "Cannot exceed 8 hrs from now."
             } else {
@@ -80,14 +80,15 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
                 maxTimeLabel.text = "Cannot select a future time."
             }
         } else {
-            timestampPicker.maximumDate = nItemNext.time
-            maxTimeLabel.text = "\(nItemNext.type): \(dateFormatter(nItemNext.time))"
+            timestampPicker.maximumDate = nextTimelog.time
+            maxTimeLabel.text = "\(nextTimelog.type): \(dateFormatter(nextTimelog.time))"
         }
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
         jobLabel.text = selectedJob.company.name
+        positionLabel.text = selectedJob.position
         jobColorDisplay.color = selectedJob.color.getColor
     }
     
@@ -100,7 +101,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         
         datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
         
-        if noMinDate == true {
+        if !hasMinDate {
             //need to add code that prevents the user from selecting a date that exceeds theyre previous shift
         } else {
             if (timestampPicker.date.compare(timestampPicker.minimumDate!)) == NSComparisonResult.OrderedAscending || timestampPicker.date == timestampPicker.minimumDate {
@@ -109,7 +110,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
             }
         }
         
-        if noMaxDate == true {
+        if !hasMaxDate {
             if timestampPicker.date.timeIntervalSinceNow > -120 {
                 maxTimeLabel.hidden = false
             }
@@ -141,26 +142,28 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         self.view.endEditing(true)
     }
     
-    func editItem() {
-        nItem.type = entryLabel.text!
-        nItem.time = timestampPicker.date
-        nItem.comment = commentTextView.text
-        nItem.lastUpdate = NSDate()
-        
-        if noMinDate == false && (timestampPicker.date.compare(timestampPicker.minimumDate!)) == NSComparisonResult.OrderedAscending {
-            nItem.time = timestampPicker.minimumDate!
-        } else {
-            nItem.time = timestampPicker.date
-        }
-    }
     
-    func saveDetails () {
-        editItem()
+    func saveDetails() {
+        
+        selectedTimelog.type = entryLabel.text!
+        selectedTimelog.time = timestampPicker.date
+        selectedTimelog.comment = commentTextView.text
+        selectedTimelog.lastUpdate = NSDate()
+        if selectedTimelog.type == "Clocked In" {
+            selectedTimelog.workedShift.startDate = timestampPicker.date
+        }
+        if hasMinDate && (timestampPicker.date.compare(timestampPicker.minimumDate!) == NSComparisonResult.OrderedAscending) {
+            selectedTimelog.time = timestampPicker.minimumDate!
+        } else {
+            selectedTimelog.time = timestampPicker.date
+        }
+        
         dataManager.save()
+        
         self.performSegueWithIdentifier("unwindSaveDetailsTVC", sender: self)
     }
     
-    func cancelDetails () {
+    func cancelDetails() {
         self.performSegueWithIdentifier("unwindCancelDetailsTVC", sender: self)
     }
     

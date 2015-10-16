@@ -11,8 +11,7 @@ import UIKit
 class IncompleteShiftsTableViewController: UITableViewController {
     
     var dataManager = DataManager()
-    var openShifts = [WorkedShift]()
-    var openShiftsCIs = [Timelog]()
+    var incompleteShifts = [WorkedShift]()
     var selectedWorkedShift : WorkedShift!
     
     override func viewDidLoad() {
@@ -22,22 +21,7 @@ class IncompleteShiftsTableViewController: UITableViewController {
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
-        
-        let predicateOpenWS = NSPredicate(format: "workedShift.status == 1")
-        let predicateCI = NSPredicate(format: "type == %@" , "Clocked In")
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateCI, predicateOpenWS])
-        
-        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
-        
-        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        
-        openShifts = [WorkedShift]()
-        
-        for timelog in openShiftsCIs {
-            openShifts.append(timelog.workedShift)
-        }
-        
-        tableView.reloadData()
+        fetchIncomplete()
     }
     
     override func didReceiveMemoryWarning() {
@@ -45,20 +29,37 @@ class IncompleteShiftsTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    func fetchIncomplete() {
+
+        incompleteShifts = []
+
+        let predicateIncomplete = NSPredicate(format: "status == 1")
+        var sortByTime = NSSortDescriptor(key: "startDate", ascending: true)
+        incompleteShifts = dataManager.fetch("WorkedShift", predicate: predicateIncomplete, sortDescriptors: [sortByTime]) as! [WorkedShift]
+        
+        for shift in incompleteShifts {
+            let timelogs = shift.timelogs.allObjects as! [Timelog]
+        
+            
+        }
+        tableView.reloadData()
+    }
+    
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return openShifts.count
+        return incompleteShifts.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ShiftListTableViewCell", forIndexPath: indexPath) as! ManualEditsListTableViewCell
-        cell.workedShift = openShifts[indexPath.row]
-        cell.clockInTL = openShiftsCIs[indexPath.row]
+        cell.workedShift = incompleteShifts[indexPath.row]
         return cell
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         println(indexPath.row)
-        selectedWorkedShift = openShifts[indexPath.row]
+        selectedWorkedShift = incompleteShifts[indexPath.row]
         
         self.performSegueWithIdentifier("showShift", sender: tableView.cellForRowAtIndexPath(indexPath))
     }
@@ -69,13 +70,13 @@ class IncompleteShiftsTableViewController: UITableViewController {
         header.textLabel.textColor = UIColor.blackColor()
         header.textLabel.frame = header.frame
         header.textLabel.textAlignment = NSTextAlignment.Justified
-        header.textLabel.text = "You have \(openShifts.count) unsaved shifts:"
+        header.textLabel.text = "You have \(incompleteShifts.count) unsaved shifts:"
         
-        if openShifts.count == 0 {
+        if incompleteShifts.count == 0 {
             header.textLabel.hidden = true
         } else {
             header.textLabel.hidden = false
-            if openShifts.count == 1 {
+            if incompleteShifts.count == 1 {
                 header.textLabel.text = "You have 1 unsaved shift:"
             }
         }
@@ -96,22 +97,19 @@ class IncompleteShiftsTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
         if editingStyle == .Delete {
-            tableView.beginUpdates()
-            
-            let shiftToDelete = openShifts[indexPath.row]
-            openShifts.removeAtIndex(indexPath.row)
+
+            let shiftToDelete = incompleteShifts[indexPath.row]
             
             //TODO: Remove with new DataManager Funct.
             for timelog in shiftToDelete.timelogs {
                 dataManager.delete(timelog as! Timelog)
             }
-            
             dataManager.delete(shiftToDelete)
             
+            incompleteShifts.removeAtIndex(indexPath.row)
+            
             tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
-            
-            tableView.endUpdates()
-            
+
             // TODO: Time the reload data to better show animation of delete
             tableView.reloadData() // Needed to udate header
         }
