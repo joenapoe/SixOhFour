@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14C1510" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
     </dependencies>
@@ -7,7 +7,7 @@
         <!--Clock In-->
         <scene sceneID="CX5-Dr-7jq">
             <objects>
-                <viewController storyboardIdentifier="ClockInViewController" id="3fF-Vc-Hph" customClass="ClockInViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ClockInViewController" id="3fF-Vc-Hph" customClass="ClockInViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="8qF-YI-T7n"/>
                         <viewControllerLayoutGuide type="bottom" id="Jx6-5q-eoC"/>
@@ -34,20 +34,20 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="t1M-q2-2Gz">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="t1M-q2-2Gz">
                                 <rect key="frame" x="0.0" y="292" width="320" height="276"/>
                                 <color key="backgroundColor" red="0.93725490196078431" green="0.93725490196078431" blue="0.95686274509803926" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="356" id="OI2-2d-ve3"/>
                                 </constraints>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="gj1-xo-Sqq" customClass="TimelogCell" customModule="SixOhFour" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="gj1-xo-Sqq" customClass="TimelogCell" customModule="Punchie" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="310" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gj1-xo-Sqq" id="QS8-ep-TcA">
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wRb-RE-dIb" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wRb-RE-dIb" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                                     <rect key="frame" x="15" y="12" width="10" height="10"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <constraints>
@@ -101,7 +101,7 @@
                                     <constraint firstAttribute="height" constant="64" id="0ZL-LJ-n20"/>
                                 </constraints>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="JobsListCell" id="whB-iq-FiT" customClass="JobsListCell" customModule="SixOhFour" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="JobsListCell" id="whB-iq-FiT" customClass="JobsListCell" customModule="Punchie" customModuleProvider="target">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="whB-iq-FiT" id="0ng-ju-4Xc">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -112,7 +112,7 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xoe-NL-rgJ" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xoe-NL-rgJ" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                                     <rect key="frame" x="15" y="17" width="10" height="10"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <constraints>
@@ -201,7 +201,7 @@
                                     <constraint firstAttribute="centerX" secondItem="NVW-5q-Yhv" secondAttribute="centerX" id="mng-VA-nY3"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1U3-zR-tQT">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1U3-zR-tQT">
                                 <rect key="frame" x="118" y="238" width="84" height="39"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                 <state key="normal" title="00:00:00">
@@ -218,7 +218,7 @@
                                     <segue destination="hN0-WT-Qik" kind="show" identifier="editBreaktimeSegue" id="Rsg-M5-rCb"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4ns-Jh-5NX">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4ns-Jh-5NX">
                                 <rect key="frame" x="223" y="264" width="80" height="28"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <state key="normal" title="Save for later">
@@ -295,7 +295,7 @@
                                         </connections>
                                     </button>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="centerY" secondItem="9cX-Y6-a9u" secondAttribute="centerY" id="Hf3-By-dBT"/>
@@ -332,7 +332,7 @@
         <!--Set Break Time View Controller-->
         <scene sceneID="DU1-bo-tKY">
             <objects>
-                <viewController id="hN0-WT-Qik" customClass="SetBreakTimeViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="hN0-WT-Qik" customClass="SetBreakTimeViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="fsy-tm-rEE"/>
                         <viewControllerLayoutGuide type="bottom" id="tKM-ju-ohM"/>
@@ -381,7 +381,7 @@
         <!--Add Shift View Controller-->
         <scene sceneID="Uwz-qF-d3N">
             <objects>
-                <viewController id="WVb-wK-cpX" customClass="AddShiftViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="WVb-wK-cpX" customClass="AddShiftViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="k7w-tj-br9"/>
                         <viewControllerLayoutGuide type="bottom" id="Qgu-Zg-JNm"/>
@@ -412,7 +412,7 @@
                                     <constraint firstAttribute="width" constant="356" id="cwz-rQ-aoL"/>
                                 </constraints>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="JobsListCell" id="sVx-sN-1HQ" customClass="JobsListCell" customModule="SixOhFour" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="JobsListCell" id="sVx-sN-1HQ" customClass="JobsListCell" customModule="Punchie" customModuleProvider="target">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="sVx-sN-1HQ" id="DmC-JJ-7Ou">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -423,7 +423,7 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hbu-87-MLE" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hbu-87-MLE" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                                     <rect key="frame" x="15" y="17" width="10" height="10"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <constraints>
@@ -461,13 +461,13 @@
                                             <outlet property="jobPositionLabel" destination="efG-Tl-iyo" id="Wm7-ub-lzd"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="ejk-hl-169" customClass="TimelogCell" customModule="SixOhFour" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="ejk-hl-169" customClass="TimelogCell" customModule="Punchie" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="310" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ejk-hl-169" id="Ryz-sp-zFS">
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vkK-ai-VRe" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vkK-ai-VRe" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                                     <rect key="frame" x="15" y="12" width="10" height="10"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <constraints>
@@ -555,13 +555,13 @@
         <!--Incomplete Shifts Table View Controller-->
         <scene sceneID="Zwf-EY-nBK">
             <objects>
-                <tableViewController id="qjo-6T-SdF" customClass="IncompleteShiftsTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="qjo-6T-SdF" customClass="IncompleteShiftsTableViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="aHY-tp-msZ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490196078431" green="0.93725490196078431" blue="0.95686274509803926" alpha="1" colorSpace="calibratedRGB"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ShiftListTableViewCell" id="fbn-TH-qXP" customClass="ManualEditsListTableViewCell" customModule="SixOhFour" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ShiftListTableViewCell" id="fbn-TH-qXP" customClass="ManualEditsListTableViewCell" customModule="Punchie" customModuleProvider="target">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fbn-TH-qXP" id="6ju-L7-37E">
                                     <autoresizingMask key="autoresizingMask"/>
@@ -578,7 +578,7 @@
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rwF-E0-qDL" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rwF-E0-qDL" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                             <rect key="frame" x="15" y="17" width="10" height="10"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <constraints>
@@ -671,7 +671,7 @@
         <!--Details-->
         <scene sceneID="Yx0-9r-HRO">
             <objects>
-                <tableViewController id="ZT9-wB-HRj" customClass="DetailsTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="ZT9-wB-HRj" customClass="DetailsTableViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" showsSelectionImmediatelyOnTouchBegin="NO" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="gmf-Mj-d79">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -692,7 +692,7 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9hf-B0-JA1" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9hf-B0-JA1" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                                     <rect key="frame" x="262" y="17" width="10" height="10"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                     <constraints>
@@ -897,19 +897,19 @@
         <!--Shift Table View Controller-->
         <scene sceneID="NwN-eA-G2V">
             <objects>
-                <tableViewController storyboardIdentifier="ShiftTableViewController" id="2CI-Xf-CjC" customClass="ShiftTableViewController" customModule="SixOhFour" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ShiftTableViewController" id="2CI-Xf-CjC" customClass="ShiftTableViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="30" sectionHeaderHeight="10" sectionFooterHeight="10" id="xzE-1e-CK4">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490196078431" green="0.93725490196078431" blue="0.95686274509803926" alpha="1" colorSpace="calibratedRGB"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="60p-YG-Tg6" customClass="TimelogCell" customModule="SixOhFour" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="60p-YG-Tg6" customClass="TimelogCell" customModule="Punchie" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="310" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="60p-YG-Tg6" id="uwA-Ta-xUL">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YWc-28-WdG" customClass="JobColorView" customModule="SixOhFour" customModuleProvider="target">
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YWc-28-WdG" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
                                             <rect key="frame" x="15" y="12" width="10" height="10"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <constraints>
