@@ -25,6 +25,10 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let font = UIFont(name: "GrandHotel-Regular", size: 28) {
+            self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: font]
+        }
+        
         tableView.dataSource = self
         tableView.delegate = self
         

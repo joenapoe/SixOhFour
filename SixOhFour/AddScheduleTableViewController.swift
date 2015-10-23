@@ -653,6 +653,22 @@ class AddScheduleTableViewController: UITableViewController {
             deleteRepeats()
         }
     }
+    
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 1 && isJobListEmpty {
+            return ""
+        }
+        
+        return super.tableView(tableView, titleForHeaderInSection: section)
+    }
+    
+    override func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        if section == 1 && isJobListEmpty {
+            return ""
+        }
+        
+        return super.tableView(tableView, titleForFooterInSection: section)
+    }
 
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if isJobListEmpty {

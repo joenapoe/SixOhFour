@@ -483,7 +483,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0630;
-				ORGANIZATIONNAME = vinceboogie;
+				ORGANIZATIONNAME = redgarage;
 				TargetAttributes = {
 					874FACF11B33A9D7002EABB0 = {
 						CreatedOnToolsVersion = 6.3.2;
