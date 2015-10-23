@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		000E10E41B8FF7C000ABC332 /* DayCellTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000E10E31B8FF7C000ABC332 /* DayCellTableViewCell.swift */; };
-		001464781B4E06D400AC0C9F /* ClockInStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 001464771B4E06D400AC0C9F /* ClockInStoryboard.storyboard */; };
 		004999FE1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */; };
 		00499A001B8787C900BD7A08 /* ShiftTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */; };
 		004C09931B7D14D4004F4527 /* DetailsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */; };
@@ -44,6 +43,7 @@
 		87B7C18C1B69C22800C65C96 /* ScheduledShift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7C18B1B69C22800C65C96 /* ScheduledShift.swift */; };
 		87B7C18E1B69C22800C65C96 /* Timelog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7C18D1B69C22800C65C96 /* Timelog.swift */; };
 		87B7C1901B69C91D00C65C96 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7C18F1B69C91D00C65C96 /* Color.swift */; };
+		B900321B1BD9C2860074A01C /* ClockInStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B900321A1BD9C2860074A01C /* ClockInStoryboard.storyboard */; };
 		B936D63F1B607674009777A7 /* EndRepeatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B936D63E1B607674009777A7 /* EndRepeatTableViewController.swift */; };
 		B93E88891B45FFA00030877B /* JobColorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93E88881B45FFA00030877B /* JobColorView.swift */; };
 		B93E888B1B46067E0030877B /* TodayScheduleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93E888A1B46067E0030877B /* TodayScheduleCell.swift */; };
@@ -98,7 +98,6 @@
 
 /* Begin PBXFileReference section */
 		000E10E31B8FF7C000ABC332 /* DayCellTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayCellTableViewCell.swift; sourceTree = "<group>"; };
-		001464771B4E06D400AC0C9F /* ClockInStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ClockInStoryboard.storyboard; sourceTree = "<group>"; };
 		004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncompleteShiftsTableViewController.swift; sourceTree = "<group>"; };
 		004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShiftTableViewController.swift; sourceTree = "<group>"; };
 		004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailsTableViewController.swift; sourceTree = "<group>"; };
@@ -141,6 +140,7 @@
 		87B7C18B1B69C22800C65C96 /* ScheduledShift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ScheduledShift.swift; path = ../ScheduledShift.swift; sourceTree = "<group>"; };
 		87B7C18D1B69C22800C65C96 /* Timelog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Timelog.swift; path = ../Timelog.swift; sourceTree = "<group>"; };
 		87B7C18F1B69C91D00C65C96 /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Color.swift; path = ../Color.swift; sourceTree = "<group>"; };
+		B900321A1BD9C2860074A01C /* ClockInStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ClockInStoryboard.storyboard; sourceTree = "<group>"; };
 		B936D63E1B607674009777A7 /* EndRepeatTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EndRepeatTableViewController.swift; sourceTree = "<group>"; };
 		B93E88881B45FFA00030877B /* JobColorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JobColorView.swift; sourceTree = "<group>"; };
 		B93E888A1B46067E0030877B /* TodayScheduleCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayScheduleCell.swift; sourceTree = "<group>"; };
@@ -358,7 +358,7 @@
 				B9E34BC21B508AA700B9FD88 /* Model */,
 				B9E34BC11B508AA200B9FD88 /* View */,
 				B9E34BC01B508A9800B9FD88 /* View Controllers */,
-				001464771B4E06D400AC0C9F /* ClockInStoryboard.storyboard */,
+				B900321A1BD9C2860074A01C /* ClockInStoryboard.storyboard */,
 			);
 			name = Clockin;
 			sourceTree = "<group>";
@@ -371,7 +371,6 @@
 				004C09921B7D14D4004F4527 /* DetailsTableViewController.swift */,
 				004999FD1B87877400BD7A08 /* IncompleteShiftsTableViewController.swift */,
 				004999FF1B8787C900BD7A08 /* ShiftTableViewController.swift */,
-				006ABA411B8972460065B6DB /* AddShiftViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -412,6 +411,7 @@
 			children = (
 				87238A4D1B3E300A004D44CA /* CalendarViewController.swift */,
 				B9C8A7B41B4E469E00C4BEEC /* AddScheduleTableViewController.swift */,
+				006ABA411B8972460065B6DB /* AddShiftViewController.swift */,
 				B9E34BCA1B50D21800B9FD88 /* JobsListTableViewController.swift */,
 				B992A18C1B582FFE006E5A2B /* SetRepeatTableViewController.swift */,
 				B936D63E1B607674009777A7 /* EndRepeatTableViewController.swift */,
@@ -538,10 +538,10 @@
 				87238A4C1B3E2EC5004D44CA /* CalendarStoryboard.storyboard in Resources */,
 				874FAD001B33A9D7002EABB0 /* Main.storyboard in Resources */,
 				874FAD051B33A9D7002EABB0 /* LaunchScreen.xib in Resources */,
+				B900321B1BD9C2860074A01C /* ClockInStoryboard.storyboard in Resources */,
 				874FAD021B33A9D7002EABB0 /* Images.xcassets in Resources */,
 				87238A461B3E25AA004D44CA /* AddJobStoryboard.storyboard in Resources */,
 				B951EFCA1BD9B616001C0E4F /* GrandHotel-Regular.ttf in Resources */,
-				001464781B4E06D400AC0C9F /* ClockInStoryboard.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -303,15 +303,9 @@
                                 </constraints>
                             </view>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="Plus" id="728-4r-pYg">
-                            <connections>
-                                <segue destination="WVb-wK-cpX" kind="show" identifier="showAddShift" id="p0B-Un-uNp"/>
-                            </connections>
-                        </barButtonItem>
                     </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
-                        <outlet property="addShiftButton" destination="728-4r-pYg" id="o4R-bg-m1x"/>
                         <outlet property="breakButton" destination="NVW-5q-Yhv" id="rTS-Xy-QAJ"/>
                         <outlet property="breakTitleLabel" destination="l76-Rv-bIS" id="8p5-Pc-bfY"/>
                         <outlet property="editBreakButton" destination="1U3-zR-tQT" id="Zdi-mc-nnU"/>
@@ -377,180 +371,6 @@
                 <exit id="frJ-yD-GyK" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="2606" y="-222"/>
-        </scene>
-        <!--Add Shift View Controller-->
-        <scene sceneID="Uwz-qF-d3N">
-            <objects>
-                <viewController id="WVb-wK-cpX" customClass="AddShiftViewController" customModule="Punchie" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="k7w-tj-br9"/>
-                        <viewControllerLayoutGuide type="bottom" id="Qgu-Zg-JNm"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="14q-GU-jY4">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="47P-xv-VRY">
-                                <rect key="frame" x="233" y="114" width="72" height="30"/>
-                                <state key="normal" title="Add Break">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="addBreakPressed:" destination="WVb-wK-cpX" eventType="touchUpInside" id="7zQ-Ww-Daz"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Work time = 8.0 hrs" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Icg-9W-B2q">
-                                <rect key="frame" x="15" y="82" width="150" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="aCX-OY-27s">
-                                <rect key="frame" x="0.0" y="149" width="320" height="414"/>
-                                <color key="backgroundColor" red="0.93725490196078431" green="0.93725490196078431" blue="0.95686274509803926" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="356" id="cwz-rQ-aoL"/>
-                                </constraints>
-                                <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="JobsListCell" id="sVx-sN-1HQ" customClass="JobsListCell" customModule="Punchie" customModuleProvider="target">
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="sVx-sN-1HQ" id="DmC-JJ-7Ou">
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SyH-75-LVO">
-                                                    <rect key="frame" x="33" y="12" width="42" height="21"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hbu-87-MLE" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
-                                                    <rect key="frame" x="15" y="17" width="10" height="10"/>
-                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="10" id="WMF-5C-IdD"/>
-                                                        <constraint firstAttribute="width" constant="10" id="j4I-V7-O9H"/>
-                                                    </constraints>
-                                                </view>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="efG-Tl-iyo">
-                                                    <rect key="frame" x="33" y="32" width="23" height="11"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="9"/>
-                                                    <color key="textColor" red="0.50196081400000003" green="0.50196081400000003" blue="0.50196081400000003" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="efG-Tl-iyo" firstAttribute="leading" secondItem="SyH-75-LVO" secondAttribute="leading" id="1F1-1o-rHc"/>
-                                                <constraint firstAttribute="bottom" secondItem="efG-Tl-iyo" secondAttribute="bottom" constant="2" id="8oc-bR-rRF"/>
-                                                <constraint firstItem="Hbu-87-MLE" firstAttribute="leading" secondItem="DmC-JJ-7Ou" secondAttribute="leading" constant="15" id="Qt1-pI-Kob"/>
-                                                <constraint firstAttribute="centerY" secondItem="SyH-75-LVO" secondAttribute="centerY" constant="-1" id="UKU-rJ-W0E"/>
-                                                <constraint firstAttribute="centerY" secondItem="Hbu-87-MLE" secondAttribute="centerY" id="UpE-kq-d2q"/>
-                                                <constraint firstItem="efG-Tl-iyo" firstAttribute="leading" secondItem="DmC-JJ-7Ou" secondAttribute="leading" constant="38" id="VlE-jK-K06"/>
-                                                <constraint firstItem="SyH-75-LVO" firstAttribute="leading" secondItem="Hbu-87-MLE" secondAttribute="trailing" constant="8" id="a8Q-Tz-ZmH"/>
-                                                <constraint firstItem="efG-Tl-iyo" firstAttribute="top" secondItem="SyH-75-LVO" secondAttribute="bottom" constant="-1" id="kQU-d0-T45"/>
-                                            </constraints>
-                                            <variation key="default">
-                                                <mask key="constraints">
-                                                    <exclude reference="8oc-bR-rRF"/>
-                                                    <exclude reference="VlE-jK-K06"/>
-                                                </mask>
-                                            </variation>
-                                        </tableViewCellContentView>
-                                        <connections>
-                                            <outlet property="jobColorView" destination="Hbu-87-MLE" id="FD4-zM-13v"/>
-                                            <outlet property="jobNameLabel" destination="SyH-75-LVO" id="1Az-mf-mkC"/>
-                                            <outlet property="jobPositionLabel" destination="efG-Tl-iyo" id="Wm7-ub-lzd"/>
-                                        </connections>
-                                    </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TimelogCell" rowHeight="35" id="ejk-hl-169" customClass="TimelogCell" customModule="Punchie" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="310" height="44"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ejk-hl-169" id="Ryz-sp-zFS">
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vkK-ai-VRe" customClass="JobColorView" customModule="Punchie" customModuleProvider="target">
-                                                    <rect key="frame" x="15" y="12" width="10" height="10"/>
-                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="10" id="0ef-OZ-ZLz"/>
-                                                        <constraint firstAttribute="height" constant="10" id="pxM-io-ugX"/>
-                                                    </constraints>
-                                                </view>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clocked In" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dpg-Vk-aUt">
-                                                    <rect key="frame" x="30" y="11" width="60" height="15"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Missing Time" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sk6-yH-xMq">
-                                                    <rect key="frame" x="237" y="11" width="74" height="15"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="dpg-Vk-aUt" firstAttribute="leading" secondItem="vkK-ai-VRe" secondAttribute="trailing" constant="5" id="08S-d3-h6j"/>
-                                                <constraint firstAttribute="centerY" secondItem="dpg-Vk-aUt" secondAttribute="centerY" constant="-1.5" id="HtM-Ol-sWa"/>
-                                                <constraint firstAttribute="trailing" secondItem="sk6-yH-xMq" secondAttribute="trailing" constant="9" id="UFC-2L-SNj"/>
-                                                <constraint firstAttribute="centerY" secondItem="sk6-yH-xMq" secondAttribute="centerY" constant="-1.5" id="czt-GF-xsK"/>
-                                                <constraint firstItem="vkK-ai-VRe" firstAttribute="leading" secondItem="Ryz-sp-zFS" secondAttribute="leading" constant="15" id="p6l-Db-si5"/>
-                                                <constraint firstAttribute="centerY" secondItem="vkK-ai-VRe" secondAttribute="centerY" id="yjY-d3-uQq"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                        <connections>
-                                            <outlet property="jobColorView" destination="vkK-ai-VRe" id="QnK-tb-dhw"/>
-                                            <outlet property="time" destination="sk6-yH-xMq" id="qP9-Cm-Fff"/>
-                                            <outlet property="type" destination="dpg-Vk-aUt" id="JMW-iC-7ku"/>
-                                        </connections>
-                                    </tableViewCell>
-                                </prototypes>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="cwz-rQ-aoL"/>
-                                    </mask>
-                                </variation>
-                                <connections>
-                                    <outlet property="dataSource" destination="WVb-wK-cpX" id="kYb-tV-C57"/>
-                                    <outlet property="delegate" destination="WVb-wK-cpX" id="qyB-RT-2au"/>
-                                </connections>
-                            </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You earned $0.00 for this shift" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ir9-7R-Zu1">
-                                <rect key="frame" x="15" y="103" width="167" height="15"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="Icg-9W-B2q" firstAttribute="leading" secondItem="14q-GU-jY4" secondAttribute="leading" constant="15" id="1Rf-jJ-9er"/>
-                            <constraint firstItem="47P-xv-VRY" firstAttribute="top" secondItem="k7w-tj-br9" secondAttribute="bottom" constant="50" id="9Am-BK-iMX"/>
-                            <constraint firstItem="aCX-OY-27s" firstAttribute="leading" secondItem="14q-GU-jY4" secondAttribute="leading" id="9N1-T7-6s9"/>
-                            <constraint firstItem="Icg-9W-B2q" firstAttribute="top" secondItem="k7w-tj-br9" secondAttribute="bottom" constant="18" id="G7c-JX-Ff4"/>
-                            <constraint firstItem="Qgu-Zg-JNm" firstAttribute="top" secondItem="aCX-OY-27s" secondAttribute="bottom" constant="5" id="VRO-sI-xc3"/>
-                            <constraint firstAttribute="trailing" secondItem="47P-xv-VRY" secondAttribute="trailing" constant="15" id="VYv-uB-bQq"/>
-                            <constraint firstItem="aCX-OY-27s" firstAttribute="top" secondItem="47P-xv-VRY" secondAttribute="bottom" constant="5" id="gm0-uJ-HRY"/>
-                            <constraint firstItem="Ir9-7R-Zu1" firstAttribute="leading" secondItem="14q-GU-jY4" secondAttribute="leading" constant="15" id="pIu-rh-t6F"/>
-                            <constraint firstAttribute="trailing" secondItem="aCX-OY-27s" secondAttribute="trailing" id="wtO-nd-93r"/>
-                            <constraint firstItem="Ir9-7R-Zu1" firstAttribute="top" secondItem="Icg-9W-B2q" secondAttribute="bottom" id="zpc-eF-kjk"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="idq-rg-eeJ"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
-                    <connections>
-                        <outlet property="addBreakButton" destination="47P-xv-VRY" id="r9h-WL-Xdh"/>
-                        <outlet property="earnedLabel" destination="Ir9-7R-Zu1" id="qYT-fT-maN"/>
-                        <outlet property="timelogTable" destination="aCX-OY-27s" id="Bhp-vm-Fp9"/>
-                        <outlet property="worktimeLabel" destination="Icg-9W-B2q" id="pIx-4H-HZL"/>
-                        <segue destination="ZT9-wB-HRj" kind="show" identifier="showDetails" id="723-6h-Cdu"/>
-                        <segue destination="vGt-Hm-FGB" kind="unwind" identifier="unwindAddShiftSave" unwindAction="unwindAddShiftSave:" id="CmS-KE-nhL"/>
-                        <segue destination="vGt-Hm-FGB" kind="unwind" identifier="unwindAddShiftCancel" unwindAction="unwindAddShiftCancel:" id="FcB-JW-wUk"/>
-                    </connections>
-                </viewController>
-                <exit id="vGt-Hm-FGB" userLabel="Exit" sceneMemberID="exit"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="fq7-Ap-Jkz" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2594" y="438"/>
         </scene>
         <!--Incomplete Shifts Table View Controller-->
         <scene sceneID="Zwf-EY-nBK">
@@ -984,7 +804,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Plus" width="16" height="16"/>
         <image name="clock" width="20" height="20"/>
     </resources>
     <inferredMetricsTieBreakers>

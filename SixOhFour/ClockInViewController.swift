@@ -14,14 +14,12 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBOutlet weak var workTitleLabel: UILabel!
     @IBOutlet weak var workTimeLabel: UILabel!
     @IBOutlet weak var breakTitleLabel: UILabel!
-//    @IBOutlet weak var breakTimeLabel: UILabel!
     
     @IBOutlet weak var jobTable: UITableView!
     @IBOutlet weak var shiftTableView: UITableView!
     @IBOutlet weak var startStopButton: UIButton!
     @IBOutlet weak var breakButton: UIButton!
     @IBOutlet weak var editBreakButton: UIButton!
-    @IBOutlet var addShiftButton: UIBarButtonItem!
     @IBOutlet weak var saveForLaterButton: UIButton!
     @IBOutlet weak var incompleteFolderButton: UIButton!
 
@@ -90,10 +88,9 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             isJobListEmpty = true
             startStopButton.enabled = false
             workTimeLabel.textColor = UIColor.grayColor()
-            addShiftButton.enabled = false
+            
         } else {
             isJobListEmpty = false
-            addShiftButton.enabled = true
             if selectedJob == nil || !contains(jobsList, selectedJob) { // NOTE: SELECTS THE FIRST JOB WHEN APP IS LOADED
                 selectedJob = jobsList[0]
 //                    if state == .Idle {
@@ -204,16 +201,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBAction func unwindCancelDetailsTVC (segue: UIStoryboardSegue) {
         //by hitting the CANCEL button
         //Nothing saved!
-    }
-    
-    @IBAction func unwindAddShiftCancel (segue: UIStoryboardSegue) {
-        //by hitting the CANCEL button
-        //Nothing saved!
-    }
-    
-    @IBAction func unwindAddShiftSave (segue: UIStoryboardSegue) {
-        //by hitting the SAVE button
-        //Saved Shift in source VC
     }
     
     @IBAction func unwindFromSetBreakTimeViewController (segue: UIStoryboardSegue) {
@@ -610,13 +597,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             let destinationVC = segue.destinationViewController as! IncompleteShiftsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
-        }
-        
-        if segue.identifier == "showAddShift" {
-            let destinationVC = segue.destinationViewController as! AddShiftViewController
-            destinationVC.hidesBottomBarWhenPushed = true;
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            destinationVC.selectedJob = selectedJob
         }
     }
 }
