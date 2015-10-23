@@ -112,17 +112,9 @@ class CalendarViewController: UIViewController {
         let dateToCompare = calendar.dateFromComponents(selectedDateComponents)
         
         if dateToCompare!.compare(today) == NSComparisonResult.OrderedAscending {
-            let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
-            let addWorkedShiftVC: AddShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("AddShiftViewController")
-                as! AddShiftViewController
-            
-            let results = dataManager.fetch("Job")
-            
-            addWorkedShiftVC.selectedJob = results[0] as! Job
-            
-            self.navigationController?.pushViewController(addWorkedShiftVC, animated: true)
+            self.performSegueWithIdentifier("addWorkedShift", sender: self)
         } else {
-            self.performSegueWithIdentifier("addScheduleSegue", sender: self)
+            self.performSegueWithIdentifier("addSchedule", sender: self)
         }
     }
     
@@ -178,10 +170,10 @@ class CalendarViewController: UIViewController {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
-        if segue.identifier == "addScheduleSegue" {
+        if segue.identifier == "addSchedule" {
             let destinationVC = segue.destinationViewController as! AddScheduleTableViewController
             destinationVC.navigationItem.title = "Add Schedule"
-            destinationVC.hidesBottomBarWhenPushed = true;
+            destinationVC.hidesBottomBarWhenPushed = true
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"", style:.Plain, target: nil, action: nil)
             
             let today = NSDate()
@@ -198,13 +190,20 @@ class CalendarViewController: UIViewController {
             destinationVC.startTime = self.selectedDate
             destinationVC.endTime = self.selectedDate
             destinationVC.isNewSchedule = true
+        } else if segue.identifier == "addWorkedShift" {
+            let destinationVC = segue.destinationViewController as! AddShiftViewController
+            destinationVC.hidesBottomBarWhenPushed = true
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
+        
+            let results = dataManager.fetch("Job")
+            destinationVC.selectedJob = results[0] as! Job
         }
         
         
         if segue.identifier == "editSchedule" {
             let destinationVC = segue.destinationViewController as! AddScheduleTableViewController
             destinationVC.navigationItem.title = "Edit Schedule"
-            destinationVC.hidesBottomBarWhenPushed = true;
+            destinationVC.hidesBottomBarWhenPushed = true
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"", style:.Plain, target: nil, action: nil)
             
             destinationVC.shift = self.shift
