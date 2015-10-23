@@ -35,7 +35,7 @@ class IncompleteShiftsTableViewController: UITableViewController {
         incompleteShifts = []
 
         let predicateIncomplete = NSPredicate(format: "status == 1")
-        var sortByTime = NSSortDescriptor(key: "startDate", ascending: true)
+        var sortByTime = NSSortDescriptor(key: "startTime", ascending: true)
         incompleteShifts = dataManager.fetch("WorkedShift", predicate: predicateIncomplete, sortDescriptors: [sortByTime]) as! [WorkedShift]
         
         for shift in incompleteShifts {
@@ -117,10 +117,15 @@ class IncompleteShiftsTableViewController: UITableViewController {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showShift" {
-            let destinationVC = segue.destinationViewController as! ShiftTableViewController
+            let destinationVC = segue.destinationViewController as! ShiftViewController
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
             destinationVC.hidesBottomBarWhenPushed = true;
             destinationVC.selectedWorkedShift = self.selectedWorkedShift
         }
     }
+    
+//    @IBAction func unwindFromShiftDelete (segue: UIStoryboardSegue) {
+//        
+//    }
+    
 }

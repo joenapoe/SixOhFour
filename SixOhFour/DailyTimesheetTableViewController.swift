@@ -92,8 +92,8 @@ class DailyTimesheetTableViewController: UITableViewController {
         selectedWorkedShift = allWorkedShifts[indexPath.row]
         
         let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
-        let shiftVC: ShiftTableViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftTableViewController")
-            as! ShiftTableViewController
+        let shiftVC: ShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftViewController")
+            as! ShiftViewController
 
         shiftVC.selectedWorkedShift = selectedWorkedShift
         self.navigationController?.pushViewController(shiftVC, animated: true)

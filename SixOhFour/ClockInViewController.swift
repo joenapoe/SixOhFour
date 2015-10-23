@@ -70,18 +70,19 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         super.viewDidLoad()
         self.shiftTableView.rowHeight = 30.0
         clearBreak()
-        
-//        UIView.setAnimationsEnabled(false)
+        checkLastShift()
         UIView.performWithoutAnimation {
             self.editBreakButton.layer.removeAllAnimations()
         }
-//        UIView.setAnimationsEnabled(true)
         
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-
+        reloadTable()
+        checkForIncomplete()
+        checkAndRunStates()
+        
         jobsList = dataManager.fetch("Job") as! [Job]
         
         if jobsList.count == 0 {
@@ -93,14 +94,10 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             isJobListEmpty = false
             if selectedJob == nil || !contains(jobsList, selectedJob) { // NOTE: SELECTS THE FIRST JOB WHEN APP IS LOADED
                 selectedJob = jobsList[0]
-//                    if state == .Idle {
-//                        startStopButton.enabled = true
-//                    }
             }
         }
-        reloadTable()
-        checkForIncomplete()
-        checkAndRunStates()
+
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -128,10 +125,8 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             
             if timelogs.count == 1 {
                 saveTimelog("Started Break")
-            } else if timelogs.count == 3 {
-                saveTimelog("Started Break #2")
             } else {
-                saveTimelog("Started Break #\(timelogs.count/2)")
+                saveTimelog("Started Break #\( (timelogs.count + 1 ) / 2 )")
             }
 //            startedBreakTime = timelogs.last?.time
             
@@ -151,7 +146,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBAction func saveForLaterButtonPressed(sender: AnyObject) {
         //Note: Notifications insdie the App (Home screen and Lock Screen)
         let alert: UIAlertController = UIAlertController(title: "Save this shift for later",
-            message: "The current shift move into the incomplete folder. You will be able to continue/edit this shift later.",
+            message: "This shift can be edited later in the incomplete folder.",
             preferredStyle: .Alert)
         alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: { action in
             self.stopShift()
@@ -215,25 +210,50 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     @IBAction func unwindFromShiftToClockIn (segue: UIStoryboardSegue) {
-        let sourceVC = segue.sourceViewController as! ShiftTableViewController
+        
+        println("clockin unwindFromShiftToClockIn")
+        
+        let sourceVC = segue.sourceViewController as! ShiftViewController
         
         if timelogs.count > 0 {
             stopShift()
         }
         
         sourceVC.selectedWorkedShift.status = 2
-        
         currentWorkedShift = sourceVC.selectedWorkedShift
-        
-//        currentWorkedShift.status = 2
-        
         println(currentWorkedShift)
+        
         
         checkForIncomplete()
         timelogs = sourceVC.timelogs
         reloadTable()
         
     }
+
+//    @IBAction func showContinueShift (segue: UIStoryboardSegue) {
+//        
+//        println("clockin showContinueShift")
+//        
+//        self.hidesBottomBarWhenPushed = false
+//
+//        
+//        let sourceVC = segue.sourceViewController as! ShiftViewController
+//        
+//        if timelogs.count > 0 {
+//            stopShift()
+//        }
+//        
+//        sourceVC.selectedWorkedShift.status = 2
+//        currentWorkedShift = sourceVC.selectedWorkedShift
+//        println(currentWorkedShift)
+//        
+//        
+//        checkForIncomplete()
+//        timelogs = sourceVC.timelogs
+//        reloadTable()
+//        
+//    }
+    
     
     //MARK: Functions
     
@@ -322,8 +342,9 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         newTimelog.setValue(type, forKey: "type")
         newTimelog.time = NSDate()
         newTimelog.setValue("", forKey: "comment")
+        newTimelog.id = Int16(timelogs.count)
         
-        // NOTE: New worked shift if Clocked In
+        // NOTE: Assigning proper WorkedShift
         if type == "Clocked In" {
             let newWorkedShift = dataManager.addItem("WorkedShift") as! WorkedShift
             currentWorkedShift = newWorkedShift
@@ -336,6 +357,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
                 currentWorkedShift.status = 0
             }
         }
+    
         timelogs.append(newTimelog)
         currentWorkedShift.sumUpDuration()
         saveWorkedShiftToJob()
@@ -567,6 +589,40 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         checkForIncomplete()
     }
     
+    func checkLastShift() {
+        
+        // Check to see if last running shift (status = 2) needs to continue or convert to incomplete (status = 1)
+        let predicateRunning = NSPredicate(format: "status == 2")
+        var runningShifts = [WorkedShift]()
+        runningShifts = dataManager.fetch("WorkedShift", predicate: predicateRunning) as! [WorkedShift]
+        
+        if runningShifts.count > 0 {
+        
+            if runningShifts[0].startTime.timeIntervalSinceNow > (-20*60*60) { //Continue Last Shift!
+                println(runningShifts[0].startTime.timeIntervalSinceNow)
+                if timelogs.count > 0 {
+                    stopShift()
+                }
+                currentWorkedShift = runningShifts[0]
+                selectedJob = currentWorkedShift.job
+            
+                var predicate = NSPredicate(format: "SELF.workedShift == %@", currentWorkedShift)
+                var sortByTime2 = NSSortDescriptor(key: "time", ascending: true)
+                timelogs = dataManager.fetch("Timelog", predicate: predicate, sortDescriptors: [sortByTime2] ) as! [Timelog]
+                
+                reloadTable()
+                checkAndRunStates()
+                
+            } else { //convert all status = 1 that began past 20hrs ago
+                for workedShift in runningShifts {
+                    workedShift.status = 1
+                }
+                dataManager.save()
+            }
+        }
+    }
+    
+    
     // MARK: Segues (Show)
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -724,7 +780,6 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
                     preferredStyle: .Alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: { action in
                     
-// TODO: Does not delete the shift... just moves it                    self.dataManager.delete(self.currentWorkedShift)
                     self.clearShift()
                     self.dataManager.delete(self.currentWorkedShift)
                     self.checkAndRunStates()
@@ -735,7 +790,6 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
                 
 
                 dataManager.delete(timelogs[indexPath.row])
-//                println(currentWorkedShift)
                 
                 timelogs.removeAtIndex(indexPath.row)
                 shiftTableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
