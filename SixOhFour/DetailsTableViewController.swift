@@ -150,7 +150,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         selectedTimelog.comment = commentTextView.text
         selectedTimelog.lastUpdate = NSDate()
         if selectedTimelog.type == "Clocked In" {
-            selectedTimelog.workedShift.startDate = timestampPicker.date
+            selectedTimelog.workedShift.startTime = timestampPicker.date
         }
         if hasMinDate && (timestampPicker.date.compare(timestampPicker.minimumDate!) == NSComparisonResult.OrderedAscending) {
             selectedTimelog.time = timestampPicker.minimumDate!

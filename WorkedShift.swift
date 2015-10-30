@@ -18,7 +18,8 @@ class WorkedShift: NSManagedObject {
     @NSManaged var status: NSNumber
     @NSManaged var job: Job
     @NSManaged var timelogs: NSSet
-    @NSManaged var startDate: NSDate
+    @NSManaged var startTime: NSDate
+    @NSManaged var startDateString: String
 
     var pay: Double!
     let dataManager = DataManager()

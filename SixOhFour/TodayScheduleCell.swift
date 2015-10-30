@@ -16,24 +16,24 @@ class TodayScheduleCell: UITableViewCell {
     @IBOutlet weak var shiftTimeLabel: UILabel!
     @IBOutlet weak var nextDayLabel: UILabel!
     
-    var shift: ScheduledShift! {
+    var schedule: ScheduledShift! {
         didSet {
-            jobColorView.color = shift.job.color.getColor
+            jobColorView.color = schedule.job.color.getColor
             
-            companyLabel.text = shift.job.company.name
-            positionLabel.text = shift.job.position
+            companyLabel.text = schedule.job.company.name
+            positionLabel.text = schedule.job.position
             
             let formatter = NSDateFormatter()
             formatter.dateStyle = .NoStyle
             formatter.timeStyle = .ShortStyle
             
-            shiftTimeLabel.text = "\(formatter.stringFromDate(shift.startTime)) - \(formatter.stringFromDate(shift.endTime))"
+            shiftTimeLabel.text = "\(formatter.stringFromDate(schedule.startTime)) - \(formatter.stringFromDate(schedule.endTime))"
             
             formatter.dateStyle = .ShortStyle
             formatter.timeStyle = .NoStyle
  
-            let start = "\(formatter.stringFromDate(shift.startTime))"
-            let end = "\(formatter.stringFromDate(shift.endTime))"
+            let start = "\(formatter.stringFromDate(schedule.startTime))"
+            let end = "\(formatter.stringFromDate(schedule.endTime))"
             
             
             if start == end {
@@ -44,10 +44,19 @@ class TodayScheduleCell: UITableViewCell {
         }
     }
     
-    func toggleLabels(bool: Bool) {
-        companyLabel.enabled = bool
-        positionLabel.enabled = bool
-        shiftTimeLabel.enabled = bool
-        nextDayLabel.enabled = bool
+    var shift: WorkedShift! {
+        didSet {
+            jobColorView.color = shift.job.color.getColor
+            
+            companyLabel.text = shift.job.company.name
+            positionLabel.text = shift.job.position
+            
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            
+            shiftTimeLabel.text = "\(shift.hoursWorked()) hours"
+            nextDayLabel.hidden = true
+        }
     }
 }

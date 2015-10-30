@@ -17,6 +17,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         UITabBar.appearance().barTintColor = UIColor.whiteColor()
+        UINavigationBar.appearance().barTintColor = UIColor(red: 10.0/255, green: 107.0/255, blue: 184.0/255, alpha: 1.0)
+        
+        UINavigationBar.appearance().barStyle = .BlackTranslucent
+        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
+
         
         //Ask user if they want to allow notifications
         let types:UIUserNotificationType = UIUserNotificationType.Alert | UIUserNotificationType.Badge

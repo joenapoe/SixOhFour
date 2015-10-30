@@ -85,19 +85,7 @@ class DataManager {
 
         startDate = calendar.dateByAddingComponents(startTimeComponents, toDate: startDate, options: nil)!
         endDate = calendar.dateByAddingComponents(endTimeComponents, toDate: endDate, options: nil)!
-        
-        // DELETE TEST
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .MediumStyle
-        formatter.timeStyle = .ShortStyle
-        formatter.timeZone = NSTimeZone()
-        
-        println(formatter.stringFromDate(shift.startTime))
-        println(formatter.stringFromDate(shift.endTime))
-        
-        println(formatter.stringFromDate(startDate))
-        println(formatter.stringFromDate(endDate))
-        
+                
         while startDate.compare(lastShift.startTime) == NSComparisonResult.OrderedAscending {
             
             let predicate = NSPredicate(format: "startTime == %@ && endTime == %@", startDate, endDate)
@@ -152,7 +140,7 @@ class DataManager {
             for timelog in shift.timelogs {
                 context?.deleteObject(timelog as! NSManagedObject)
             } 
-        }
+        } 
         
         context?.deleteObject(objectToDelete)
         save()

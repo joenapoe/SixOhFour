@@ -15,48 +15,54 @@ class AddShiftViewController: UIViewController {
     @IBOutlet var timelogTable: UITableView!
     @IBOutlet var earnedLabel: UILabel!
     
-    var newShift : WorkedShift!
-    var breakCount = 0
-    let dataManager = DataManager()
+    var shift : WorkedShift!
     var timelogs : [Timelog]!
-    
-    //Variables for Segue: "showDetails"
     var selectedTimelog : Timelog!
     var previousTimelog : Timelog!
     var nextTimelog : Timelog!
     var selectedJob : Job!
+    var selectedDate: NSDate!
+    
     var hasMinDate = false
     var hasMaxDate = false
+    var isJobListEmpty = true
+    var isNewShift = false
+    var breakCount = 0
+    let dataManager = DataManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         self.title = "Add Shift"
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: nil)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveWorkedShift")
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelWorkedShift")
         
         timelogTable.sectionHeaderHeight = 1.0
         timelogTable.sectionFooterHeight = 1.0
         
-        newShift = dataManager.addItem("WorkedShift") as! WorkedShift
-        newShift.setValue(3, forKey: "status")
-        newShift.job = selectedJob
+        if shift != nil {
+            selectedJob = shift.job
+            
+            let timelogArray = shift.timelogs.allObjects as NSArray
+            timelogs = timelogArray as! [Timelog]
+            
+        } else {
+            shift = dataManager.addItem("WorkedShift") as! WorkedShift
+            shift.setValue(3, forKey: "status")
+            shift.job = selectedJob
         
-        var saveButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveWorkedShift")
-        self.navigationItem.rightBarButtonItem = saveButton
-        var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelWorkedShift")
-        self.navigationItem.leftBarButtonItem = cancelButton
+            timelogs = []
+            createTimelog("Clocked In")
+            createTimelog("Clocked Out")
+        }
         
-        timelogs = []
-        
-        createTimelog("Clocked In")
-        createTimelog("Clocked Out")
-        
-        worktimeLabel.text = "Work time = \( newShift.hoursWorked() ) hrs"
-        earnedLabel.text = "You earned $\( newShift.moneyShiftOTx2()) for this shift"
+        worktimeLabel.text = "\(shift.hoursWorked()) hours worked"
+        earnedLabel.text = "You earned $\(shift.moneyShiftOTx2()) for this shift"
     }
     
     override func viewDidAppear(animated: Bool) {
         selectedJob.color.getColor
-        newShift.sumUpDuration()
+        shift.sumUpDuration()
         timelogTable.reloadData()
     }
     
@@ -65,8 +71,10 @@ class AddShiftViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+     // MARK: IBActions
+    
     @IBAction func addBreakPressed(sender: AnyObject) {
-        
         breakCount++
         
         if breakCount == 1 {
@@ -87,8 +95,8 @@ class AddShiftViewController: UIViewController {
     @IBAction func unwindFromJobsListTableViewControllerToDetails (segue: UIStoryboardSegue) {
         let sourceVC = segue.sourceViewController as! JobsListTableViewController
         selectedJob = sourceVC.selectedJob
-        newShift.job = selectedJob
-        earnedLabel.text = "You earned $\( newShift.moneyShiftOTx2()) for this shift"
+        shift.job = selectedJob
+        earnedLabel.text = "You earned $\(shift.moneyShiftOTx2()) for this shift"
     }
     
     @IBAction func unwindSaveDetailsTVC (segue: UIStoryboardSegue) {
@@ -96,9 +104,9 @@ class AddShiftViewController: UIViewController {
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         selectedTimelog = sourceVC.selectedTimelog
         
-        newShift.hoursWorked()
-        worktimeLabel.text = "Work time = \( newShift.hoursWorked() ) hrs"
-        earnedLabel.text = "You earned $\( newShift.moneyShiftOTx2()) for this shift"
+        shift.hoursWorked()
+        worktimeLabel.text = "Work time = \(shift.hoursWorked()) hrs"
+        earnedLabel.text = "You earned $\(shift.moneyShiftOTx2()) for this shift"
         selectedJob = sourceVC.selectedJob
         timelogTable.reloadData()
     }
@@ -109,52 +117,40 @@ class AddShiftViewController: UIViewController {
     }
     
     
+    // MARK: Class functions
+    
     func saveWorkedShift() {
-        newShift.startDate = timelogs.first!.time
+        shift.startTime = timelogs.first!.time
+        shift.startDateString = NSDateFormatter.localizedStringFromDate(shift.startTime, dateStyle: .LongStyle, timeStyle: .NoStyle)
+  
         dataManager.save()
-        self.performSegueWithIdentifier("unwindAddShiftSave", sender: self)
+        self.performSegueWithIdentifier("unwindAfterSaveShift", sender: self)
     }
     
     func cancelWorkedShift() {
-        for timelog in timelogs {
-            dataManager.delete(timelog)
+        if isNewShift {
+            dataManager.delete(shift)
         }
         
-        dataManager.delete(newShift)
-        self.performSegueWithIdentifier("unwindAddShiftCancel", sender: self)
+        self.performSegueWithIdentifier("unwindAfterCancel", sender: self)
     }
     
     func createTimelog(type: String){
         let newTimelog = dataManager.addItem("Timelog") as! Timelog
-        newTimelog.workedShift = newShift
+        newTimelog.workedShift = shift
         newTimelog.comment = ""
         newTimelog.type = type
-        newTimelog.time = NSDate()
+        newTimelog.time = selectedDate
         timelogs.append(newTimelog)
     }
     
     func insertTimelog(type: String){
         let newTimelog = dataManager.addItem("Timelog") as! Timelog
-        newTimelog.workedShift = newShift
+        newTimelog.workedShift = shift
         newTimelog.comment = ""
         newTimelog.type = type
         newTimelog.time = timelogs[breakCount*2-1].time
         timelogs.insert(newTimelog, atIndex: (breakCount*2-1))
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
-    {
-        if segue.identifier == "showDetails" {
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            let destinationVC = segue.destinationViewController as! DetailsTableViewController
-            destinationVC.hidesBottomBarWhenPushed = true;
-            destinationVC.selectedTimelog = self.selectedTimelog
-            destinationVC.previousTimelog = self.previousTimelog
-            destinationVC.nextTimelog = self.nextTimelog
-            destinationVC.hasMinDate = self.hasMinDate
-            destinationVC.hasMaxDate = self.hasMaxDate
-            destinationVC.selectedJob = self.selectedJob
-        }
     }
 }
 
@@ -162,8 +158,10 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
             let cell = tableView.dequeueReusableCellWithIdentifier("JobsListCell", forIndexPath: indexPath) as! JobsListCell
+            
             cell.job = selectedJob
             cell.jobColorView.setNeedsDisplay()
+            
             return cell
         } else {
             let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
@@ -176,8 +174,10 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
             } else {
                 cell.timelog = timelogs[indexPath.row+1]
             }
+            
             cell.job = selectedJob
             cell.jobColorView.setNeedsDisplay()
+            
             return cell
         }
     }
@@ -231,7 +231,7 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
             }
             if indexPath.section == 3 {
                 selectedTimelog = timelogs.last
-                hasMaxDate = false //user select last TIMELOD so noMaxDat is sent, and will use NSDATE instead
+                hasMaxDate = false //user select last TIMELOG so noMaxData is sent, and will use NSDATE instead
             } else {
                 hasMaxDate = true
                 
@@ -243,7 +243,21 @@ extension AddShiftViewController: UITableViewDelegate, UITableViewDataSource {
                     self.nextTimelog = timelogs[indexPath.row+2]
                 }
             }
-            self.performSegueWithIdentifier("showDetails", sender: tableView.cellForRowAtIndexPath(indexPath))
+            
+            let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
+            let destinationVC: DetailsTableViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("DetailsTableViewController")
+                as! DetailsTableViewController
+            
+            destinationVC.hidesBottomBarWhenPushed = true;
+            destinationVC.selectedTimelog = self.selectedTimelog
+            destinationVC.previousTimelog = self.previousTimelog
+            destinationVC.nextTimelog = self.nextTimelog
+            destinationVC.hasMinDate = self.hasMinDate
+            destinationVC.hasMaxDate = self.hasMaxDate
+            destinationVC.selectedJob = self.selectedJob
+            
+            self.navigationController?.pushViewController(destinationVC, animated: true)
+            
         }
     }
     

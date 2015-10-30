@@ -76,7 +76,7 @@ class DailyTimesheetTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("DayCellTableViewCell", forIndexPath: indexPath) as! DayCellTableViewCell
         cell.workedShift = allWorkedShifts[indexPath.row]
-        cell.clockInTL = openShiftsCIs[indexPath.row]
+        cell.timelog = openShiftsCIs[indexPath.row]
         
         if cell.workedShift.status == 1 {
             cell.dateLabel.textColor = UIColor.redColor()

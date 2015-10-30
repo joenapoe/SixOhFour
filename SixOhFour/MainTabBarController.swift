@@ -45,17 +45,14 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         }
         
         // Pre-populate the Color table when the app is opened for the first time
-        
         var colors = dataManager.fetch("Color") as! [Color]
         
         let defaultColors = ["Red", "Magenta", "Purple", "Blue", "Cyan", "Green", "Yellow", "Orange", "Brown", "Gray"]
 
         if colors.isEmpty {
-            for d in defaultColors {
-                
+            for colorName in defaultColors {
                 let color = dataManager.addItem("Color") as! Color
-            
-                color.name = d
+                color.name = colorName
                 color.isSelected = false
                 
                 dataManager.save()
@@ -63,13 +60,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         }
      
         // Check to see if last running shift (status = 2) needs to be convert to incomplete (status = 1)
-        
         let predicateRunning = NSPredicate(format: "status == 2")
         var runningShifts = [WorkedShift]()
         runningShifts = dataManager.fetch("WorkedShift", predicate: predicateRunning) as! [WorkedShift]
     
         if runningShifts.count > 0 {
-
             //convert all status = 1
             for workedShift in runningShifts {
                 workedShift.status = 1
