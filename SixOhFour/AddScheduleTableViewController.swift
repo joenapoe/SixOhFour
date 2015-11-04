@@ -42,19 +42,20 @@ class AddScheduleTableViewController: UITableViewController {
     var minutes = 0
  
     let dataManager = DataManager()
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         saveButton = UIBarButtonItem(title:"Save", style: .Plain, target: self, action: "saveButtonPressed")
-        self.navigationItem.rightBarButtonItem = saveButton
         saveButton.enabled = false
+        
+        self.navigationItem.rightBarButtonItem = saveButton
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelButtonPressed")
         
         hoursTextField.delegate = self
         minutesTextField.delegate = self
         
-        var tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        var tap = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
         tap.cancelsTouchesInView = false
         tableView.addGestureRecognizer(tap)
         
@@ -79,9 +80,9 @@ class AddScheduleTableViewController: UITableViewController {
             isValidShift = true
             
             repeatingSchedule = dataManager.fetchRepeatingSchedule(shift)
-  
         } else {
             
+            // TODO: Change to default job
             var results = dataManager.fetch("Job")
             
             if results.count > 0 {
@@ -90,16 +91,10 @@ class AddScheduleTableViewController: UITableViewController {
                 positionLabel.text = job.position
                 jobColorView.color = job.color.getColor
                 isJobListEmpty = false
-            } else {
-                jobNameLabel.text = "Add a Job"
-                positionLabel.text = ""
-                jobNameLabel.textColor = UIColor.lightGrayColor()
-                jobColorView.color = UIColor.lightGrayColor()
-            }
+            } 
             
             startDatePicker.date = startTime
             endDatePicker.date = endTime
-            
         }
         
         repeatSettings = RepeatSettings(startDate: startDatePicker.date)
@@ -206,6 +201,10 @@ class AddScheduleTableViewController: UITableViewController {
         }
     }
     
+    func cancelButtonPressed() {
+        self.performSegueWithIdentifier("unwindAfterCancel", sender: self)
+    }
+    
     func saveButtonPressed() {
         conflicts = []
         
@@ -246,10 +245,6 @@ class AddScheduleTableViewController: UITableViewController {
         dataManager.save()
     }
     
-    func unwind() {
-        self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
-    }
-    
     func togglePicker(picker: String) {
         if picker == "startDate" {
             startDatePickerHidden = !startDatePickerHidden
@@ -265,7 +260,6 @@ class AddScheduleTableViewController: UITableViewController {
         
         tableView.beginUpdates()
         tableView.endUpdates()
-        
     }
     
     func toggleSaveButton() {
@@ -277,14 +271,13 @@ class AddScheduleTableViewController: UITableViewController {
     }
     
     func addShift() {
-        
         let newShift = dataManager.addItem("ScheduledShift") as! ScheduledShift
         
         let formatter = NSDateFormatter()
         formatter.dateStyle = .LongStyle
         formatter.timeStyle = .NoStyle
         
-        newShift.startDate = formatter.stringFromDate(self.startTime)
+        newShift.startDateString = formatter.stringFromDate(self.startTime)
         newShift.startTime = self.startTime
         newShift.endTime = self.endTime
         newShift.job = self.job
@@ -378,14 +371,13 @@ class AddScheduleTableViewController: UITableViewController {
             var row = repeatSettings.repeatEvery - 1
             
             let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-            var difference = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: startRepeat, toDate: repeatSettings.endDate, options: nil).day
+            var difference = calendar.components(NSCalendarUnit.CalendarUnitDay, fromDate: startRepeat, toDate: repeatSettings.endDate, options: nil).day + 1
             
             var offset = 0 - repeatSettings.daySelectedIndex
             
-            while offset < difference {
+            while offset <= difference {
                 for x in 0...row{
                     for y in 0...6 {
-                        
                         if repeatArray[x][y] == true {
                             var date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: startRepeat, options: nil)
                             
@@ -440,7 +432,7 @@ class AddScheduleTableViewController: UITableViewController {
     func resolveConflicts() {
         if conflicts.count == 0 {
             save(schedule)
-            unwind()
+            self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
         } else {
             
             let formatter = NSDateFormatter()
@@ -484,7 +476,7 @@ class AddScheduleTableViewController: UITableViewController {
                 }
                 
                 self.save(self.schedule)
-                self.unwind()
+                self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
             }
             
             let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in

@@ -24,10 +24,10 @@ class DayCellTableViewCell: UITableViewCell {
         }
     }
     
-    var clockInTL: Timelog! {
+    var timelog: Timelog! {
         didSet {
-            dateLabel.text = NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .LongStyle,  timeStyle: .NoStyle)
-            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate( (clockInTL.time) ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
+            dateLabel.text = NSDateFormatter.localizedStringFromDate(timelog.time, dateStyle: .LongStyle, timeStyle: .NoStyle)
+            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate(timelog.time ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
         }
     }
     

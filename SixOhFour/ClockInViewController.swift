@@ -327,7 +327,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         if type == "Clocked In" {
             let newWorkedShift = dataManager.addItem("WorkedShift") as! WorkedShift
             currentWorkedShift = newWorkedShift
-            currentWorkedShift.startDate = newTimelog.time
+            currentWorkedShift.startTime = newTimelog.time
             currentWorkedShift.status = 2 // 2=running, 1=incomplete, 0=complete, 3=added manually
             newTimelog.workedShift = currentWorkedShift
         } else {

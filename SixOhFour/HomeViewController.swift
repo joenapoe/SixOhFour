@@ -25,10 +25,6 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let font = UIFont(name: "GrandHotel-Regular", size: 28) {
-            self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: font]
-        }
-        
         tableView.dataSource = self
         tableView.delegate = self
         
@@ -38,11 +34,22 @@ class HomeViewController: UIViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
+        if let font = UIFont(name: "GrandHotel-Regular", size: 28) {
+            self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: font]
+        }
+        
         fetchJobData()
         
         toggleAddButton()
         
         tableView.reloadData()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        let font = UIFont.boldSystemFontOfSize(18)
+        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: font]
     }
     
     func toggleAddButton() {

@@ -23,8 +23,8 @@ class ManualEditsListTableViewCell: UITableViewCell {
             companyLabel.text = workedShift.job.company.name
             positionLabel.text = workedShift.job.position
             jobColorView.color = workedShift.job.color.getColor
-            dateLabel.text = NSDateFormatter.localizedStringFromDate( (workedShift.startDate) ,dateStyle: .LongStyle,  timeStyle: .NoStyle)
-            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate( (workedShift.startDate) ,dateStyle: .NoStyle,  timeStyle: .MediumStyle))"
+            dateLabel.text = NSDateFormatter.localizedStringFromDate(workedShift.startTime, dateStyle: .LongStyle, timeStyle: .NoStyle)
+            timeLabel.text = "Clocked in at \(NSDateFormatter.localizedStringFromDate(workedShift.startTime, dateStyle: .NoStyle, timeStyle: .MediumStyle))"
         }
     }
     

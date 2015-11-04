@@ -288,7 +288,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
         var shouldShowDot = false
         
         for s in monthSchedule {
-            if day == s.startDate {
+            if day == s.startDateString {
                 shouldShowDot = true
             }
         }
@@ -312,7 +312,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
         var numberOfDots = 0
         
         for s in monthSchedule {
-            if day == s.startDate {
+            if day == s.startDateString {
                 numberOfDots++
             }
         }
