@@ -5,25 +5,14 @@
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="job" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Job" inverseName="color" inverseEntity="Job" syncable="YES"/>
     </entity>
-    <entity name="Company" representedClassName="Company" syncable="YES">
-        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
-        <relationship name="jobs" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Job" inverseName="company" inverseEntity="Job" syncable="YES"/>
-    </entity>
     <entity name="Job" representedClassName="Job" syncable="YES">
+        <attribute name="company" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="payRate" optional="YES" attributeType="Decimal" defaultValueString="0.0" syncable="YES"/>
         <attribute name="position" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="color" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Color" inverseName="job" inverseEntity="Color" syncable="YES"/>
-        <relationship name="company" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Company" inverseName="jobs" inverseEntity="Company" syncable="YES"/>
         <relationship name="scheduledShifts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ScheduledShift" inverseName="job" inverseEntity="ScheduledShift" syncable="YES"/>
         <relationship name="workedShifts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="WorkedShift" inverseName="job" inverseEntity="WorkedShift" syncable="YES"/>
-    </entity>
-    <entity name="Reminders" representedClassName="Reminders" syncable="YES">
-        <attribute name="alert" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="enableAlert" optional="YES" attributeType="Boolean" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="enableReminder" optional="YES" attributeType="Boolean" syncable="YES"/>
-        <attribute name="enableReminder2" optional="YES" attributeType="Boolean" syncable="YES"/>
-        <attribute name="reminder" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="reminder2" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
     <entity name="ScheduledShift" representedClassName="ScheduledShift" syncable="YES">
         <attribute name="endTime" optional="YES" attributeType="Date" syncable="YES"/>
@@ -39,11 +28,9 @@
         <attribute name="updatedBy" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="workedShift" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WorkedShift" inverseName="timelogs" inverseEntity="WorkedShift" syncable="YES"/>
     </entity>
-    <entity name="UserPreferences" representedClassName="UserPreferences" syncable="YES">
-        <attribute name="jobColors" optional="YES" attributeType="Binary" syncable="YES"/>
-    </entity>
     <entity name="WorkedShift" representedClassName="WorkedShift" syncable="YES">
         <attribute name="duration" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="endTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="source" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startDateString" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startTime" optional="YES" attributeType="Date" syncable="YES"/>
@@ -53,12 +40,9 @@
     </entity>
     <elements>
         <element name="Color" positionX="-65" positionY="173" width="128" height="88"/>
-        <element name="Company" positionX="-119" positionY="-126" width="128" height="73"/>
-        <element name="Job" positionX="-63" positionY="-1" width="128" height="135"/>
-        <element name="Reminders" positionX="-423" positionY="209" width="128" height="133"/>
+        <element name="Job" positionX="-63" positionY="-1" width="128" height="148"/>
         <element name="ScheduledShift" positionX="-216" positionY="-0" width="128" height="105"/>
         <element name="Timelog" positionX="304" positionY="-0" width="128" height="133"/>
-        <element name="UserPreferences" positionX="-272" positionY="212" width="128" height="58"/>
-        <element name="WorkedShift" positionX="124" positionY="5" width="128" height="150"/>
+        <element name="WorkedShift" positionX="124" positionY="5" width="128" height="165"/>
     </elements>
 </model>

@@ -25,8 +25,9 @@ class AddJobTableViewController: UITableViewController {
     var previousColor: Color!
     var selectedColor: Color!
     var currentString = ""
-    var companyName = ""
+    var company = ""
     var position = ""
+    var order: Int32!
     var colors = [Color]()
     
     let dataManager = DataManager()
@@ -51,7 +52,6 @@ class AddJobTableViewController: UITableViewController {
         colorPicker.dataSource = self
         colorPicker.delegate = self
         
-        
         if job != nil {
             let unitedStatesLocale = NSLocale(localeIdentifier: "en_US")
             let pay = job.payRate
@@ -59,7 +59,7 @@ class AddJobTableViewController: UITableViewController {
             numberFormatter.numberStyle = NSNumberFormatterStyle.CurrencyStyle
             numberFormatter.locale = unitedStatesLocale
             
-            nameTextField.text = job.company.name
+            nameTextField.text = job.company
             positionTextField.text = job.position
             payTextField.text = numberFormatter.stringFromNumber(pay)!
             
@@ -75,6 +75,8 @@ class AddJobTableViewController: UITableViewController {
             colorLabel.text = selectedColor.name
             jobColorView.color = colors[0].getColor
 
+            let jobs = dataManager.fetch("Job") as! [Job]
+            order = Int32(jobs.count)
         }
         
         toggleSaveButton()
@@ -98,7 +100,7 @@ class AddJobTableViewController: UITableViewController {
     
     @IBAction func saveJobButton(sender: AnyObject) {
         var str = nameTextField.text
-        companyName = str.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        company = str.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
         str = positionTextField.text
         position = str.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
         
@@ -169,11 +171,10 @@ class AddJobTableViewController: UITableViewController {
         let color = dataManager.editItem(selectedColor, entityName: "Color") as! Color
         color.isSelected = true
         
-        let company = dataManager.addItem("Company") as! Company
         let job = dataManager.addItem("Job") as! Job
         
-        company.name = companyName
-        job.setValue(company, forKey: "company")
+        job.order = order
+        job.company = company
         job.position = position
         job.setValue(color, forKey: "color")
         job.payRate = payRate
@@ -191,7 +192,7 @@ class AddJobTableViewController: UITableViewController {
         
         let editJob = dataManager.editItem(job, entityName: "Job") as! Job
         
-        editJob.company.name = companyName
+        editJob.company = company
         editJob.position = position
         editJob.payRate = payRate
         editJob.color = currentColor

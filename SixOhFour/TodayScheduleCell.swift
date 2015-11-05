@@ -20,7 +20,7 @@ class TodayScheduleCell: UITableViewCell {
         didSet {
             jobColorView.color = schedule.job.color.getColor
             
-            companyLabel.text = schedule.job.company.name
+            companyLabel.text = schedule.job.company
             positionLabel.text = schedule.job.position
             
             let formatter = NSDateFormatter()
@@ -48,7 +48,7 @@ class TodayScheduleCell: UITableViewCell {
         didSet {
             jobColorView.color = shift.job.color.getColor
             
-            companyLabel.text = shift.job.company.name
+            companyLabel.text = shift.job.company
             positionLabel.text = shift.job.position
             
             let formatter = NSDateFormatter()

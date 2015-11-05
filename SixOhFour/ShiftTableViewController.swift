@@ -184,7 +184,7 @@ class ShiftTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        var predicateJob = NSPredicate(format: "company.name == %@", (timelogs[indexPath.row].workedShift.job.company.name) )
+        var predicateJob = NSPredicate(format: "company == %@", (timelogs[indexPath.row].workedShift.job.company) )
         jobs = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         
         selectedJob = jobs[0]

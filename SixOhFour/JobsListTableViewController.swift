@@ -22,7 +22,9 @@ class JobsListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        jobs = dataManager.fetch("Job") as! [Job]
+        let sortDescriptor = NSSortDescriptor(key: "order", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        jobs = dataManager.fetch("Job", sortDescriptors: sortDescriptors) as! [Job]
     }
     
     override func didReceiveMemoryWarning() {

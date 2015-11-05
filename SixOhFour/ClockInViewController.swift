@@ -348,7 +348,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     func saveWorkedShiftToJob() {
-        var predicateJob = NSPredicate(format: "company.name == %@ && position == %@" , selectedJob.company.name, selectedJob.position)
+        var predicateJob = NSPredicate(format: "company == %@ && position == %@" , selectedJob.company, selectedJob.position)
         let assignedJob = dataManager.fetch("Job", predicate: predicateJob) as! [Job]
         currentWorkedShift.job = assignedJob[0]
         dataManager.save()

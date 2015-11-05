@@ -27,7 +27,6 @@ class JobOverviewViewController: UIViewController {
     var editButton: UIBarButtonItem!
     var jobs = [Job]()
     var job: Job!
-    var company: Company!
     var timelog: Timelog!
     var workedshift: WorkedShift!
     var allWorkedShifts = [WorkedShift]()
@@ -47,7 +46,7 @@ class JobOverviewViewController: UIViewController {
         editButton = UIBarButtonItem(title: "Edit", style: .Plain, target: self, action: "editJob")
         self.navigationItem.rightBarButtonItem = editButton
         
-        self.title = job.company.name
+        self.title = job.company
         
         let unitedStatesLocale = NSLocale(localeIdentifier: "en_US")
         let pay = job.payRate
@@ -56,7 +55,7 @@ class JobOverviewViewController: UIViewController {
         numberFormatter.locale = unitedStatesLocale
         
         monthLabel.text = CVDate(date: NSDate()).monthYear
-        nameLabel.text = job.company.name
+        nameLabel.text = job.company
         positionLabel.text = job.position
         payLabel.text = "\(numberFormatter.stringFromNumber(pay)!)/hr"
         fetchData()
@@ -231,7 +230,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
         if monthLabel.text != date.monthYear && self.animationFinished {
             
             currentMonth = date.currentMonth
-            let predicate = NSPredicate(format: "startDate contains[c] %@", currentMonth)
+            let predicate = NSPredicate(format: "startDateString contains[c] %@", currentMonth)
             monthSchedule = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
             
             let updatedMonthLabel = UILabel()
@@ -277,7 +276,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
     func dotMarker(shouldShowOnDayView dayView: CVCalendarDayView) -> Bool {
         
         var currentMonth = dayView.date.currentMonth
-        let monthPredicate = NSPredicate(format: "startDate contains[c] %@", currentMonth)
+        let monthPredicate = NSPredicate(format: "startDateString contains[c] %@", currentMonth)
         let jobPredicate = NSPredicate(format: "job == %@", job)
         
         let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [monthPredicate, jobPredicate])
@@ -299,7 +298,7 @@ extension JobOverviewViewController: CVCalendarViewDelegate {
     func dotMarker(colorOnDayView dayView: CVCalendarDayView) -> [UIColor] {
         
         var currentMonth = dayView.date.currentMonth
-        let monthPredicate = NSPredicate(format: "startDate contains[c] %@", currentMonth)
+        let monthPredicate = NSPredicate(format: "startDateString contains[c] %@", currentMonth)
         let jobPredicate = NSPredicate(format: "job == %@", job)
         
         let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [monthPredicate, jobPredicate])
