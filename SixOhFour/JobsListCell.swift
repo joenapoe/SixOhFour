@@ -16,7 +16,7 @@ class JobsListCell: UITableViewCell {
     
     var job: Job! {
         didSet {
-            jobNameLabel.text = job.company.name
+            jobNameLabel.text = job.company
             jobPositionLabel.text = job.position
             jobColorView.color = job.color.getColor
         }

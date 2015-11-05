@@ -12,11 +12,10 @@ import CoreData
 
 class Job: NSManagedObject {
 
+    @NSManaged var company: String
+    @NSManaged var order: Int32
     @NSManaged var payRate: NSDecimalNumber
     @NSManaged var position: String
-
-    //RELATIONSHIP TO OTHER Classes
-    @NSManaged var company: Company
     @NSManaged var color: Color
     @NSManaged var scheduledShifts: NSSet
     @NSManaged var workedShifts: NSSet

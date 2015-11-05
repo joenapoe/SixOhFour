@@ -20,7 +20,7 @@ class ManualEditsListTableViewCell: UITableViewCell {
     
     var workedShift: WorkedShift! {
         didSet {
-            companyLabel.text = workedShift.job.company.name
+            companyLabel.text = workedShift.job.company
             positionLabel.text = workedShift.job.position
             jobColorView.color = workedShift.job.color.getColor
             dateLabel.text = NSDateFormatter.localizedStringFromDate(workedShift.startTime, dateStyle: .LongStyle, timeStyle: .NoStyle)

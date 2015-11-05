@@ -61,7 +61,7 @@ class AddScheduleTableViewController: UITableViewController {
         
         if shift != nil {
             job = shift.job
-            jobNameLabel.text = job.company.name
+            jobNameLabel.text = job.company
             positionLabel.text = job.position
             jobColorView.color = job.color.getColor
             isJobListEmpty = false
@@ -82,12 +82,12 @@ class AddScheduleTableViewController: UITableViewController {
             repeatingSchedule = dataManager.fetchRepeatingSchedule(shift)
         } else {
             
-            // TODO: Change to default job
-            var results = dataManager.fetch("Job")
+            let predicate = NSPredicate(format: "order == 0")
+            let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
             
-            if results.count > 0 {
-                job = results[0] as! Job
-                jobNameLabel.text = job.company.name
+            if jobs.count > 0 {
+                job = jobs[0]
+                jobNameLabel.text = job.company
                 positionLabel.text = job.position
                 jobColorView.color = job.color.getColor
                 isJobListEmpty = false
@@ -142,7 +142,7 @@ class AddScheduleTableViewController: UITableViewController {
         
         if sourceVC.selectedJob != nil {
             job = sourceVC.selectedJob
-            jobNameLabel.text = sourceVC.selectedJob.company.name
+            jobNameLabel.text = sourceVC.selectedJob.company
             positionLabel.text = sourceVC.selectedJob.position
 
             jobColorView.color = sourceVC.selectedJob.color.getColor

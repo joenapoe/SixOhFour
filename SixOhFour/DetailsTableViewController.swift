@@ -87,7 +87,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
-        jobLabel.text = selectedJob.company.name
+        jobLabel.text = selectedJob.company
         positionLabel.text = selectedJob.position
         jobColorDisplay.color = selectedJob.color.getColor
     }

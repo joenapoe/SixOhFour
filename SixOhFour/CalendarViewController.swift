@@ -239,10 +239,14 @@ class CalendarViewController: UIViewController {
             destinationVC.hidesBottomBarWhenPushed = true
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
             
-            let results = dataManager.fetch("Job")
-            destinationVC.selectedJob = results[0] as! Job
+            
+            let predicate = NSPredicate(format: "order == 0")
+            let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
+            
+            destinationVC.selectedJob = jobs[0]
             destinationVC.selectedDate = self.selectedDate
             destinationVC.isNewShift = true
+            
         } else if segue.identifier == "editWorkedShift" {
             let destinationVC = segue.destinationViewController as! AddShiftViewController
             destinationVC.hidesBottomBarWhenPushed = true
