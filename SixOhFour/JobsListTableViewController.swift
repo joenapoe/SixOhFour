@@ -43,6 +43,8 @@ class JobsListTableViewController: UITableViewController {
             self.performSegueWithIdentifier("unwindFromJobsListTableViewControllerToClockIn", sender: self)
         case "details":
             self.performSegueWithIdentifier("unwindFromJobsListTableViewControllerToDetails", sender: self)
+        case "shift":
+            self.performSegueWithIdentifier("unwindFromJobsListTableViewControllerToShift", sender: self)
         default:
             ()
         }

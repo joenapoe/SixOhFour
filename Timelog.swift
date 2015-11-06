@@ -18,5 +18,6 @@ class Timelog: NSManagedObject {
     @NSManaged var type: String
     @NSManaged var updatedBy: String
     @NSManaged var workedShift: WorkedShift
+    @NSManaged var id: Int16
 
 }

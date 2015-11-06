@@ -39,6 +39,9 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        println("details selectedtimelog = \(self.selectedTimelog)")
+
+        
         entryLabel.text = selectedTimelog.type
         timestampLabel.text = "\(selectedTimelog.time)"
         minTimeLabel.hidden = true

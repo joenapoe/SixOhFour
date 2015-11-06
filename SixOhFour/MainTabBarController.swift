@@ -58,19 +58,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
                 dataManager.save()
             }
         }
-     
-        // Check to see if last running shift (status = 2) needs to be convert to incomplete (status = 1)
-        let predicateRunning = NSPredicate(format: "status == 2")
-        var runningShifts = [WorkedShift]()
-        runningShifts = dataManager.fetch("WorkedShift", predicate: predicateRunning) as! [WorkedShift]
     
-        if runningShifts.count > 0 {
-            //convert all status = 1
-            for workedShift in runningShifts {
-                workedShift.status = 1
-            }
-            dataManager.save()
-        }
         
         //Check for any timelogs that arent assigned to workedshift
         //TODO: Remove this checkpoint when fully tested and confirmed that there are no timelog leaks

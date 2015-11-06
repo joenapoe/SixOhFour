@@ -111,8 +111,8 @@ class ShiftTableViewController: UITableViewController {
         let sourceVC = segue.sourceViewController as! DetailsTableViewController
         if newTimelogsCreated > 0 {
             dataManager.delete(sourceVC.selectedTimelog)
+            selectedWorkedShift.status = 1
         }
-        selectedWorkedShift.status = 1
 
     }
  
