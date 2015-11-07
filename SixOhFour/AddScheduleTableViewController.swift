@@ -202,7 +202,7 @@ class AddScheduleTableViewController: UITableViewController {
     }
     
     func cancelButtonPressed() {
-        self.performSegueWithIdentifier("unwindAfterCancel", sender: self)
+        navigationController?.popViewControllerAnimated(true)
     }
     
     func saveButtonPressed() {
@@ -210,7 +210,7 @@ class AddScheduleTableViewController: UITableViewController {
         
         if isNewSchedule {
             if repeatSettings.type == "Never" {
-                addShift()
+                addShift(startTime, shiftEndTime: endTime)
             } else {
                 addWeeklySchedule()
             }
@@ -233,13 +233,21 @@ class AddScheduleTableViewController: UITableViewController {
             formatter.timeZone = NSTimeZone()
             
             let start = formatter.stringFromDate(shift.startTime)
+            let end = formatter.stringFromDate(shift.endTime)
             
-            var notification = UILocalNotification()
-            notification.alertBody = "You have a shift at \(start)"
-            notification.alertAction = "clock in"
-            notification.fireDate = shift.startTime
-            notification.soundName = UILocalNotificationDefaultSoundName
-            UIApplication.sharedApplication().scheduleLocalNotification(notification)
+            var startNotification = UILocalNotification()
+            startNotification.alertBody = "You are scheduled to clock in at \(start)"
+            startNotification.alertAction = "clock in"
+            startNotification.fireDate = shift.startTime
+            startNotification.soundName = UILocalNotificationDefaultSoundName
+            UIApplication.sharedApplication().scheduleLocalNotification(startNotification)
+            
+            var endNotification = UILocalNotification()
+            endNotification.alertBody = "You are scheduled to clock out at \(end)"
+            endNotification.alertAction = "clock out"
+            endNotification.fireDate = shift.endTime
+            endNotification.soundName = UILocalNotificationDefaultSoundName
+            UIApplication.sharedApplication().scheduleLocalNotification(endNotification)
         }
         
         dataManager.save()
@@ -270,16 +278,11 @@ class AddScheduleTableViewController: UITableViewController {
         }
     }
     
-    func addShift() {
+    func addShift(shiftStartTime: NSDate, shiftEndTime: NSDate) {
         let newShift = dataManager.addItem("ScheduledShift") as! ScheduledShift
         
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .LongStyle
-        formatter.timeStyle = .NoStyle
-        
-        newShift.startDateString = formatter.stringFromDate(self.startTime)
-        newShift.startTime = self.startTime
-        newShift.endTime = self.endTime
+        newShift.startTime = shiftStartTime
+        newShift.endTime = shiftEndTime
         newShift.job = self.job
         
         checkConflicts(newShift)
@@ -297,7 +300,7 @@ class AddScheduleTableViewController: UITableViewController {
             // Delete the existing shift then create a new one
             // Edits are handled this way to also handle notifications automatically
             dataManager.delete(shift)
-            addShift()
+            addShift(startTime, shiftEndTime: endTime)
         }
     }
     
@@ -382,7 +385,6 @@ class AddScheduleTableViewController: UITableViewController {
                             var date = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: offset, toDate: startRepeat, options: nil)
                             
                             if date!.compare(startRepeat) == NSComparisonResult.OrderedDescending || date!.compare(startRepeat) == NSComparisonResult.OrderedSame {
-                                
                                 shifts.append(date!)
                             }
                         }
@@ -397,13 +399,16 @@ class AddScheduleTableViewController: UITableViewController {
             }
         }
         
+        var shiftStartTime = startTime
+        var shiftEndTime = endTime
+        
         for shift in shifts {
-            var difference = endTime.timeIntervalSinceDate(startTime)
+            var difference = shiftEndTime.timeIntervalSinceDate(shiftStartTime)
             
-            startTime = shift
-            endTime = startTime.dateByAddingTimeInterval(difference)
+            shiftStartTime = shift
+            shiftEndTime = shiftStartTime.dateByAddingTimeInterval(difference)
             
-            addShift()
+            addShift(shiftStartTime, shiftEndTime: shiftEndTime)
         }
     }
     
@@ -422,31 +427,25 @@ class AddScheduleTableViewController: UITableViewController {
         let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
         let sortDescriptors = [sortDescriptor]
         
-        let results = dataManager.fetch("ScheduledShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [ScheduledShift]
-        
-        for result in results {
-            conflicts.append(result)
-        }
+        conflicts += dataManager.fetch("ScheduledShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [ScheduledShift]
     }
     
     func resolveConflicts() {
         if conflicts.count == 0 {
             save(schedule)
-            self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
+            navigationController?.popViewControllerAnimated(true)
         } else {
+            var conflictsMessage = ""
             
-            let formatter = NSDateFormatter()
-            formatter.dateFormat = "EEEE"
-            
-            let day = formatter.stringFromDate(conflicts[0].startTime)
-            
-            formatter.dateStyle = .NoStyle
-            formatter.timeStyle = .ShortStyle
-            formatter.timeZone = NSTimeZone()
-            
-            let start = formatter.stringFromDate(conflicts[0].startTime)
-            let end = formatter.stringFromDate(conflicts[0].endTime)
-            let message = String(format: "\nReplace the following schedule: \n%@\n%@ - %@\n", day, start, end)
+            for conflict in conflicts {
+                let date = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .MediumStyle, timeStyle: .NoStyle)
+                let start = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+                let end = NSDateFormatter.localizedStringFromDate(conflict.endTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+
+                conflictsMessage += String(format: "%@, %@ - %@\n", date, start, end)
+            }
+        
+            let message = String(format: "\nReplace the following schedule: \n%@", conflictsMessage)
             
             var title = "\(conflicts.count) Schedule Conflict"
             var replaceTitle = "Replace"
@@ -460,23 +459,11 @@ class AddScheduleTableViewController: UITableViewController {
             
             let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
                 for conflict in self.conflicts {
-                    let app = UIApplication.sharedApplication()
-                    
-                    for event in app.scheduledLocalNotifications {
-                        let notification = event as! UILocalNotification
-                        let startTime = notification.fireDate
-                        
-                        if conflict.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
-                            app.cancelLocalNotification(notification)
-                            break
-                        }
-                    }
-                    
                     self.dataManager.delete(conflict)
                 }
                 
                 self.save(self.schedule)
-                self.performSegueWithIdentifier("unwindAfterSaveSchedule", sender: self)
+                self.navigationController?.popViewControllerAnimated(true)
             }
             
             let cancel = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
@@ -484,7 +471,7 @@ class AddScheduleTableViewController: UITableViewController {
                     for shift in self.schedule {
                         self.dataManager.delete(shift)
                         self.schedule.removeAtIndex(0)
-                        }
+                    }
                 } else {
                     self.dataManager.undo()
                 }

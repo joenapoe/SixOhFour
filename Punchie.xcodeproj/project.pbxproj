@@ -43,6 +43,7 @@
 		B936D63F1B607674009777A7 /* EndRepeatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B936D63E1B607674009777A7 /* EndRepeatTableViewController.swift */; };
 		B93E88891B45FFA00030877B /* JobColorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93E88881B45FFA00030877B /* JobColorView.swift */; };
 		B93E888B1B46067E0030877B /* TodayScheduleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93E888A1B46067E0030877B /* TodayScheduleCell.swift */; };
+		B94341521BFDC8E2009D82DB /* NSDate+Punchie.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94341511BFDC8E2009D82DB /* NSDate+Punchie.swift */; };
 		B951EFCA1BD9B616001C0E4F /* GrandHotel-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B951EFC91BD9B616001C0E4F /* GrandHotel-Regular.ttf */; };
 		B9920E691B3B711A0037B44B /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9920E681B3B711A0037B44B /* MainTabBarController.swift */; };
 		B992A18D1B582FFE006E5A2B /* SetRepeatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B992A18C1B582FFE006E5A2B /* SetRepeatTableViewController.swift */; };
@@ -135,6 +136,7 @@
 		B936D63E1B607674009777A7 /* EndRepeatTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EndRepeatTableViewController.swift; sourceTree = "<group>"; };
 		B93E88881B45FFA00030877B /* JobColorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JobColorView.swift; sourceTree = "<group>"; };
 		B93E888A1B46067E0030877B /* TodayScheduleCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayScheduleCell.swift; sourceTree = "<group>"; };
+		B94341511BFDC8E2009D82DB /* NSDate+Punchie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Punchie.swift"; sourceTree = "<group>"; };
 		B951EFC91BD9B616001C0E4F /* GrandHotel-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GrandHotel-Regular.ttf"; sourceTree = "<group>"; };
 		B9920E681B3B711A0037B44B /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		B992A18C1B582FFE006E5A2B /* SetRepeatTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetRepeatTableViewController.swift; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 				B9E31D1B1B7C24CF008CF7DC /* RepeatWeekly.swift */,
 				B9E31D1D1B7C25DF008CF7DC /* RepeatMonthly.swift */,
 				B9E31D211B7C27A5008CF7DC /* RepeatSettings.swift */,
+				B94341511BFDC8E2009D82DB /* NSDate+Punchie.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -602,6 +605,7 @@
 				B9CF32931B6B046900757E43 /* CVCalendarMenuView.swift in Sources */,
 				00D7F46A1BB5EF830015BAB0 /* Timers.swift in Sources */,
 				B9CF32921B6B046900757E43 /* CVCalendarManager.swift in Sources */,
+				B94341521BFDC8E2009D82DB /* NSDate+Punchie.swift in Sources */,
 				B9CF329F1B6B046900757E43 /* CVCalendarWeekContentViewController.swift in Sources */,
 				B9E31D1E1B7C25DF008CF7DC /* RepeatMonthly.swift in Sources */,
 				B9BBE8AD1B3BE356004D68DB /* HomeViewController.swift in Sources */,

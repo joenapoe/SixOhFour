@@ -15,6 +15,4 @@ class ScheduledShift: NSManagedObject {
     @NSManaged var endTime: NSDate
     @NSManaged var startTime: NSDate
     @NSManaged var job: Job
-    @NSManaged var startDateString: String
-
 }

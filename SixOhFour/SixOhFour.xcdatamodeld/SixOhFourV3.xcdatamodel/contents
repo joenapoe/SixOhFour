@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14F27" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14F1021" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Color" representedClassName="Color" syncable="YES">
         <attribute name="isSelected" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -16,7 +16,6 @@
     </entity>
     <entity name="ScheduledShift" representedClassName="ScheduledShift" syncable="YES">
         <attribute name="endTime" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="startDateString" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startTime" optional="YES" attributeType="Date" syncable="YES"/>
         <relationship name="job" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Job" inverseName="scheduledShifts" inverseEntity="Job" syncable="YES"/>
     </entity>
@@ -33,7 +32,6 @@
         <attribute name="duration" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="endTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="source" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="startDateString" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="status" optional="YES" attributeType="Boolean" syncable="YES"/>
         <relationship name="job" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Job" inverseName="workedShifts" inverseEntity="Job" syncable="YES"/>
@@ -42,8 +40,8 @@
     <elements>
         <element name="Color" positionX="-65" positionY="173" width="128" height="88"/>
         <element name="Job" positionX="-63" positionY="-1" width="128" height="148"/>
-        <element name="ScheduledShift" positionX="-216" positionY="-0" width="128" height="105"/>
+        <element name="ScheduledShift" positionX="-216" positionY="-0" width="128" height="90"/>
         <element name="Timelog" positionX="304" positionY="-0" width="128" height="133"/>
-        <element name="WorkedShift" positionX="124" positionY="5" width="128" height="165"/>
+        <element name="WorkedShift" positionX="124" positionY="5" width="128" height="150"/>
     </elements>
 </model>

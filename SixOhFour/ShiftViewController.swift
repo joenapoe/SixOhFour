@@ -234,17 +234,18 @@ class ShiftViewController: UIViewController {
     //AddShift SAVE and CANCEL; CREATE
     func saveWorkedShift() {
         selectedWorkedShift.startTime = timelogs.first!.time
-        selectedWorkedShift.startDateString = NSDateFormatter.localizedStringFromDate(selectedWorkedShift.startTime, dateStyle: .LongStyle, timeStyle: .NoStyle)
-        
+
         dataManager.save()
-        self.performSegueWithIdentifier("unwindAfterSaveShift", sender: self)
+        navigationController?.popViewControllerAnimated(true)
     }
+    
     func cancelWorkedShift() {
         if isNewShift {
             dataManager.delete(selectedWorkedShift)
         }
-        self.performSegueWithIdentifier("unwindAfterCancel", sender: self)
+        navigationController?.popViewControllerAnimated(true)
     }
+    
     func createTimelog(type: String){
         let newTimelog = dataManager.addItem("Timelog") as! Timelog
         newTimelog.workedShift = selectedWorkedShift

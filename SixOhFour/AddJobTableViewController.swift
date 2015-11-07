@@ -35,6 +35,8 @@ class AddJobTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelButtonPressed")
+        
         let predicate = NSPredicate(format: "isSelected == false")
         colors = dataManager.fetch("Color", predicate: predicate) as! [Color]
         
@@ -99,12 +101,12 @@ class AddJobTableViewController: UITableViewController {
     // MARK: - IBActions
     
     @IBAction func saveJobButton(sender: AnyObject) {
-        var str = nameTextField.text
-        company = str.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        str = positionTextField.text
-        position = str.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
         
-        if payTextField.text != nil {
+        company = nameTextField.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        position = positionTextField.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        
+        
+        if payTextField.text != "" {
             var payStr = payTextField.text
             payStr = payStr.stringByReplacingOccurrencesOfString(",", withString: "")
             payStr = payStr.stringByReplacingOccurrencesOfString("$", withString: "")
@@ -114,15 +116,22 @@ class AddJobTableViewController: UITableViewController {
             payRate = 0.00
         }
         
-        if job != nil {
-            editItem()
+        if job == nil {
+            checkJobExists(company, position: position, isNewJob: true)
+        } else if job.company != company || job.position != position {
+            checkJobExists(company, position: position, isNewJob: false)
         } else {
-            newItem()
+            editItem()
         }
-        navigationController?.popToRootViewControllerAnimated(true)
+        
+        navigationController?.popViewControllerAnimated(true)
     }
     
     // MARK: - Class functions
+    
+    func cancelButtonPressed() {
+        navigationController?.popViewControllerAnimated(true)
+    }
     
     func dismissKeyboard() {
         self.view.endEditing(true)
@@ -135,6 +144,22 @@ class AddJobTableViewController: UITableViewController {
             self.navigationItem.rightBarButtonItem!.enabled = true
         }
     }
+    
+    func checkJobExists(company: String, position: String, isNewJob: Bool) {
+        let predicate = NSPredicate(format: "company ==[c] %@ && position ==[c] %@", company, position)
+        let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
+        
+        if jobs.count > 0 {
+            let alert: UIAlertController = UIAlertController(title: nil, message: "Job already exists", preferredStyle: .Alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+            self.presentViewController(alert, animated: true, completion: nil)
+        } else if isNewJob {
+            newItem()
+        } else {
+            editItem()
+        }
+    }
+    
     
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool { // return NO to not change text
         
@@ -206,9 +231,9 @@ class AddJobTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.section == 1 && indexPath.row == 1 {
             pickerVisible = !pickerVisible
-            
             tableView.reloadData()
         }
+        
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
@@ -221,17 +246,6 @@ class AddJobTableViewController: UITableViewController {
         }
         return 44.0
     }
-    
-    
-    // MARK: - Navigation 
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "payRate" {
-            let destinationVC = segue.destinationViewController as! PayRateTableViewController
-            destinationVC.job = self.job
-        }
-    }
-    
 }
 
 
