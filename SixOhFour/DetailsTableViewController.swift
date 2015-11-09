@@ -31,24 +31,21 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     var selectedTimelog : Timelog!
     var previousTimelog : Timelog!
     var nextTimelog : Timelog!
-    
+
     var hideTimePicker = true
+    var conflicts : [WorkedShift] = []
     
     let dataManager = DataManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        println("details selectedtimelog = \(self.selectedTimelog)")
-
-        
         entryLabel.text = selectedTimelog.type
         timestampLabel.text = "\(selectedTimelog.time)"
         minTimeLabel.hidden = true
         commentTextView.text = selectedTimelog.comment
         commentTextView.delegate = self
         
-        doneButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "saveDetails")
+        doneButton = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "checkAndSave")
         self.navigationItem.rightBarButtonItem = doneButton
         var cancelButton = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "cancelDetails")
         self.navigationItem.leftBarButtonItem = cancelButton
@@ -61,30 +58,30 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         tap.cancelsTouchesInView = false
         tableView.addGestureRecognizer(tap)
         
-        // TODO : Need to set restrictions of 24hrs when picking times for both min and max. Hurdle = how are you going to handle when the WS only has 1 entry CI.. what is the min?
-        if !hasMinDate {
-            //No Minimum Data
-            minTimeLabel.text = ""
-        } else {
+        if hasMinDate { //Previous timelog aka Minimum Data
             timestampPicker.minimumDate = previousTimelog.time
             minTimeLabel.text = "\(previousTimelog.type): \(dateFormatter(previousTimelog.time))"
+        } else {
+            timestampPicker.minimumDate = selectedTimelog.time.dateByAddingTimeInterval(-24*60*60)
+            minTimeLabel.text = "Can not exceed 24hrs" //TODO: User can go back 24hr, then repeat and repeat. 1 at a time.
         }
         
-        // TODO : Need to set restrictions of 24hrs when picking times for both min and max
-        if !hasMaxDate {
-            //No NextTimeStamp for Maxium Data
-            //And no MinDate to set 24hr restriction
-            
-            if selectedTimelog.type == "Clocked Out" {
-                timestampPicker.maximumDate = NSDate().dateByAddingTimeInterval(8*60*60)
-                maxTimeLabel.text = "Cannot exceed 8 hrs from now."
-            } else {
-                timestampPicker.maximumDate = NSDate()
-                maxTimeLabel.text = "Cannot select a future time."
-            }
-        } else {
+        if hasMaxDate {
             timestampPicker.maximumDate = nextTimelog.time
             maxTimeLabel.text = "\(nextTimelog.type): \(dateFormatter(nextTimelog.time))"
+        } else { //No NextTimeStamp for Max Data
+            
+            let predicateStatus = NSPredicate(format: "status == 2")
+            var runningShift = [WorkedShift]()
+            runningShift = dataManager.fetch("WorkedShift", predicate: predicateStatus) as! [WorkedShift]
+            
+            if runningShift.count == 0 || selectedTimelog.workedShift.status == 2 { //If there are no running shifts, or if you've selected the current running shift
+                timestampPicker.maximumDate = NSDate()
+                maxTimeLabel.text = "Cannot select a future time."
+            } else {
+                timestampPicker.maximumDate = runningShift[0].startTime //TODO - THIS IS NOT RESTRICITING MAX DATE!
+                maxTimeLabel.text = "Cannot pass the current running shift."
+            }
         }
     }
     
@@ -101,26 +98,15 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     }
     
     @IBAction func timestampChanged(sender: AnyObject) {
-        
         datePickerChanged(timestampLabel!, datePicker: timestampPicker!)
         
-        if !hasMinDate {
-            //need to add code that prevents the user from selecting a date that exceeds theyre previous shift
-        } else {
-            if (timestampPicker.date.compare(timestampPicker.minimumDate!)) == NSComparisonResult.OrderedAscending || timestampPicker.date == timestampPicker.minimumDate {
-                minTimeLabel.hidden = false
-                timestampLabel.text = "\(dateFormatter(timestampPicker.minimumDate!))"
-            }
+        if (timestampPicker.date.compare(timestampPicker.minimumDate!)) == NSComparisonResult.OrderedAscending || timestampPicker.date == timestampPicker.minimumDate {
+            minTimeLabel.hidden = false
+            timestampLabel.text = "\(dateFormatter(timestampPicker.minimumDate!))"
         }
         
-        if !hasMaxDate {
-            if timestampPicker.date.timeIntervalSinceNow > -120 {
-                maxTimeLabel.hidden = false
-            }
-        } else {
-            if timestampPicker.date.timeIntervalSinceDate(timestampPicker.maximumDate!) > -60 {
-                maxTimeLabel.hidden = false
-            }
+        if timestampPicker.date.timeIntervalSinceNow > -120 || timestampPicker.date.timeIntervalSinceDate(timestampPicker.maximumDate!) > -60 {
+            maxTimeLabel.hidden = false
         }
         
     }
@@ -145,29 +131,126 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
         self.view.endEditing(true)
     }
     
-    
-    func saveDetails() {
-        
+    func saveAndUnwindDetails() {
         selectedTimelog.type = entryLabel.text!
         selectedTimelog.time = timestampPicker.date
         selectedTimelog.comment = commentTextView.text
         selectedTimelog.lastUpdate = NSDate()
         if selectedTimelog.type == "Clocked In" {
             selectedTimelog.workedShift.startTime = timestampPicker.date
+        } else if selectedTimelog.type == "Clocked Out" {
+            selectedTimelog.workedShift.endTime = timestampPicker.date
         }
         if hasMinDate && (timestampPicker.date.compare(timestampPicker.minimumDate!) == NSComparisonResult.OrderedAscending) {
             selectedTimelog.time = timestampPicker.minimumDate!
         } else {
             selectedTimelog.time = timestampPicker.date
         }
-        
         dataManager.save()
-        
         self.performSegueWithIdentifier("unwindSaveDetailsTVC", sender: self)
+    }
+    
+    func checkAndSave() {
+        if selectedTimelog.type == "Clocked In" || selectedTimelog.type == "Clocked Out" {
+                checkConflicts(selectedTimelog.workedShift)
+        }
+
+        if conflicts.count == 0 {
+            saveAndUnwindDetails()
+        } else {
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .ShortStyle
+            let startDay = formatter.stringFromDate(conflicts[0].startTime)
+            let endDay = formatter.stringFromDate(conflicts[0].endTime)
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            formatter.timeZone = NSTimeZone()
+            let startTime = formatter.stringFromDate(conflicts[0].startTime)
+            let endTime = formatter.stringFromDate(conflicts[0].endTime)
+
+            let job = "\(conflicts[0].job.company) - \(conflicts[0].job.position)"
+            
+            var message: String!
+            
+            if startDay == endDay {
+                message = String(format: "\nReplace the following shift: \n%@ \n%@ %@ - %@", job, startDay, startTime, endTime)
+            } else {
+                message = String(format: "\nReplace the following shift: \n%@ \n%@ %@ - %@ %@", job, startDay, startTime, endDay, endTime)
+            } //TODO: change message to have all conflicts
+            
+            var title = "\(conflicts.count) Shift Conflict"
+            var replaceTitle = "Replace"
+            
+            if conflicts.count > 1 {
+                title += "s"
+                replaceTitle += " All (\(conflicts.count))"
+            }
+            
+            let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
+                for conflict in self.conflicts {
+                    let app = UIApplication.sharedApplication()
+                    
+                    for event in app.scheduledLocalNotifications {
+                        let notification = event as! UILocalNotification
+                        let startTime = notification.fireDate
+                        
+                        if conflict.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
+                            app.cancelLocalNotification(notification)
+                            break
+                        }
+                    }
+                    self.dataManager.delete(conflict)
+                }
+                self.saveAndUnwindDetails()
+            }
+            alertController.addAction(replace)
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
     }
     
     func cancelDetails() {
         self.performSegueWithIdentifier("unwindCancelDetailsTVC", sender: self)
+    }
+    
+    func checkConflicts(shift: WorkedShift) {
+        
+        var startOfShift = NSDate()
+        var endOfShift = NSDate()
+        
+        if selectedTimelog.type == "Clocked In" {
+            startOfShift = timestampPicker.date
+
+            if shift.endTime.timeIntervalSinceReferenceDate < startOfShift.timeIntervalSinceReferenceDate {
+                endOfShift = timestampPicker.date
+            } else {
+                endOfShift = shift.endTime
+            }
+        } else if selectedTimelog.type == "Clocked Out" {
+            startOfShift = shift.startTime
+            endOfShift = timestampPicker.date
+        }
+        
+        var startPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", startOfShift, startOfShift)
+        var selfPredicate = NSPredicate(format: "SELF != %@", shift)
+        var predicate: NSCompoundPredicate
+        
+        if selectedTimelog.workedShift.status == 1 || selectedTimelog.workedShift.status == 2 {
+            predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [startPredicate, selfPredicate])
+        } else {
+            let endPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", endOfShift, endOfShift)
+            let startPredicate1 = NSPredicate(format: "%@ <= startTime AND startTime <= %@", startOfShift, endOfShift)
+            let endPredicate2 = NSPredicate(format: "%@ <= endTime AND endTime <= %@", startOfShift, endOfShift)
+            let shiftPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType,
+                subpredicates: [startPredicate, endPredicate, startPredicate1, endPredicate2])
+            predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [shiftPredicate, selfPredicate])
+        }
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        
+        conflicts = []
+        conflicts = dataManager.fetch("WorkedShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [WorkedShift]
     }
     
     // MARK: - Date Picker
@@ -180,7 +263,6 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     }
     
     func hideTimePicker(status: Bool) {
-        
         if status {
             timestampPicker.hidden = true
             minTimeLabel.hidden = true
@@ -190,7 +272,6 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
             timestampPicker.hidden = false
             hideTimePicker = false
         }
-        
         tableView.beginUpdates()
         tableView.endUpdates()
     }
@@ -202,14 +283,13 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         commentTextView.resignFirstResponder()
         
         if hideTimePicker == false {
             hideTimePicker(true)
             hideTimePicker = true
-        } else if indexPath.row == 2 && hideTimePicker {
+        } else if indexPath.row == 1 && hideTimePicker {
             hideTimePicker(false)
             hideTimePicker = false
         } else if indexPath.row == 0 {
@@ -224,22 +304,18 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        
-        if hideTimePicker && indexPath.row == 3 {
+        if hideTimePicker && indexPath.row == 2 {
             hideTimePicker(true)
             return 0
         } else {
             return super.tableView(tableView, heightForRowAtIndexPath: indexPath)
         }
-        
     }
     
     //MARK: Segues
     @IBAction func unwindFromJobsListTableViewControllerToDetails (segue: UIStoryboardSegue) {
-        
         let sourceVC = segue.sourceViewController as! JobsListTableViewController
         selectedJob = sourceVC.selectedJob
-        
         if sourceVC.selectedJob != nil {
             selectedJob = sourceVC.selectedJob
             jobColorDisplay.color = selectedJob.color.getColor
