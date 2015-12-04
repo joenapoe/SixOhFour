@@ -106,8 +106,7 @@ class AddScheduleTableViewController: UITableViewController {
         
         endRepeatLabel.text = dateFormatter.stringFromDate(repeatSettings.endDate)
 
-        let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-        let minDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitMinute, value: 5, toDate: NSDate(), options: nil)
+        let minDate = NSDate()
         
         startDatePicker.minimumDate = minDate
         endDatePicker.minimumDate = minDate
