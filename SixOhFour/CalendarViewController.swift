@@ -123,7 +123,17 @@ class CalendarViewController: UIViewController {
         let dateToCompare = calendar.dateFromComponents(selectedDateComponents)
         
         if dateToCompare!.compare(today) == NSComparisonResult.OrderedAscending {
-            self.performSegueWithIdentifier("addWorkedShift", sender: self)
+            
+            let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
+            let destinationVC: ShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftViewController") as! ShiftViewController
+            destinationVC.hidesBottomBarWhenPushed = true
+            let predicate = NSPredicate(format: "order == 0")
+            let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
+            destinationVC.selectedJob = jobs[0]
+            destinationVC.selectedDate = self.selectedDate
+            destinationVC.isNewShift = true
+            self.navigationController?.pushViewController(destinationVC, animated: true)
+            
         } else {
             self.performSegueWithIdentifier("addSchedule", sender: self)
         }
@@ -234,30 +244,9 @@ class CalendarViewController: UIViewController {
             
             destinationVC.shift = self.selectedSchedule
             destinationVC.isNewSchedule = false
-        } else if segue.identifier == "addWorkedShift" {
-            let destinationVC = segue.destinationViewController as! AddShiftViewController
-            destinationVC.hidesBottomBarWhenPushed = true
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            
-            
-            let predicate = NSPredicate(format: "order == 0")
-            let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
-            
-            destinationVC.selectedJob = jobs[0]
-            destinationVC.selectedDate = self.selectedDate
-            destinationVC.isNewShift = true
-            
-        } else if segue.identifier == "editWorkedShift" {
-            let destinationVC = segue.destinationViewController as! AddShiftViewController
-            destinationVC.hidesBottomBarWhenPushed = true
-            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            
-            destinationVC.shift = self.selectedWorkedShift
-            destinationVC.isNewShift = false
         }
     }
 }
-
 
 // MARK: - Table View Datasource & Delegate
 
@@ -294,9 +283,19 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             self.performSegueWithIdentifier("editSchedule", sender: self)
         } else {
             selectedWorkedShift = dayWorkedShifts[indexPath.row]
-            self.performSegueWithIdentifier("editWorkedShift", sender: self)
-        }
             
+            
+            
+            let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
+            let destinationVC: ShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftViewController") as! ShiftViewController
+            destinationVC.hidesBottomBarWhenPushed = true
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
+            destinationVC.selectedWorkedShift = self.selectedWorkedShift
+            destinationVC.isNewShift = false
+            self.navigationController?.pushViewController(destinationVC, animated: true)
+        
+            
+        }
     }
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {

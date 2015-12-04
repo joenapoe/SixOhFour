@@ -11,7 +11,7 @@
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>1501E4DC1A00FEB23AB81981904847094134DD09</key>
-		<string>https://github.com/jemsomniac/SixOhFour.git</string>
+		<string>https://github.com/joenapoe/SixOhFour.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>Punchie.xcodeproj</string>
@@ -21,7 +21,7 @@
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/jemsomniac/SixOhFour.git</string>
+	<string>https://github.com/joenapoe/SixOhFour.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>

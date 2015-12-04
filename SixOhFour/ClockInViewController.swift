@@ -11,10 +11,8 @@ import CoreData
 
 class ClockInViewController: UIViewController, UIPopoverPresentationControllerDelegate {
     
-    @IBOutlet weak var workTitleLabel: UILabel!
     @IBOutlet weak var workTimeLabel: UILabel!
     @IBOutlet weak var breakTitleLabel: UILabel!
-    
     @IBOutlet weak var jobTable: UITableView!
     @IBOutlet weak var shiftTableView: UITableView!
     @IBOutlet weak var startStopButton: UIButton!
@@ -74,16 +72,18 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         UIView.performWithoutAnimation {
             self.editBreakButton.layer.removeAllAnimations()
         }
-        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "StopTimerNotification:", name:"StopTimerNotification", object: nil)
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(true)
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
         reloadTable()
         checkForIncomplete()
         checkAndRunStates()
         
-        jobsList = dataManager.fetch("Job") as! [Job]
+        let sortDescriptor = NSSortDescriptor(key: "order", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        jobsList = dataManager.fetch("Job", sortDescriptors: sortDescriptors ) as! [Job]
         
         if jobsList.count == 0 {
             isJobListEmpty = true
@@ -94,10 +94,12 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             isJobListEmpty = false
             if selectedJob == nil || !contains(jobsList, selectedJob) { // NOTE: SELECTS THE FIRST JOB WHEN APP IS LOADED
                 selectedJob = jobsList[0]
+
+                let predicate = NSPredicate(format: "order == 0")
+                let jobs = dataManager.fetch("Job", predicate: predicate) as! [Job]
+                selectedJob = jobs[0]
             }
         }
-
-        
     }
 
     override func didReceiveMemoryWarning() {
@@ -119,7 +121,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBAction func lapReset(sender: AnyObject) {
 
         if state == .OnTheClock { //STARTED BREAK
-            
             breaktimeSecondsRemaining = breaktimeSecondsSet
             createNotifyBreakOver(breaktimeSecondsSet)
             
@@ -128,8 +129,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             } else {
                 saveTimelog("Started Break #\( (timelogs.count + 1 ) / 2 )")
             }
-//            startedBreakTime = timelogs.last?.time
-            
         } else if state == .OnBreak {  //ENDED BREAK
             if timelogs.count == 2 {
                 saveTimelog("Ended Break")
@@ -153,9 +152,8 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             self.checkAndRunStates() }))
         alert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
         self.presentViewController(alert, animated: true, completion: nil)
-        
     }
-    
+
     // MARK: Segues (Unwind) = Getting data from sourceVC
     
     @IBAction func unwindFromJobsListTableViewControllerToClockIn (segue: UIStoryboardSegue) {
@@ -188,7 +186,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         if timelogs != [] {
             saveWorkedShiftToJob()
         }
-        
         saveWorkedShiftToJob()
         reloadTable()
     }
@@ -204,14 +201,10 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
   
         breaktimeSecondsRemaining += (sourceVC.breaktimeSecondsSet - breaktimeSecondsSet)
         breaktimeSecondsSet = sourceVC.breaktimeSecondsSet
-        
-//        displayBreaktime()
         createNotifyBreakOver(breaktimeSecondsSet)
     }
     
     @IBAction func unwindFromShiftToClockIn (segue: UIStoryboardSegue) {
-        
-        println("clockin unwindFromShiftToClockIn")
         
         let sourceVC = segue.sourceViewController as! ShiftViewController
         
@@ -221,66 +214,31 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         
         sourceVC.selectedWorkedShift.status = 2
         currentWorkedShift = sourceVC.selectedWorkedShift
-        println(currentWorkedShift)
-        
         
         checkForIncomplete()
         timelogs = sourceVC.timelogs
         reloadTable()
-        
     }
-
-//    @IBAction func showContinueShift (segue: UIStoryboardSegue) {
-//        
-//        println("clockin showContinueShift")
-//        
-//        self.hidesBottomBarWhenPushed = false
-//
-//        
-//        let sourceVC = segue.sourceViewController as! ShiftViewController
-//        
-//        if timelogs.count > 0 {
-//            stopShift()
-//        }
-//        
-//        sourceVC.selectedWorkedShift.status = 2
-//        currentWorkedShift = sourceVC.selectedWorkedShift
-//        println(currentWorkedShift)
-//        
-//        
-//        checkForIncomplete()
-//        timelogs = sourceVC.timelogs
-//        reloadTable()
-//        
-//    }
-    
     
     //MARK: Functions
     
-    
-    
     func checkAndRunStates() {
-        
+    
         if timelogs.count == 0 {
             state = .Idle
-            println("state = .Idle")
         } else {
             if timelogs.last!.type == "Clocked Out" {
                 state = .ClockedOut
-                println("state = .ClockedOut")
             } else {
                 if timelogs.count % 2 == 1 {
                     state = .OnTheClock
-                    println("state = .OnTheClock")
                 } else {
                     state = .OnBreak
-                    println("state = .OnBreak")
                 }
             }
         }
         
         if state == .Idle {
-            workTitleLabel.text = " "
             workTimeLabel.text = "00:00:00"
             startStopButton.enabled = true
             breakButton.enabled = false
@@ -288,7 +246,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             startStopButton.setTitle("Clock In", forState: UIControlState.Normal)
             breakButton.setTitle("Start Break", forState: UIControlState.Normal)
         } else if state == .OnTheClock {
-            workTitleLabel.text = "Time you've worked"
             saveForLaterButton.hidden = false
             startStopButton.setTitle("Clock Out", forState: UIControlState.Normal)
             breakButton.setTitle("Start Break", forState: UIControlState.Normal)
@@ -301,15 +258,12 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         } else if state == .OnBreak {
             displayBreaktime()
             saveForLaterButton.hidden = false
-            workTitleLabel.text = "Time you've worked"
             runAndUpdateWorkTimer()
-//            startedBreakTime = timelogs.last?.time
             if !breakTimer.valid {
             breakTimer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: Selector("runBreakTimer"), userInfo: nil, repeats: true)
             }
             createNotifyBreakOver(breaktimeSecondsRemaining)
             timer.invalidate()
-//            breakTimeLabel.hidden = false
             breakTitleLabel.hidden = false
             editBreakButton.hidden = false
             editBreakButton.enabled = true
@@ -319,7 +273,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             currentWorkedShift.sumUpDuration()
         } else if state == .ClockedOut {
             clearBreak()
-            workTitleLabel.text = "Total time you've worked"
             saveForLaterButton.hidden = true
             timer.invalidate()
             startStopButton.setTitle("", forState: UIControlState.Normal)
@@ -328,7 +281,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             currentWorkedShift.sumUpDuration()
             saveWorkedShiftToJob()
         }
-        
     }
     
     func reloadTable() {
@@ -354,19 +306,16 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         } else {
             newTimelog.workedShift = currentWorkedShift
             if type == "Clocked Out"{
+                currentWorkedShift.endTime = newTimelog.time
                 currentWorkedShift.status = 0
             }
         }
-    
         timelogs.append(newTimelog)
         currentWorkedShift.sumUpDuration()
         saveWorkedShiftToJob()
-        
-        //Scroll to the bottom
         reloadTable()
-        var indexPathScroll = NSIndexPath(forRow: (timelogs.count-1), inSection: 0)
+        var indexPathScroll = NSIndexPath(forRow: (timelogs.count-1), inSection: 0) //Scroll to the bottom
         self.shiftTableView.scrollToRowAtIndexPath(indexPathScroll, atScrollPosition: UITableViewScrollPosition.Bottom, animated: true)
-        
     }
     
     func saveWorkedShiftToJob() {
@@ -376,13 +325,21 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         dataManager.save()
     }
     
+    func StopTimerNotification(notification: NSNotification!){
+        if state != .Idle {
+            timer.invalidate()
+            breakTimer.invalidate()
+            breakTimerOver.invalidate()
+            clearShift()
+        }
+    }
+
     // DURATION FUNCTIONS
     
     func runAndUpdateWorkTimer() {
         //currently calculated since clock in and subtracting the total breaktime duration
         let elapsedTimeInterval = NSDate().timeIntervalSinceDate(timelogs.last!.time)
         elapsedTime = Int(elapsedTimeInterval) + Int(currentWorkedShift.duration)
-        
         updateWorkTimerLabel()
     }
     
@@ -440,7 +397,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             }
         }
         breakTimerString  = getTimerString(breakSeconds, minutes: breakMinutes, hours: breakHours)
-//        breakTimeLabel.text = breakTimerString
         editBreakButton.setTitle(breakTimerString, forState: UIControlState.Normal)
     }
     
@@ -495,7 +451,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
     }
     
-    
     func alertBreakOver() {
         //Notifications insdie the App (Home screen and Lock Screen)
         let alert: UIAlertController = UIAlertController(title: "Breaktime is over!",
@@ -546,31 +501,15 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     func clearShift() {
-
-//        startStopButton.setTitle("Clock In", forState: UIControlState.Normal)
-//        breakButton.setTitle("Start Break", forState: UIControlState.Normal)
-//        breakButton.enabled = false
-//        saveForLaterButton.hidden = true
-      
         timelogs = []
         reloadTable()
         timer.invalidate()
         clearBreak()
         saveWorkedShiftToJob()
-
-        workTitleLabel.text = " "
         workTimeLabel.text = "00:00:00"
-//        breakTimeLabel.text = " "
         editBreakButton.setTitle(" ", forState: UIControlState.Normal)
         breakTitleLabel.text = " "
-        
-//        duration = 0
         totalBreaktime = 0
-        
-//        startStopButton.enabled = true
-        
-        //Wait to reset to idle - this is bc viewdidappear for duration calc.
-//        state = .Idle
     }
     
     func clearBreak() {
@@ -599,7 +538,6 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         if runningShifts.count > 0 {
         
             if runningShifts[0].startTime.timeIntervalSinceNow > (-20*60*60) { //Continue Last Shift!
-                println(runningShifts[0].startTime.timeIntervalSinceNow)
                 if timelogs.count > 0 {
                     stopShift()
                 }
@@ -622,23 +560,17 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         }
     }
     
-    
     // MARK: Segues (Show)
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "editBreaktimeSegue" {
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
-            
             let destinationVC = segue.destinationViewController as! SetBreakTimeViewController
             destinationVC.navigationItem.title = "Set Breaktime"
             destinationVC.hidesBottomBarWhenPushed = true;
-                   
             destinationVC.breaktimeSecondsSet = self.breaktimeSecondsSet
-        }
-        
-        if segue.identifier == "showDetails" {
+        } else if segue.identifier == "showDetails" {
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Cancel", style:.Plain, target: nil, action: nil)
-            
             let destinationVC = segue.destinationViewController as! DetailsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
             destinationVC.selectedTimelog = self.selectedTimelog
@@ -647,9 +579,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
             destinationVC.hasMinDate = self.hasMinDate
             destinationVC.hasMaxDate = self.hasMaxDate
             destinationVC.selectedJob = self.selectedJob
-        }
-        
-        if segue.identifier == "showIncompleteShifts" {
+        } else if segue.identifier == "showIncompleteShifts" {
             let destinationVC = segue.destinationViewController as! IncompleteShiftsTableViewController
             destinationVC.hidesBottomBarWhenPushed = true;
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.Plain, target: nil, action: nil)
@@ -664,16 +594,13 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
         
         if tableView == shiftTableView {
             let cell = tableView.dequeueReusableCellWithIdentifier("TimelogCell", forIndexPath: indexPath) as! TimelogCell
-            
             cell.timelog = timelogs[indexPath.row]
             cell.jobColorView.color = selectedJob.color.getColor
             cell.jobColorView.setNeedsDisplay()
-            
             return cell
         } else {
-
             let cell = tableView.dequeueReusableCellWithIdentifier("JobsListCell", forIndexPath: indexPath) as! JobsListCell
-            
+        
             if jobsList.count == 0 {
                 isJobListEmpty == true
                 cell.jobNameLabel.text = "Add a job"
@@ -686,13 +613,11 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.jobColorView.hidden = false
                 cell.jobColorView.setNeedsDisplay()
             }
-            
             return cell
         }
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         if tableView == shiftTableView {
             return timelogs.count
         } else {
@@ -721,6 +646,7 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
             return 10
         }
     }
+    
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return ""
     }
@@ -755,10 +681,8 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
                 let addJobStoryboard: UIStoryboard = UIStoryboard(name: "CalendarStoryboard", bundle: nil)
                 let jobsListVC: JobsListTableViewController = addJobStoryboard.instantiateViewControllerWithIdentifier("JobsListTableViewController")
                     as! JobsListTableViewController
-                
                 jobsListVC.previousSelection = self.selectedJob
                 jobsListVC.source = "clockin"
-                
                 self.navigationController?.pushViewController(jobsListVC, animated: true)
             }
         }
@@ -787,34 +711,22 @@ extension ClockInViewController: UITableViewDelegate, UITableViewDataSource {
                 alert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
                 self.presentViewController(alert, animated: true, completion: nil)
             } else if indexPath.row == (timelogs.count-1) {
-                
-
                 dataManager.delete(timelogs[indexPath.row])
-                
                 timelogs.removeAtIndex(indexPath.row)
                 shiftTableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
                 self.checkAndRunStates()
-                
-                //                // TODO: Time the reload data to better show animation of delete
-                //                tableView.reloadData() // Needed to udate header
-                
-                
+                // TODO: better show animation of delete. tableView.reloadData() is needed to udate header
             } else {
                 let alert: UIAlertController = UIAlertController(title: "Warning!",
                     message: "This will also delete all following entries.",
                     preferredStyle: .Alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: { action in
-                    
                     for timelogNumber in (indexPath.row)...(self.timelogs.count-1) {
                         self.dataManager.delete(self.timelogs[indexPath.row])
                         self.timelogs.removeAtIndex(indexPath.row)
                         self.shiftTableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
                     }
-                    
-                    
-                
                     self.checkAndRunStates()
-
                 }))
                 alert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
                 self.presentViewController(alert, animated: true, completion: nil)

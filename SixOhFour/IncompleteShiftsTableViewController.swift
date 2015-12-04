@@ -29,7 +29,6 @@ class IncompleteShiftsTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    
     func fetchIncomplete() {
 
         incompleteShifts = []
@@ -40,12 +39,9 @@ class IncompleteShiftsTableViewController: UITableViewController {
         
         for shift in incompleteShifts {
             let timelogs = shift.timelogs.allObjects as! [Timelog]
-        
-            
         }
         tableView.reloadData()
     }
-    
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return incompleteShifts.count
@@ -58,9 +54,7 @@ class IncompleteShiftsTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        println(indexPath.row)
         selectedWorkedShift = incompleteShifts[indexPath.row]
-        
         self.performSegueWithIdentifier("showShift", sender: tableView.cellForRowAtIndexPath(indexPath))
     }
     
@@ -97,21 +91,11 @@ class IncompleteShiftsTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
         if editingStyle == .Delete {
-
             let shiftToDelete = incompleteShifts[indexPath.row]
-            
-            //TODO: Remove with new DataManager Funct.
-            for timelog in shiftToDelete.timelogs {
-                dataManager.delete(timelog as! Timelog)
-            }
             dataManager.delete(shiftToDelete)
-            
             incompleteShifts.removeAtIndex(indexPath.row)
-            
             tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Fade)
-
-            // TODO: Time the reload data to better show animation of delete
-            tableView.reloadData() // Needed to udate header
+            tableView.reloadData() // Needed to udate header // TODO: Time the reload data to better show animation of delete
         }
     }
     
@@ -123,9 +107,4 @@ class IncompleteShiftsTableViewController: UITableViewController {
             destinationVC.selectedWorkedShift = self.selectedWorkedShift
         }
     }
-    
-//    @IBAction func unwindFromShiftDelete (segue: UIStoryboardSegue) {
-//        
-//    }
-    
 }

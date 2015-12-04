@@ -32,6 +32,7 @@ class HomeViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
+        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -100,6 +101,8 @@ class HomeViewController: UIViewController {
         
         dataManager.save()
     }
+    
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if segue.identifier == "add" {
@@ -144,6 +147,9 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
                 self.jobs.removeAtIndex(indexPath.row)
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                 
+                //TODO: END TIMERS!
+                NSNotificationCenter.defaultCenter().postNotificationName("StopTimerNotification", object: nil)
+
                 self.dataManager.delete(jobDelete)
                 self.updateOrder()
                 

@@ -12,14 +12,8 @@ class SetBreakTimeViewController: UIViewController {
     
     @IBOutlet weak var SetBreakTimePicker: UIPickerView!
     var doneButton : UIBarButtonItem!
-    
     var breakHoursRange = 3
     var breakMinutesRange = 60
-    
-//    //Variable values are passed in when segue
-//    var breakHours = 0
-//    var breakMinutes = 0
-
 
     //Variable values are passed in when segue
     var breaktimeSecondsSet = 0.0
@@ -51,9 +45,6 @@ class SetBreakTimeViewController: UIViewController {
         
         doneButton = UIBarButtonItem(title: "Done", style: .Plain, target: self, action: "doneSettingBreak")
         self.navigationItem.rightBarButtonItem = doneButton
-     
-//        breaktimeSecondsSet = Double(breakHours) * hourInSeconds + Double(breakMinutes) * minuteInSeconds
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -104,6 +95,5 @@ extension SetBreakTimeViewController: UIPickerViewDataSource, UIPickerViewDelega
             }
         }
         breaktimeSecondsSet = Double(breakHours) * hourInSeconds + Double(breakMinutes) * minuteInSeconds
-        println(breaktimeSecondsSet)
     }
 }
