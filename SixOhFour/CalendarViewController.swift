@@ -188,17 +188,20 @@ class CalendarViewController: UIViewController {
                         shift.setValue(4, forKey: "status") // Auto
                         shift.job = sched.job
                         shift.startTime = sched.startTime
+                        shift.endTime = sched.endTime
                         
                         let clockInTimelog = dataManager.addItem("Timelog") as! Timelog
                         clockInTimelog.workedShift = shift
                         clockInTimelog.comment = ""
                         clockInTimelog.type = "Clocked In"
+                        clockInTimelog.id = 0
                         clockInTimelog.time = sched.startTime
                         
                         let clockOutTimelog = dataManager.addItem("Timelog") as! Timelog
                         clockOutTimelog.workedShift = shift
                         clockOutTimelog.comment = ""
                         clockOutTimelog.type = "Clocked Out"
+                        clockOutTimelog.id = 1
                         clockOutTimelog.time = shift.endTime
                         
                         dataManager.save()
