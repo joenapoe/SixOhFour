@@ -129,11 +129,11 @@ class DataManager {
 
             for event in app.scheduledLocalNotifications {
                 let notification = event as! UILocalNotification
-                let startTime = notification.fireDate
+                let fireDate = notification.fireDate
                 
-                if shift.startTime.compare(startTime!) == NSComparisonResult.OrderedSame && notification.alertAction == "clock in"{
+                if (notification.alertAction == "clock in" && shift.startTime.compare(fireDate!) == .OrderedSame) ||
+                    (notification.alertAction == "clock out" && shift.endTime.compare(fireDate!) == .OrderedSame) {
                     app.cancelLocalNotification(notification)
-                    break
                 }
             }
         } else if let shift = objectToDelete as? WorkedShift {

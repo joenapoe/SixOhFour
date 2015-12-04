@@ -73,6 +73,22 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
                 dataManager.delete(i)
             }
         }
+        
+        
+        // TODO: Delete Test
+        let app = UIApplication.sharedApplication()
+        var index = 1
+        
+        for event in app.scheduledLocalNotifications {
+            let notification = event as! UILocalNotification
+            let fireDate = notification.fireDate
+            
+            print(index)
+            print(" " + notification.alertAction! + " ")
+            println(NSDateFormatter.localizedStringFromDate(fireDate!, dateStyle: .LongStyle, timeStyle: .ShortStyle))
+            index++
+        }
+        
     }
     
     override func didReceiveMemoryWarning() {

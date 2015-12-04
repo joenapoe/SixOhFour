@@ -32,7 +32,6 @@ class HomeViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
-        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -45,12 +44,6 @@ class HomeViewController: UIViewController {
         let sortDescriptor = NSSortDescriptor(key: "order", ascending: true)
         let sortDescriptors = [sortDescriptor]
         jobs = dataManager.fetch("Job", sortDescriptors: sortDescriptors) as! [Job]
-        
-        // TODO: DELETE
-        for job in jobs {
-            println(job.company)
-            println(job.order)
-        }
         
         if jobs.count == 10 {
             addButton.enabled = false
@@ -65,6 +58,7 @@ class HomeViewController: UIViewController {
         }
         
         tableView.reloadData()
+        
     }
     
     override func viewWillDisappear(animated: Bool) {
