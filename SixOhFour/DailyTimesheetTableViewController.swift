@@ -43,9 +43,10 @@ class DailyTimesheetTableViewController: UITableViewController {
         allWorkedShifts = []
         
         let predicateCurrent = NSPredicate(format: "workedShift.status != 2")
+        let predicateIncomplete = NSPredicate(format: "workedShift.status != 1")
         let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
         let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDate, endDate)
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob, predicateCurrent])
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob, predicateCurrent, predicateIncomplete])
         
         var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
         

@@ -37,9 +37,6 @@ class IncompleteShiftsTableViewController: UITableViewController {
         var sortByTime = NSSortDescriptor(key: "startTime", ascending: true)
         incompleteShifts = dataManager.fetch("WorkedShift", predicate: predicateIncomplete, sortDescriptors: [sortByTime]) as! [WorkedShift]
         
-        for shift in incompleteShifts {
-            let timelogs = shift.timelogs.allObjects as! [Timelog]
-        }
         tableView.reloadData()
     }
     

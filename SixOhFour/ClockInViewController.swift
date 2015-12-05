@@ -63,6 +63,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     
     var currentWorkedShift : WorkedShift!
     var dataManager = DataManager()
+    var conflicts = [WorkedShift]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,10 +113,10 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBAction func startStop(sender: AnyObject) {
         if state == .Idle { //CLOCK IN
             saveTimelog("Clocked In")
+            checkAndRunStates()
         } else if state == .OnTheClock { //CLOCK OUT
-            saveTimelog("Clocked Out")
+            checkConflicts(currentWorkedShift)
         }
-        checkAndRunStates()
     }
     
     @IBAction func lapReset(sender: AnyObject) {
@@ -334,6 +335,90 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         }
     }
 
+    
+    func checkConflicts(shift: WorkedShift) {
+        
+        var startOfShift = currentWorkedShift.startTime
+        var endOfShift = NSDate()
+        
+        var startPredicate = NSPredicate(format: "startTime < %@ AND %@ < endTime", startOfShift, startOfShift)
+        var selfPredicate = NSPredicate(format: "SELF != %@", shift)
+        var predicate: NSCompoundPredicate
+        
+        let endPredicate = NSPredicate(format: "startTime < %@ AND %@ < endTime", endOfShift, endOfShift)
+        let startPredicate1 = NSPredicate(format: "%@ < startTime AND startTime < %@", startOfShift, endOfShift)
+        let endPredicate2 = NSPredicate(format: "%@ < endTime AND endTime < %@", startOfShift, endOfShift)
+        let shiftPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType,
+            subpredicates: [startPredicate, endPredicate, startPredicate1, endPredicate2])
+        predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [shiftPredicate, selfPredicate])
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let sortDescriptors = [sortDescriptor]
+        
+        conflicts = []
+        conflicts = dataManager.fetch("WorkedShift", predicate: predicate, sortDescriptors: sortDescriptors) as! [WorkedShift]
+    
+        if conflicts.count == 0 {
+            saveTimelog("Clocked Out")
+            checkAndRunStates()
+        } else {
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .ShortStyle
+            let startDay = formatter.stringFromDate(conflicts[0].startTime)
+            let endDay = formatter.stringFromDate(conflicts[0].endTime)
+            formatter.dateStyle = .NoStyle
+            formatter.timeStyle = .ShortStyle
+            formatter.timeZone = NSTimeZone()
+            let startTime = formatter.stringFromDate(conflicts[0].startTime)
+            let endTime = formatter.stringFromDate(conflicts[0].endTime)
+            
+            let job = "\(conflicts[0].job.company) - \(conflicts[0].job.position)"
+            
+            var conflictsMessage = "\n"
+            
+            for conflict in conflicts {
+                let date = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .MediumStyle, timeStyle: .NoStyle)
+                let start = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+                let end = NSDateFormatter.localizedStringFromDate(conflict.endTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+                
+                conflictsMessage += String(format: "%@, %@ - %@\n", date, start, end)
+            }
+            
+            var title = "\(conflicts.count) Shift Conflict"
+            var replaceTitle = "Replace"
+            
+            if conflicts.count > 1 {
+                title += "s"
+                replaceTitle += " All (\(conflicts.count))"
+            }
+            
+            let alertController = UIAlertController(title: title, message: conflictsMessage, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
+                for conflict in self.conflicts {
+                    let app = UIApplication.sharedApplication()
+                    
+                    for event in app.scheduledLocalNotifications {
+                        let notification = event as! UILocalNotification
+                        let startTime = notification.fireDate
+                        
+                        if conflict.startTime.compare(startTime!) == NSComparisonResult.OrderedSame {
+                            app.cancelLocalNotification(notification)
+                            break
+                        }
+                    }
+                    self.dataManager.delete(conflict)
+                }
+                self.saveTimelog("Clocked Out")
+                self.checkAndRunStates()
+            }
+            alertController.addAction(replace)
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: nil))
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
+
+    
+    }
+
+    
     // DURATION FUNCTIONS
     
     func runAndUpdateWorkTimer() {
@@ -444,7 +529,7 @@ class ClockInViewController: UIViewController, UIPopoverPresentationControllerDe
         //Notifications outside the App (Home screen and Lock Screen)
         cancelNotifyBreakOver()
         var localNotification: UILocalNotification = UILocalNotification()
-        localNotification.alertAction = "SixOhFour"
+        localNotification.alertAction = "Breaktime Over"
         localNotification.alertBody = "Your breaktime is over!"
         localNotification.soundName = UILocalNotificationDefaultSoundName
         localNotification.fireDate = NSDate(timeIntervalSinceNow: seconds) //seconds from now

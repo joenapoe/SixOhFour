@@ -448,7 +448,7 @@ class AddScheduleTableViewController: UITableViewController {
             handleNotifications()
             navigationController?.popViewControllerAnimated(true)
         } else {
-            var conflictsMessage = ""
+            var conflictsMessage = "\n"
             
             for conflict in conflicts {
                 let date = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .MediumStyle, timeStyle: .NoStyle)

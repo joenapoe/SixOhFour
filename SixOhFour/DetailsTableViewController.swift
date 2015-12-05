@@ -170,13 +170,15 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
 
             let job = "\(conflicts[0].job.company) - \(conflicts[0].job.position)"
             
-            var message: String!
-            
-            if startDay == endDay {
-                message = String(format: "\nReplace the following shift: \n%@ \n%@ %@ - %@", job, startDay, startTime, endTime)
-            } else {
-                message = String(format: "\nReplace the following shift: \n%@ \n%@ %@ - %@ %@", job, startDay, startTime, endDay, endTime)
-            } //TODO: change message to have all conflicts
+            var conflictsMessage = "\n"
+
+            for conflict in conflicts {
+                let date = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .MediumStyle, timeStyle: .NoStyle)
+                let start = NSDateFormatter.localizedStringFromDate(conflict.startTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+                let end = NSDateFormatter.localizedStringFromDate(conflict.endTime, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+                
+                conflictsMessage += String(format: "%@, %@ - %@\n", date, start, end)
+            }
             
             var title = "\(conflicts.count) Shift Conflict"
             var replaceTitle = "Replace"
@@ -186,7 +188,7 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
                 replaceTitle += " All (\(conflicts.count))"
             }
             
-            let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            let alertController = UIAlertController(title: title, message: conflictsMessage, preferredStyle: UIAlertControllerStyle.ActionSheet)
             let replace = UIAlertAction(title: replaceTitle, style: .Destructive) { (action) in
                 for conflict in self.conflicts {
                     let app = UIApplication.sharedApplication()
@@ -232,16 +234,16 @@ class DetailsTableViewController: UITableViewController, UITextFieldDelegate, UI
             endOfShift = timestampPicker.date
         }
         
-        var startPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", startOfShift, startOfShift)
+        var startPredicate = NSPredicate(format: "startTime < %@ AND %@ < endTime", startOfShift, startOfShift)
         var selfPredicate = NSPredicate(format: "SELF != %@", shift)
         var predicate: NSCompoundPredicate
         
         if selectedTimelog.workedShift.status == 1 || selectedTimelog.workedShift.status == 2 {
             predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [startPredicate, selfPredicate])
         } else {
-            let endPredicate = NSPredicate(format: "startTime <= %@ AND %@ <= endTime", endOfShift, endOfShift)
-            let startPredicate1 = NSPredicate(format: "%@ <= startTime AND startTime <= %@", startOfShift, endOfShift)
-            let endPredicate2 = NSPredicate(format: "%@ <= endTime AND endTime <= %@", startOfShift, endOfShift)
+            let endPredicate = NSPredicate(format: "startTime < %@ AND %@ < endTime", endOfShift, endOfShift)
+            let startPredicate1 = NSPredicate(format: "%@ < startTime AND startTime < %@", startOfShift, endOfShift)
+            let endPredicate2 = NSPredicate(format: "%@ < endTime AND endTime < %@", startOfShift, endOfShift)
             let shiftPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType,
                 subpredicates: [startPredicate, endPredicate, startPredicate1, endPredicate2])
             predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [shiftPredicate, selfPredicate])

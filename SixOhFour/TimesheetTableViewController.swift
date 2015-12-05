@@ -28,7 +28,6 @@ class TimesheetTableViewController: UITableViewController {
     var dataManager = DataManager()
     var allWorkedShifts = [WorkedShift]()
     var selectedJob : Job!
-    var openShiftsCIs = [Timelog]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,7 +49,6 @@ class TimesheetTableViewController: UITableViewController {
 
         tableView.dataSource = self
         tableView.delegate = self
-        
         
         calcWorkTime()
         calculatePayDaysAgo()
@@ -125,10 +123,9 @@ class TimesheetTableViewController: UITableViewController {
     }
     
     func pullShiftsInTimeFrame() {
-        openShiftsCIs = []
         allWorkedShifts = []
-        let predicateCurrent = NSPredicate(format: "workedShift.status != 2")
-        let predicateTypeJob = NSPredicate(format: "workedShift.job == %@ && type == %@", selectedJob, "Clocked In")
+        let predicateRunning = NSPredicate(format: "status != 2 || status != 1")
+        let predicateTypeJob = NSPredicate(format: "self.job == %@", selectedJob)
         
         let formatter = NSDateFormatter()
         formatter.dateStyle = .MediumStyle
@@ -138,16 +135,12 @@ class TimesheetTableViewController: UITableViewController {
         startDateMidnight = makeDateMidnight(startDate)
         endDateMidnightNextDay = makeDateMidnight(endDate).dateByAddingTimeInterval(60*60*24)
         
-        let predicateTime = NSPredicate(format: "time >= %@ && time <= %@", startDateMidnight , endDateMidnightNextDay )
-        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob, predicateCurrent])
+        let predicateTime = NSPredicate(format: "startTime >= %@ && startTime <= %@", startDateMidnight , endDateMidnightNextDay )
+        let compoundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates([predicateTime, predicateTypeJob, predicateRunning])
         
-        var sortNSDATE = NSSortDescriptor(key: "time", ascending: true)
+        var sortNSDATE = NSSortDescriptor(key: "startTime", ascending: true)
         
-        openShiftsCIs = dataManager.fetch("Timelog", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [Timelog]
-        
-        for timelog in openShiftsCIs {
-            allWorkedShifts.append(timelog.workedShift)
-        }
+        allWorkedShifts = dataManager.fetch("WorkedShift", predicate: compoundPredicate, sortDescriptors: [sortNSDATE] ) as! [WorkedShift]
     }
     
     func makeDateMidnight(date: NSDate) -> NSDate{
