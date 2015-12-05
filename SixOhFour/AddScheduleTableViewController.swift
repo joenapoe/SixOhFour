@@ -224,32 +224,46 @@ class AddScheduleTableViewController: UITableViewController {
         }
     }
     
-    func save(schedule: [ScheduledShift]) {
-        for shift in schedule {
-            let formatter = NSDateFormatter()
-            formatter.dateStyle = .NoStyle
-            formatter.timeStyle = .ShortStyle
-            formatter.timeZone = NSTimeZone()
-            
-            let start = formatter.stringFromDate(shift.startTime)
-            let end = formatter.stringFromDate(shift.endTime)
-            
-            var startNotification = UILocalNotification()
-            startNotification.alertBody = "You are scheduled to clock in at \(start)"
-            startNotification.alertAction = "clock in"
-            startNotification.fireDate = shift.startTime
-            startNotification.soundName = UILocalNotificationDefaultSoundName
-            UIApplication.sharedApplication().scheduleLocalNotification(startNotification)
-            
-            var endNotification = UILocalNotification()
-            endNotification.alertBody = "You are scheduled to clock out at \(end)"
-            endNotification.alertAction = "clock out"
-            endNotification.fireDate = shift.endTime
-            endNotification.soundName = UILocalNotificationDefaultSoundName
-            UIApplication.sharedApplication().scheduleLocalNotification(endNotification)
-        }
-        
+    func handleNotifications() {
         dataManager.save()
+        
+        let app = UIApplication.sharedApplication()
+        app.cancelAllLocalNotifications()
+
+        let limit = 25 // limit to 50 notifications (pair of 25)
+        var index = 0
+        
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let schedule = dataManager.fetch("ScheduledShift", sortDescriptors: [sortDescriptor]) as! [ScheduledShift]
+        
+        for sched in schedule {
+            if index == limit {
+                break
+            } else {
+                let formatter = NSDateFormatter()
+                formatter.dateStyle = .NoStyle
+                formatter.timeStyle = .ShortStyle
+                formatter.timeZone = NSTimeZone()
+
+                let start = formatter.stringFromDate(sched.startTime)
+                let end = formatter.stringFromDate(sched.endTime)
+
+                var startNotification = UILocalNotification()
+                startNotification.alertBody = "You are scheduled to clock in at \(start)"
+                startNotification.alertAction = "clock in"
+                startNotification.fireDate = sched.startTime
+                startNotification.soundName = UILocalNotificationDefaultSoundName
+                UIApplication.sharedApplication().scheduleLocalNotification(startNotification)
+
+                var endNotification = UILocalNotification()
+                endNotification.alertBody = "You are scheduled to clock out at \(end)"
+                endNotification.alertAction = "clock out"
+                endNotification.fireDate = sched.endTime
+                endNotification.soundName = UILocalNotificationDefaultSoundName
+                UIApplication.sharedApplication().scheduleLocalNotification(endNotification)
+            }
+            index++
+        }
     }
     
     func togglePicker(picker: String) {
@@ -431,7 +445,7 @@ class AddScheduleTableViewController: UITableViewController {
     
     func resolveConflicts() {
         if conflicts.count == 0 {
-            save(schedule)
+            handleNotifications()
             navigationController?.popViewControllerAnimated(true)
         } else {
             var conflictsMessage = ""
@@ -461,7 +475,7 @@ class AddScheduleTableViewController: UITableViewController {
                     self.dataManager.delete(conflict)
                 }
                 
-                self.save(self.schedule)
+                self.handleNotifications()
                 self.navigationController?.popViewControllerAnimated(true)
             }
             

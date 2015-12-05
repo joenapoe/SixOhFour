@@ -77,6 +77,7 @@
 		B9CF32A51B6B046900757E43 /* CVSelectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CF328B1B6B046900757E43 /* CVSelectionType.swift */; };
 		B9CF32A61B6B046900757E43 /* CVSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CF328C1B6B046900757E43 /* CVSet.swift */; };
 		B9CF32A71B6B046900757E43 /* CVShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CF328D1B6B046900757E43 /* CVShape.swift */; };
+		B9DF53331C12466F00656FD3 /* ShowInCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9DF53321C12466F00656FD3 /* ShowInCalendar.swift */; };
 		B9E31D1C1B7C24CF008CF7DC /* RepeatWeekly.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E31D1B1B7C24CF008CF7DC /* RepeatWeekly.swift */; };
 		B9E31D1E1B7C25DF008CF7DC /* RepeatMonthly.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E31D1D1B7C25DF008CF7DC /* RepeatMonthly.swift */; };
 		B9E31D221B7C27A5008CF7DC /* RepeatSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E31D211B7C27A5008CF7DC /* RepeatSettings.swift */; };
@@ -170,6 +171,7 @@
 		B9CF328B1B6B046900757E43 /* CVSelectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CVSelectionType.swift; sourceTree = "<group>"; };
 		B9CF328C1B6B046900757E43 /* CVSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CVSet.swift; sourceTree = "<group>"; };
 		B9CF328D1B6B046900757E43 /* CVShape.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CVShape.swift; sourceTree = "<group>"; };
+		B9DF53321C12466F00656FD3 /* ShowInCalendar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShowInCalendar.swift; sourceTree = "<group>"; };
 		B9E31D1B1B7C24CF008CF7DC /* RepeatWeekly.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatWeekly.swift; sourceTree = "<group>"; };
 		B9E31D1D1B7C25DF008CF7DC /* RepeatMonthly.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatMonthly.swift; sourceTree = "<group>"; };
 		B9E31D211B7C27A5008CF7DC /* RepeatSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatSettings.swift; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 		874FACF41B33A9D7002EABB0 /* SixOhFour */ = {
 			isa = PBXGroup;
 			children = (
+				B9DF53341C1263C300656FD3 /* Core Data */,
 				B951EFC81BD9B5FE001C0E4F /* Resources */,
 				B9E34BC71B508C8800B9FD88 /* Main */,
 				B9E34BBB1B5089F600B9FD88 /* Home */,
@@ -296,6 +299,18 @@
 			path = CVCalendar;
 			sourceTree = "<group>";
 		};
+		B9DF53341C1263C300656FD3 /* Core Data */ = {
+			isa = PBXGroup;
+			children = (
+				87B7C1851B69C22800C65C96 /* Job.swift */,
+				87B7C18F1B69C91D00C65C96 /* Color.swift */,
+				87B7C18B1B69C22800C65C96 /* ScheduledShift.swift */,
+				87B7C17F1B69C22700C65C96 /* WorkedShift.swift */,
+				87B7C18D1B69C22800C65C96 /* Timelog.swift */,
+			);
+			name = "Core Data";
+			sourceTree = "<group>";
+		};
 		B9E34BBB1B5089F600B9FD88 /* Home */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,10 +325,6 @@
 		B9E34BBC1B508A0E00B9FD88 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				87B7C18D1B69C22800C65C96 /* Timelog.swift */,
-				87B7C17F1B69C22700C65C96 /* WorkedShift.swift */,
-				87B7C1851B69C22800C65C96 /* Job.swift */,
-				87B7C18F1B69C91D00C65C96 /* Color.swift */,
 				879277021B588B2C0023CBA6 /* PayRate.swift */,
 			);
 			name = Model;
@@ -419,11 +430,11 @@
 		B9E34BC61B508AD200B9FD88 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				87B7C18B1B69C22800C65C96 /* ScheduledShift.swift */,
 				B9E31D1B1B7C24CF008CF7DC /* RepeatWeekly.swift */,
 				B9E31D1D1B7C25DF008CF7DC /* RepeatMonthly.swift */,
 				B9E31D211B7C27A5008CF7DC /* RepeatSettings.swift */,
 				B94341511BFDC8E2009D82DB /* NSDate+Punchie.swift */,
+				B9DF53321C12466F00656FD3 /* ShowInCalendar.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -572,6 +583,7 @@
 				B936D63F1B607674009777A7 /* EndRepeatTableViewController.swift in Sources */,
 				B9CF329E1B6B046900757E43 /* CVCalendarViewPresentationMode.swift in Sources */,
 				87238A501B3E3212004D44CA /* ClockInViewController.swift in Sources */,
+				B9DF53331C12466F00656FD3 /* ShowInCalendar.swift in Sources */,
 				B9CF32A61B6B046900757E43 /* CVSet.swift in Sources */,
 				B9CF32A51B6B046900757E43 /* CVSelectionType.swift in Sources */,
 				B9A0BFF01B5993BB00433C96 /* WeekDayCollectionViewCell.swift in Sources */,

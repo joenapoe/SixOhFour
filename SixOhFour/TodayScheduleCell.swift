@@ -13,8 +13,8 @@ class TodayScheduleCell: UITableViewCell {
     @IBOutlet weak var jobColorView: JobColorView!
     @IBOutlet weak var companyLabel: UILabel!
     @IBOutlet weak var positionLabel: UILabel!
-    @IBOutlet weak var shiftTimeLabel: UILabel!
-    @IBOutlet weak var nextDayLabel: UILabel!
+    @IBOutlet weak var primaryLabel: UILabel!
+    @IBOutlet weak var secondaryLabel: UILabel!
     
     var schedule: ScheduledShift! {
         didSet {
@@ -27,7 +27,7 @@ class TodayScheduleCell: UITableViewCell {
             formatter.dateStyle = .NoStyle
             formatter.timeStyle = .ShortStyle
             
-            shiftTimeLabel.text = "\(formatter.stringFromDate(schedule.startTime)) - \(formatter.stringFromDate(schedule.endTime))"
+            primaryLabel.text = "\(formatter.stringFromDate(schedule.startTime)) - \(formatter.stringFromDate(schedule.endTime))"
             
             formatter.dateStyle = .ShortStyle
             formatter.timeStyle = .NoStyle
@@ -37,9 +37,9 @@ class TodayScheduleCell: UITableViewCell {
             
             
             if start == end {
-                nextDayLabel.hidden = true
+                secondaryLabel.hidden = true
             } else {
-                nextDayLabel.hidden = false
+                secondaryLabel.hidden = false
             }
         }
     }
@@ -55,8 +55,9 @@ class TodayScheduleCell: UITableViewCell {
             formatter.dateStyle = .NoStyle
             formatter.timeStyle = .ShortStyle
             
-            shiftTimeLabel.text = "\(shift.hoursWorked()) hours"
-            nextDayLabel.hidden = true
+            primaryLabel.text = "\(shift.hoursWorked()) hours"            
+            secondaryLabel.text = "\(formatter.stringFromDate(shift.startTime)) - \(formatter.stringFromDate(shift.endTime))"
+        
         }
     }
 }

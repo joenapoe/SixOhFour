@@ -141,7 +141,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
                 self.jobs.removeAtIndex(indexPath.row)
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                 
-                //TODO: END TIMERS!
                 NSNotificationCenter.defaultCenter().postNotificationName("StopTimerNotification", object: nil)
 
                 self.dataManager.delete(jobDelete)
