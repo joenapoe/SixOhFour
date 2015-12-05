@@ -74,21 +74,44 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             }
         }
         
-        
-        // TODO: Delete Test
+        // Recreate the first 50 Notifications
         let app = UIApplication.sharedApplication()
-        var index = 1
+        app.cancelAllLocalNotifications()
         
-        for event in app.scheduledLocalNotifications {
-            let notification = event as! UILocalNotification
-            let fireDate = notification.fireDate
-            
-            print(index)
-            print(" " + notification.alertAction! + " ")
-            println(NSDateFormatter.localizedStringFromDate(fireDate!, dateStyle: .LongStyle, timeStyle: .ShortStyle))
+        let limit = 25 // limit to 50 notifications (pair of 25)
+        var index = 0
+        
+        let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
+        let schedule = dataManager.fetch("ScheduledShift", sortDescriptors: [sortDescriptor]) as! [ScheduledShift]
+        
+        for sched in schedule {
+            if index == limit {
+                break
+            } else {
+                let formatter = NSDateFormatter()
+                formatter.dateStyle = .NoStyle
+                formatter.timeStyle = .ShortStyle
+                formatter.timeZone = NSTimeZone()
+                
+                let start = formatter.stringFromDate(sched.startTime)
+                let end = formatter.stringFromDate(sched.endTime)
+                
+                var startNotification = UILocalNotification()
+                startNotification.alertBody = "You are scheduled to clock in at \(start)"
+                startNotification.alertAction = "clock in"
+                startNotification.fireDate = sched.startTime
+                startNotification.soundName = UILocalNotificationDefaultSoundName
+                UIApplication.sharedApplication().scheduleLocalNotification(startNotification)
+                
+                var endNotification = UILocalNotification()
+                endNotification.alertBody = "You are scheduled to clock out at \(end)"
+                endNotification.alertAction = "clock out"
+                endNotification.fireDate = sched.endTime
+                endNotification.soundName = UILocalNotificationDefaultSoundName
+                UIApplication.sharedApplication().scheduleLocalNotification(endNotification)
+            }
             index++
         }
-        
     }
     
     override func didReceiveMemoryWarning() {

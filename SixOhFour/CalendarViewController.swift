@@ -21,17 +21,16 @@ class CalendarViewController: UIViewController {
     var selectedDate: NSDate!
     var currentDate: NSDate!
     var monthWorkedShifts: [WorkedShift]!
-    var dayWorkedShifts: [WorkedShift]!
     var monthSchedule: [ScheduledShift]!
-    var daySchedule: [ScheduledShift]!
     var selectedSchedule: ScheduledShift!
     var selectedWorkedShift: WorkedShift!
     
     var isMonthView = true
-    var shouldShowSchedule = true
+    var showInCalendar = ShowInCalendar.Both
     var shouldShowDaysOut = true
     var animationFinished = true
     var repeatingSchedule = [ScheduledShift]()
+    var dayArray = [AnyObject]()
     
     let dataManager = DataManager()
     
@@ -52,12 +51,8 @@ class CalendarViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
     
-        currentDate = CVDate(date: NSDate()).convertedDate()
-        selectedDate = currentDate
-        daySchedule = [ScheduledShift]()
-        
-        fetchMonthSchedule()
-        fetchWorkedShifts()
+        currentDate = today
+        selectedDate = today
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -70,12 +65,11 @@ class CalendarViewController: UIViewController {
         } else {
             addButton.enabled = false
         }
-        
-        fetchMonthSchedule()
+
         fetchWorkedShifts()
+        fetchMonthSchedule()
         
-        updateDaySchedule(selectedDate)
-        updateDayWorkedShifts(selectedDate)
+        updateDayArray(selectedDate)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -124,7 +118,8 @@ class CalendarViewController: UIViewController {
             destinationVC.selectedJob = jobs[0]
             destinationVC.selectedDate = self.selectedDate
             destinationVC.isNewShift = true
-            self.navigationController?.pushViewController(destinationVC, animated: true)        }
+            self.navigationController?.pushViewController(destinationVC, animated: true)
+        }
     }
             
     // MARK: - Class Functions
@@ -132,23 +127,33 @@ class CalendarViewController: UIViewController {
     func toggleToCurrentDate() {
         calendarView.toggleCurrentDayView()
     }
-    
-    func updateDaySchedule(selectedDate: NSDate) {
-        daySchedule = []
-        
-        for sched in monthSchedule {
-            if NSDate.isSameDay(selectedDate, dateToCompare: sched.startTime) {
-                daySchedule.append(sched)
-            }
-        }
-    }
-    
-    func updateDayWorkedShifts(selectedDate: NSDate) {
-        dayWorkedShifts = []
 
-        for shift in monthWorkedShifts {
-            if NSDate.isSameDay(selectedDate, dateToCompare: shift.startTime) {
-                dayWorkedShifts.append(shift)
+    func updateDayArray(selectedDate: NSDate) {
+        dayArray = []
+        
+        if showInCalendar == .Shift {
+            for shift in monthWorkedShifts {
+                if NSDate.isSameDay(selectedDate, dateToCompare: shift.startTime) {
+                    dayArray.append(shift)
+                }
+            }
+        } else if showInCalendar == .Schedule {
+            for sched in monthSchedule {
+                if NSDate.isSameDay(selectedDate, dateToCompare: sched.startTime) {
+                    dayArray.append(sched)
+                }
+            }
+        } else {
+            for shift in monthWorkedShifts {
+                if NSDate.isSameDay(selectedDate, dateToCompare: shift.startTime) {
+                    dayArray.append(shift)
+                }
+            }
+            
+            for sched in monthSchedule {
+                if NSDate.isSameDay(selectedDate, dateToCompare: sched.startTime) {
+                    dayArray.append(sched)
+                }
             }
         }
     }
@@ -222,7 +227,10 @@ class CalendarViewController: UIViewController {
         let startOfMonth = NSDate.firstDayOfMonth(currentDate)
         let endOfMonth = NSDate.lastDayOfMonth(currentDate)
         
-        let predicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", startOfMonth, endOfMonth)
+        let statusPredicate = NSPredicate(format: "status != 1 AND status != 2") // 1 = Incomplete, 2 = Running
+        let timePredicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", startOfMonth, endOfMonth)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [statusPredicate, timePredicate])
+
         let sortDescriptor = NSSortDescriptor(key: "startTime", ascending: true)
         let sortDescriptors = [sortDescriptor]
         
@@ -269,37 +277,29 @@ class CalendarViewController: UIViewController {
 extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if shouldShowSchedule && daySchedule != nil {
-            return daySchedule.count
-        } else if !shouldShowSchedule && dayWorkedShifts != nil {
-            return dayWorkedShifts.count
-        } else {
-            return 0
-        }
+        return dayArray.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("TodayScheduleCell", forIndexPath: indexPath) as! TodayScheduleCell
         
-        if shouldShowSchedule {
-            cell.schedule = daySchedule[indexPath.row]
-            cell.jobColorView.setNeedsDisplay()
-        } else {
-            cell.shift = dayWorkedShifts[indexPath.row]
-            cell.jobColorView.setNeedsDisplay()
+        if let schedule = dayArray[indexPath.row] as? ScheduledShift {
+            cell.schedule = schedule
+        } else if let shift = dayArray[indexPath.row] as? WorkedShift {
+            cell.shift = shift
         }
+        
+        cell.jobColorView.setNeedsDisplay()
         
         return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if shouldShowSchedule {
-            selectedSchedule = daySchedule[indexPath.row]
+        if let schedule = dayArray[indexPath.row] as? ScheduledShift {
+            selectedSchedule = schedule
             self.performSegueWithIdentifier("editSchedule", sender: self)
-        } else {
-            selectedWorkedShift = dayWorkedShifts[indexPath.row]
-            
-            
+        } else if let shift = dayArray[indexPath.row] as? WorkedShift {
+            selectedWorkedShift = shift
             
             let clockInStoryboard: UIStoryboard = UIStoryboard(name: "ClockInStoryboard", bundle: nil)
             let destinationVC: ShiftViewController = clockInStoryboard.instantiateViewControllerWithIdentifier("ShiftViewController") as! ShiftViewController
@@ -308,8 +308,6 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             destinationVC.selectedWorkedShift = self.selectedWorkedShift
             destinationVC.isNewShift = false
             self.navigationController?.pushViewController(destinationVC, animated: true)
-        
-            
         }
     }
     
@@ -326,9 +324,8 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
             
             let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
             
-            if shouldShowSchedule {
-                let shiftToDelete = daySchedule[indexPath.row]
-                
+            if let schedule = dayArray[indexPath.row] as? ScheduledShift {
+                let shiftToDelete = schedule
                 repeatingSchedule = dataManager.fetchRepeatingSchedule(shiftToDelete)
                 
                 let formatter = NSDateFormatter()
@@ -350,7 +347,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                         self.dataManager.delete(shiftToDelete)
                         
                         self.repeatingSchedule = []
-                        self.daySchedule.removeAtIndex(indexPath.row)
+                        self.dayArray.removeAtIndex(indexPath.row)
                         self.fetchMonthSchedule()
                         tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
                         self.calendarView.reloadMonthView(self.selectedDate)
@@ -381,7 +378,7 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                             self.dataManager.delete(shiftToDelete)
                             
                             self.repeatingSchedule = []
-                            self.daySchedule.removeAtIndex(indexPath.row)
+                            self.dayArray.removeAtIndex(indexPath.row)
                             self.fetchMonthSchedule()
                             tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
                             self.calendarView.reloadMonthView(self.selectedDate)
@@ -397,20 +394,20 @@ extension CalendarViewController: UITableViewDataSource, UITableViewDelegate {
                     self.dataManager.delete(shiftToDelete)
                     
                     self.repeatingSchedule = []
-                    self.daySchedule.removeAtIndex(indexPath.row)
+                    self.dayArray.removeAtIndex(indexPath.row)
                     self.fetchMonthSchedule()
                     tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
                     self.calendarView.reloadMonthView(self.selectedDate)
                 }
                 
                 alertController.addAction(delete)
-            } else {
-                let shiftToDelete = dayWorkedShifts[indexPath.row]
+            } else if let shift = dayArray[indexPath.row] as? WorkedShift {
+                let shiftToDelete = shift
                 
                 let delete = UIAlertAction(title: deleteTitle, style: .Destructive) { (action) in
                     self.dataManager.delete(shiftToDelete)
                     
-                    self.dayWorkedShifts.removeAtIndex(indexPath.row)
+                    self.dayArray.removeAtIndex(indexPath.row)
                     self.fetchWorkedShifts()
                     tableView.deleteRowsAtIndexPaths([indexPath],  withRowAnimation: .Automatic)
                     self.calendarView.reloadMonthView(self.selectedDate)
@@ -457,14 +454,15 @@ extension CalendarViewController: CVCalendarViewDelegate {
         
         selectedDate = dayView.date.convertedDate()
         
-        updateDaySchedule(selectedDate)
-        updateDayWorkedShifts(selectedDate)
-        
-        if NSDate.isSameDay(selectedDate, dateToCompare: NSDate()) || selectedDate.compare(NSDate()) == NSComparisonResult.OrderedDescending {
-            shouldShowSchedule = true
+        if NSDate.isSameDay(selectedDate, dateToCompare: NSDate()) {
+            showInCalendar = .Both
+        } else if selectedDate.compare(NSDate()) == NSComparisonResult.OrderedDescending {
+            showInCalendar = .Schedule
         } else {
-            shouldShowSchedule = false
+            showInCalendar = .Shift
         }
+    
+        updateDayArray(selectedDate)
         
         dayView.circleView?.setNeedsDisplay()
         tableView.reloadData()
@@ -522,45 +520,40 @@ extension CalendarViewController: CVCalendarViewDelegate {
         let day = dayView.date.convertedDate()!
         var shouldShowDot = false
         
-        let predicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", day.startOfDay, day.endOfDay!)
-        let schedule = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
+        let statusPredicate = NSPredicate(format: "status != 1 AND status != 2") // 1 = Incomplete, 2 = Running
+        let timePredicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", day.startOfDay, day.endOfDay!)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [statusPredicate, timePredicate])
+        
+        let schedule = dataManager.fetch("ScheduledShift", predicate: timePredicate) as! [ScheduledShift]
         let workedShifts = dataManager.fetch("WorkedShift", predicate: predicate) as! [WorkedShift]
         
         if schedule.count > 0 || workedShifts.count > 0 {
             shouldShowDot = true
         }
-
+                
         return shouldShowDot
     }
     
     func dotMarker(colorOnDayView dayView: CVCalendarDayView) -> [UIColor] {
         let day = dayView.date.convertedDate()!
-        let predicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", day.startOfDay, day.endOfDay!)
         
+        var results = [AnyObject]()
         var colors = [UIColor]()
         var count = 0
         
-        if NSDate.isSameDay(day, dateToCompare: NSDate()) || day.compare(NSDate()) == NSComparisonResult.OrderedDescending {
-            let results = dataManager.fetch("ScheduledShift", predicate: predicate) as! [ScheduledShift]
-            
-            for shift in results {
-                colors.append(shift.job.color.getColor)
-                
-                count++
-                if count == 3 {
-                    break
-                }
-            }
-        } else {
-            let results = dataManager.fetch("WorkedShift", predicate: predicate) as! [WorkedShift]
-            
-            for shift in results {
-                colors.append(shift.job.color.getColor)
-                
-                count++
-                if count == 3 {
-                    break
-                }
+        let statusPredicate = NSPredicate(format: "status != 1 AND status != 2") // 1 = Incomplete, 2 = Running
+        let timePredicate = NSPredicate(format: "%@ <= startTime AND startTime <= %@", day.startOfDay, day.endOfDay!)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [statusPredicate, timePredicate])
+        
+        results = dataManager.fetch("ScheduledShift", predicate: timePredicate) as [(AnyObject)]
+        results += dataManager.fetch("WorkedShift", predicate: predicate)
+        
+        for result in results {
+            colors.append(UIColor.grayColor())
+        
+            count++
+            if count == 3 {
+                break
             }
         }
         
